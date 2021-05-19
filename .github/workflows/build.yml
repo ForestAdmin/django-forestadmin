@@ -1,0 +1,96 @@
+name: Build, Test and Deploy
+
+on:
+  push:
+    branches:
+      - master
+      - beta
+  pull_request:
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.5, 3.6, 3.7, 3.8, 3.9 ]
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: Cancel previous running workflows
+        uses: fkirc/skip-duplicate-actions@master
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint commit message
+        uses: wagoid/commitlint-github-action@v2
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --show-source --statistics
+          # exit-zero treats all errors as warnings.
+          flake8 . --count --exit-zero --statistics
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.5, 3.6, 3.7, 3.8, 3.9 ]
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Test with pytest
+        run: |
+          pytest
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: yarn test:coverage
+
+  deploy:
+    name: Release package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.5, 3.6, 3.7, 3.8, 3.9 ]
+    needs: [test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # GITHUB_TOKEN must not be set for the semantic release
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build package
+        run: python setup.py sdist
+      - name: Semantic Release
+        uses: relekang/python-semantic-release@master
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GIT_AUTHOR_EMAIL: ${{ secrets.GIT_AUTHOR_EMAIL }}
+          GIT_AUTHOR_NAME: ${{ secrets.GIT_AUTHOR_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ secrets.GIT_COMMITTER_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ secrets.GIT_COMMITTER_NAME }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }} # https://python-semantic-release.readthedocs.io/en/latest/envvars.html#env-pypi-token
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
