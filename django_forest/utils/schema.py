@@ -3,6 +3,8 @@ import json
 import os
 import sys
 
+from django_forest.utils.json_api_serializer import create_json_api_schema
+
 if sys.version_info >= (3, 8):
     from importlib import metadata
 else:
@@ -15,6 +17,7 @@ from django.db import connection
 from django.utils.module_loading import autodiscover_modules
 
 from django_forest.utils.forest_api_requester import ForestApiRequester
+
 
 TYPE_CHOICES = {
     'AutoField': 'String',
@@ -64,7 +67,7 @@ FIELD = {
     'integration': None,
     'reference': None,
     'inverse_of': None,
-    'relationships': None,
+    'relationship': None,
     'widget': None,
     'validations': []
 }
@@ -106,16 +109,25 @@ class Schema:
                 'segments': [],
                 'fields': []
             }
-            for field in model._meta.fields:
-                field = cls.get_default_field({
+            for field in model._meta.get_fields():
+                f = cls.get_default_field({
                     'field': field.name,
                     'type': cls.get_type(field.get_internal_type())
                 })
-                collection['fields'].append(field)
+                if field.is_relation:
+                    many = field.one_to_many or field.many_to_many
+                    f['type'] = ['Number'] if many else 'Number'
+                    f['relationship'] = 'HasMany' if many else 'BelongsTo'
+                    f['reference'] = f'{field.related_model.__name__}.id'
+
+                collection['fields'].append(f)
 
             # TODO handle association with model._meta.related_objects[0].__class__.__name__
 
             cls.schema['collections'].append(collection)
+
+            # create marshmallow-jsonapi resource for json api serializer
+            create_json_api_schema(model)
 
         return cls.schema
 

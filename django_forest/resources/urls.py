@@ -9,5 +9,5 @@ urlpatterns = [
     path('', csrf_exempt(views.IndexView.as_view()), name='list'),
     path('/count', views.CountView.as_view(), name='count'),
     path('/<int:pk>', csrf_exempt(views.DetailView.as_view()), name='detail'),
-    path('/<int:pk>/relationships', csrf_exempt(include(associations_urls))),
+    path('/<int:pk>/relationships', include(associations_urls)),
 ]
