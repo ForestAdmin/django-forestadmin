@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 
 from django.db import models
-from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
@@ -17,7 +16,7 @@ class IndexView(SmartFieldMixin, generic.View):
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
-        queryset = Model.objects.all() # TODO handle filter/search/fields
+        queryset = Model.objects.all()  # TODO handle filter/search/fields
 
         # handle smart fields
         self.handle_smart_fields(queryset, resource, Model, many=True)
