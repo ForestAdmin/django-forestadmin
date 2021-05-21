@@ -85,6 +85,14 @@ class Schema:
     }
 
     @classmethod
+    def get_collection(cls, resource):
+        collections = [collection for collection in cls.schema['collections'] if collection['name'] == resource]
+        if len(collections):
+            return collections[0]
+
+        return None
+
+    @classmethod
     def get_default_field(cls, obj):
         for key, value in FIELD.items():
             obj[key] = value if key not in obj else obj[key]
@@ -116,26 +124,18 @@ class Schema:
                 })
                 if field.is_relation:
                     many = field.one_to_many or field.many_to_many
-                    f['type'] = ['Number'] if many else 'Number'
+                    f['type'] = ['Number'] if many else 'Number'  # TODO review, maybe not a Number
                     f['relationship'] = 'HasMany' if many else 'BelongsTo'
-                    f['reference'] = f'{field.related_model.__name__}.id'
+                    f['reference'] = f'{field.related_model.__name__}.{field.name}'
 
                 collection['fields'].append(f)
-
-            # TODO handle association with model._meta.related_objects[0].__class__.__name__
-
             cls.schema['collections'].append(collection)
-
-            # create marshmallow-jsonapi resource for json api serializer
-            create_json_api_schema(model)
-
         return cls.schema
 
     @classmethod
     def get_type(cls, field_type):
         # TODO handle Enum
         # handle ArrayField
-        # handle ForeignKey, ManyToManyField, OneToOneField
         # handle 'RangeField', 'IntegerRangeField', 'BigIntegerRangeField',
         #     'DecimalRangeField', 'DateTimeRangeField', 'DateRangeField',
         # See connection.data_types (different for each DB Engine)
@@ -143,7 +143,15 @@ class Schema:
 
     @classmethod
     def add_smart_features(cls):
+        # will load all files in <app>/forest folder from client
         autodiscover_modules('forest')
+
+    @classmethod
+    def handle_json_api_serializer(cls):
+        models = apps.get_models()
+        for model in models:
+            # create marshmallow-jsonapi resource for json api serializer
+            create_json_api_schema(model, cls)
 
     @classmethod
     def handle_schema_file(cls):

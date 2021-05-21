@@ -12,14 +12,6 @@ class Collection:
     def register(cls, model, model_forest):
         cls._registry[model.__name__] = model_forest(model)
 
-    @staticmethod
-    def get_collection(resource):
-        collections = [collection for collection in Schema.schema['collections'] if collection['name'] == resource]
-        if len(collections):
-            return collections[0]
-
-        return None
-
     def load(self):
         pass
 
@@ -44,9 +36,10 @@ class Collection:
         self.load()
 
         # find resource in Schema
-        collection = self.get_collection(self.model.__name__)
+        collection = Schema.get_collection(self.model.__name__)
         self.handle_smart_fields(collection)
         self.handle_smart_actions(collection)
         self.handle_smart_segments(collection)
+        # TODO handle smart collection
 
         super().__init__()

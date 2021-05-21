@@ -5,12 +5,12 @@ from django_forest.resources.utils import get_model
 
 
 class CountView(generic.View):
-    def get(self, request, resource, pk, association_field, *args, **kwargs):
+    def get(self, request, resource, pk, association_resource, *args, **kwargs):
         data = {'count': 0}
 
-        model = get_model(resource)
-        if model is not None:
-            queryset = model.objects.count()
+        Model = get_model(resource)
+        if Model is not None:
+            queryset = getattr(Model.objects.get(pk=pk), f'{association_resource.lower()}_set').count()
             data['count'] = queryset
 
         return JsonResponse(data, safe=False)
