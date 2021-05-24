@@ -72,6 +72,20 @@ FIELD = {
     'validations': []
 }
 
+COLLECTION = {
+    'name': '',
+    'is_virtual': False,
+    'icon': None,
+    'is_read_only': False,
+    'is_searchable': True,
+    'only_for_relationships': False,
+    'pagination_type': 'page',
+    'search_fields': None,
+    'actions': [],
+    'segments': [],
+    'fields': []
+}
+
 
 class Schema:
     schema = {
@@ -94,7 +108,14 @@ class Schema:
 
     @classmethod
     def get_default_field(cls, obj):
-        for key, value in FIELD.items():
+        for key, value in copy.deepcopy(FIELD).items():
+            obj[key] = value if key not in obj else obj[key]
+
+        return obj
+
+    @classmethod
+    def get_default_collection(cls, obj):
+        for key, value in copy.deepcopy(COLLECTION).items():
             obj[key] = value if key not in obj else obj[key]
 
         return obj
@@ -104,19 +125,7 @@ class Schema:
         # TODO support included/excluded, smart collection
         models = apps.get_models()
         for model in models:
-            collection = {
-                'name': model.__name__,
-                'is_virtual': False,
-                'icon': None,
-                'is_read_only': False,
-                'is_searchable': True,
-                'only_for_relationships': False,
-                'pagination_type': 'page',
-                'search_fields': None,
-                'actions': [],
-                'segments': [],
-                'fields': []
-            }
+            collection = cls.get_default_collection({'name': model.__name__})
             for field in model._meta.get_fields():
                 f = cls.get_default_field({
                     'field': field.name,
@@ -126,7 +135,7 @@ class Schema:
                     many = field.one_to_many or field.many_to_many
                     f['type'] = ['Number'] if many else 'Number'  # TODO review, maybe not a Number
                     f['relationship'] = 'HasMany' if many else 'BelongsTo'
-                    f['reference'] = f'{field.related_model.__name__}.{field.name}'
+                    f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'  # TODO review
 
                 collection['fields'].append(f)
             cls.schema['collections'].append(collection)
@@ -148,10 +157,10 @@ class Schema:
 
     @classmethod
     def handle_json_api_serializer(cls):
-        models = apps.get_models()
-        for model in models:
+        for collection in cls.schema['collections']:
             # create marshmallow-jsonapi resource for json api serializer
-            create_json_api_schema(model, cls)
+            # TODO place in a registry
+            create_json_api_schema(collection)
 
     @classmethod
     def handle_schema_file(cls):

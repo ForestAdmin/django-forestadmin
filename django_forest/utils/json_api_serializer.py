@@ -4,41 +4,6 @@ from marshmallow_jsonapi.fields import Relationship
 
 
 TYPE_CHOICES = {
-    'AutoField': fields.Str,
-    'BigAutoField': fields.Number,
-    'BinaryField': fields.Str,
-    'BooleanField': fields.Boolean,
-    'CharField': fields.Str,
-    'DateField': fields.Date,
-    'DateTimeField': fields.DateTime,
-    'DecimalField': fields.Decimal,
-    'DurationField': fields.Number,
-    'FileField': fields.Str,
-    'FilePathField': fields.Str,
-    'FloatField': fields.Float,
-    'IntegerField': fields.Integer,
-    'BigIntegerField': fields.Integer,
-    'IPAddressField': fields.Str,
-    'GenericIPAddressField': fields.Str,
-    'JSONField': fields.Dict,  # maybe a fields.Mapping or fields.Raw
-    'NullBooleanField': fields.Boolean,
-    'OneToOneField': fields.Number,
-    'PositiveBigIntegerField': fields.Integer,
-    'PositiveIntegerField': fields.Integer,
-    'PositiveSmallIntegerField': fields.Integer,
-    'SlugField': fields.Str,
-    'SmallAutoField': fields.Str,
-    'SmallIntegerField': fields.Integer,
-    'TextField': fields.Str,
-    'TimeField': fields.Time,
-    'UUIDField': fields.Str,
-    'CICharField': fields.Str,
-    'CIEmailField': fields.Str,
-    'CITextField': fields.Str,
-    'HStoreField': fields.Dict,  # maybe a fields.Mapping or fields.Raw
-}
-
-SMART_TYPE_CHOICES = {
     'String': fields.Str,
     'Number': fields.Number,
     'Boolean': fields.Boolean,
@@ -47,6 +12,7 @@ SMART_TYPE_CHOICES = {
     'Time': fields.Time,
     'Json': fields.Dict,  # maybe a fields.Mapping or fields.Raw,
 }
+
 
 class JsonApiSchema(type):
     _registry = {}
@@ -62,31 +28,46 @@ class MarshmallowType(JsonApiSchema, SchemaMeta):
     pass
 
 
-def create_json_api_schema(model, ForestSchema):
+def create_json_api_schema(collection):
     attrs = {}
-    # TODO handle included/excluded
-    for field in model._meta.get_fields():
-        if not field.is_relation:
-            attrs[field.name] = TYPE_CHOICES.get(field.get_internal_type(), fields.Str)()
-        else:
-            related_name = field.related_model.__name__
-            field_name = field.name
+    collection_name = collection['name']
+
+    for field in collection['fields']:
+        if field['reference'] is not None:
+            related_name = field['reference'].split('.')[0]
+            field_name = field['field']
             attrs[field_name] = Relationship(
                 type_=related_name.lower(),
-                many=field.one_to_many or field.many_to_many,
-                schema=f'{field.related_model.__name__}Schema',
-                related_url=f'/forest/{model.__name__}/{{{model.__name__.lower()}_id}}/relationships/{related_name}',
-                related_url_kwargs={f'{model.__name__.lower()}_id': '<id>'},
+                many=field['relationship'] == 'HasMany',
+                schema=f'{collection_name}Schema',
+                related_url=f'/forest/{collection_name}/{{{collection_name.lower()}_id}}/relationships/{related_name}',
+                related_url_kwargs={f'{collection_name.lower()}_id': '<id>'},
             )
-    # add smart fields
-    collection = ForestSchema.get_collection(model.__name__)
-    smart_fields = [f for f in collection['fields'] if f['is_virtual']]
-    for field in smart_fields:
-        attrs[field['field']] = SMART_TYPE_CHOICES.get(field['type'], fields.Str)()
+        else:
+            attrs[field['field']] = TYPE_CHOICES.get(field['type'], fields.Str)()
 
     class MarshmallowSchema(Schema):
+
+        # TODO, if we want modify how is returned the data, we need to override format_json_api_response
+        # https://marshmallow-jsonapi.readthedocs.io/en/latest/api_reference.html#marshmallow_jsonapi.Schema.format_json_api_response
+        # format_items and format_item will need to be updated
+
+        # We add the id in the attributes
+        def format_item(self, item):
+            ret = super().format_item(item)
+            if 'attributes' in ret:
+                attributes = {
+                    (self.fields[field].data_key or field): field for field in self.fields
+                }
+                for field_name, value in item.items():
+                    attribute = attributes[field_name]
+                    if attribute == 'id':
+                        ret['attributes']['id'] = value
+
+            return ret
+
         class Meta:
-            type_ = model.__name__.lower()
+            type_ = collection_name.lower()
             strict = True
 
-    return MarshmallowType(f'{model.__name__}Schema', (MarshmallowSchema,), attrs)
+    return MarshmallowType(f'{collection_name}Schema', (MarshmallowSchema,), attrs)

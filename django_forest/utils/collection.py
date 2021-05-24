@@ -2,6 +2,7 @@ from django_forest.utils.schema import Schema
 
 
 class Collection:
+    name = None
     actions = []
     fields = []
     segments = []
@@ -9,8 +10,14 @@ class Collection:
     _registry = {}
 
     @classmethod
-    def register(cls, model, model_forest):
-        cls._registry[model.__name__] = model_forest(model)
+    def register(cls, model_forest, model=None):
+        instance = model_forest(model)
+        key = instance.__class__.__name__
+        if model is not None:
+            key = model.__name__
+        elif instance.name is not None:
+            key = instance.name
+        cls._registry[key] = instance
 
     def load(self):
         pass
@@ -20,7 +27,9 @@ class Collection:
         existing_fields = [f['field'] for f in collection['fields']]
         for field in self.fields:
             if field['field'] in existing_fields:  # update
-                collection['fields'] = Schema.get_default_field(field)
+                # TODO review
+                fi = [f for f in collection['fields'] if f['field'] == field['field']][0]
+                fi = Schema.get_default_field(fi)
             else:  # add
                 field.update({'is_virtual': True})
                 collection['fields'].append(Schema.get_default_field(field))
@@ -32,11 +41,17 @@ class Collection:
         pass
 
     def __init__(self, model):
-        self.model = model
         self.load()
 
         # find resource in Schema
-        collection = Schema.get_collection(self.model.__name__)
+        if model is not None:
+            collection = Schema.get_collection(model.__name__)
+        else:  # create smart collection
+            name = self.__class__.__name__
+            if self.name is not None:
+                name = self.name
+            collection = Schema.get_default_collection({'name': name, 'is_virtual': True})
+            Schema.schema['collections'].append(collection)
         self.handle_smart_fields(collection)
         self.handle_smart_actions(collection)
         self.handle_smart_segments(collection)
