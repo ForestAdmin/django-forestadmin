@@ -6,10 +6,9 @@ from django_forest.utils.schema import Schema
 
 def get_model(resource):
     # TODO handle included/excluded models from settings
-    # TODO support smart collection
-    models = [model for model in apps.get_models() if model.__name__.lower() == resource.lower()]
-    if len(models):
-        return models[0]
+    for model in apps.get_models():
+        if resource.lower() in (model.__name__.lower(), f'{model.__name__.lower()}s'):
+            return model
 
     return None
 

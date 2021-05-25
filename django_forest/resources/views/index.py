@@ -32,6 +32,11 @@ class IndexView(SmartFieldMixin, generic.View):
         # TODO other special fields, put in a mixin
         if isinstance(field, models.DateTimeField):
             return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
+        elif isinstance(field, models.ForeignKey):
+            model = get_model(value['data']['type'])
+            if model:
+                return model.objects.get(pk=value['data']['id'])
+            return None
 
         return value
 
@@ -47,6 +52,9 @@ class IndexView(SmartFieldMixin, generic.View):
         fields_name = fields.keys()
         attributes = {}
         for k, v in body['data']['attributes'].items():
+            if k in fields_name:
+                attributes[k] = self.format(v, fields[k])
+        for k, v in body['data']['relationships'].items():
             if k in fields_name:
                 attributes[k] = self.format(v, fields[k])
 
