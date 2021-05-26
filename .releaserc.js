@@ -12,9 +12,21 @@ module.exports = {
     ],
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
-    '@semantic-release/npm',
-    '@semantic-release/git',
+      [
+      '@semantic-release/exec',
+      {
+        prepareCmd: 'sed -i \'s/version = ".*"/version = "${nextRelease.version}"/g\' setup.cfg; sed -i \'s/"version": ".*"/"version": "${nextRelease.version}"/g\' package.json;',
+        successCmd: 'touch .trigger-rubygem-release',
+      },
+    ],
+    [
+      '@semantic-release/git',
+      {
+        assets: ['CHANGELOG.md', 'package.json', 'setup.cfg'],
+      },
+    ],
     '@semantic-release/github',
+    'semantic-release-pypi',
     [
       'semantic-release-slack-bot',
       {
