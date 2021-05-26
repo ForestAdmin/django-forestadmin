@@ -1,0 +1,5 @@
+Django==3.2.2
+django-cors-headers==3.7.0
+oic==1.2.1
+python-jose==3.2.0
+requests==2.25.1
