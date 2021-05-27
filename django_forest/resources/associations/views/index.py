@@ -1,7 +1,8 @@
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import get_model, SmartFieldMixin
+from django_forest.resources.utils import SmartFieldMixin
+from django_forest.utils.get_model import get_model
 from django_forest.utils.json_api_serializer import JsonApiSchema
 
 

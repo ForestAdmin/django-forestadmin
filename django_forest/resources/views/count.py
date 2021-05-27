@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views import generic
 
-from django_forest.resources.utils import get_model
+from django_forest.utils.get_model import get_model
 
 
 class CountView(generic.View):

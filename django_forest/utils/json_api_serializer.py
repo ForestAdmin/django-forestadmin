@@ -1,7 +1,10 @@
+import re
+
 from marshmallow.schema import SchemaMeta
 from marshmallow_jsonapi import Schema, fields
 from marshmallow_jsonapi.fields import Relationship
 
+from django_forest.utils.get_model import get_model
 
 TYPE_CHOICES = {
     'String': fields.Str,
@@ -28,7 +31,11 @@ class MarshmallowType(JsonApiSchema, SchemaMeta):
     pass
 
 
-def create_json_api_schema(collection):
+def getTypeName(name):
+    return re.sub(r"(\w)([A-Z])", r"\1 \2", name)
+
+
+def create_json_api_schema(collection, ForestSchema):
     attrs = {}
     collection_name = collection['name']
 
@@ -37,14 +44,20 @@ def create_json_api_schema(collection):
             related_name = field['reference'].split('.')[0]
             field_name = field['field']
             attrs[field_name] = Relationship(
-                type_=related_name.lower(),
+                type_=getTypeName(related_name).lower(),
                 many=field['relationship'] == 'HasMany',
-                schema=f'{collection_name}Schema',
+                schema=f'{related_name}Schema',
                 related_url=f'/forest/{collection_name}/{{{collection_name.lower()}_id}}/relationships/{related_name}',
                 related_url_kwargs={f'{collection_name.lower()}_id': '<id>'},
             )
         else:
             attrs[field['field']] = TYPE_CHOICES.get(field['type'], fields.Str)()
+
+    # Add id field if does not exist, taking pk (do not work for smart collection which need an id)
+    if 'id' not in attrs:
+        Model = get_model(collection_name)
+        if Model:
+            attrs['id'] = TYPE_CHOICES.get(ForestSchema.get_type(Model._meta.pk.get_internal_type()), fields.Str)()
 
     class MarshmallowSchema(Schema):
 
@@ -64,10 +77,22 @@ def create_json_api_schema(collection):
                     if attribute == 'id':
                         ret['attributes']['id'] = value
 
+                if 'id' not in ret['attributes']:
+                    Model = get_model(self.Meta.type_)
+                    if Model:
+                        ret['attributes']['id'] = ret['attributes'][Model._meta.pk.name]
+                        ret['id'] = ret['attributes'][Model._meta.pk.name]
+
             return ret
 
+        def get_attribute(self, obj, attr, default):
+            value = super().get_attribute(obj, attr, default)
+            if value.__class__.__name__ == 'ManyRelatedManager':
+                value = value.all()
+            return value
+
         class Meta:
-            type_ = collection_name.lower()
+            type_ = getTypeName(collection_name).lower()
             strict = True
 
     return MarshmallowType(f'{collection_name}Schema', (MarshmallowSchema,), attrs)

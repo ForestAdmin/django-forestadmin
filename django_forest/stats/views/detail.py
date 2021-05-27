@@ -2,7 +2,7 @@ from django.core import serializers
 from django.http import HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import get_model
+from django_forest.utils.get_model import get_model
 
 
 class DetailView(generic.View):
@@ -10,9 +10,9 @@ class DetailView(generic.View):
         data = {}
         # TODO
 
-        model = get_model(resource)
-        if model is not None:
-            queryset = model.objects.get(pk=pk)
+        Model = get_model(resource)
+        if Model is not None:
+            queryset = Model.objects.get(pk=pk)
             data = serializers.serialize('json', (queryset,))
 
         return HttpResponse(data, content_type='application/json')

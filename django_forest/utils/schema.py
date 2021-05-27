@@ -160,7 +160,7 @@ class Schema:
         for collection in cls.schema['collections']:
             # create marshmallow-jsonapi resource for json api serializer
             # TODO place in a registry
-            create_json_api_schema(collection)
+            create_json_api_schema(collection, cls)
 
     @classmethod
     def handle_schema_file(cls):

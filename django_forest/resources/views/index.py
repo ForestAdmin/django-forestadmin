@@ -5,7 +5,8 @@ from django.db import models
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import get_model, SmartFieldMixin
+from django_forest.resources.utils import SmartFieldMixin
+from django_forest.utils.get_model import get_model
 from django_forest.utils.json_api_serializer import JsonApiSchema
 
 
@@ -23,8 +24,8 @@ class IndexView(SmartFieldMixin, generic.View):
 
         # json api serializer
         Schema = JsonApiSchema._registry[f'{resource}Schema']
-        include_data = [x.related_model.__name__.lower() for x in Model._meta.get_fields() if x.is_relation]
-        data = Schema(include_data=include_data).dump(queryset, many=True)
+        include_data = [x.name for x in Model._meta.get_fields() if x.is_relation]
+        data = Schema(include_data=include_data).dump(queryset, many=True) if queryset else {'data': []}
 
         return JsonResponse(data, safe=False)
 
