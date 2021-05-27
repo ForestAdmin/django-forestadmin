@@ -35,7 +35,7 @@ def getTypeName(name):
     return re.sub(r"(\w)([A-Z])", r"\1 \2", name)
 
 
-def create_json_api_schema(collection, ForestSchema):
+def create_json_api_schema(collection, ForestSchema):  # noqa: C901
     attrs = {}
     collection_name = collection['name']
 
