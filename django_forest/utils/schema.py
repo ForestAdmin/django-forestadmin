@@ -87,16 +87,26 @@ COLLECTION = {
 }
 
 
+def get_app_version():
+    version = '0.0.0'
+    try:
+        version = metadata.version('django_forest')
+    except:
+        pass
+    finally:
+        return version
+
 class Schema:
     schema = {
         'collections': [],
         'meta': {
             'database_type': connection.vendor,
             'liana': 'django-forest',
-            'liana_version': metadata.version('django_forest'),
+            'liana_version': get_app_version(),
             'orm_version': django.get_version()
         }
     }
+
 
     @classmethod
     def get_collection(cls, resource):
