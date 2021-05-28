@@ -8,9 +8,11 @@ class CountView(generic.View):
     def get(self, request, resource, *args, **kwargs):
         data = {'count': 0}
 
-        model = get_model(resource.lower())
-        if model is not None:
-            queryset = model.objects.count()
-            data['count'] = queryset
+        Model = get_model(resource.lower())
+        if Model is None:
+            return JsonResponse({'message': 'error no model found'}, status=400)
+
+        queryset = Model.objects.count()
+        data['count'] = queryset
 
         return JsonResponse(data, safe=False)

@@ -61,6 +61,8 @@ class IndexView(SmartFieldMixin, generic.View):
 
         obj = Model.objects.create(**attributes)
 
+        # TODO handle many to many
+
         Schema = JsonApiSchema._registry[f'{resource}Schema']
         data = Schema().dump(obj)
         return JsonResponse(data, safe=False)

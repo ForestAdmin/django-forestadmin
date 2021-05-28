@@ -32,6 +32,11 @@ class DetailView(SmartFieldMixin, generic.View):
         # TODO other special fields, put in a mixin
         if isinstance(field, models.DateTimeField):
             return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
+        elif isinstance(field, models.ForeignKey):
+            model = get_model(value['data']['type'])
+            if model:
+                return model.objects.get(pk=value['data']['id'])
+            return None
 
         return value
 

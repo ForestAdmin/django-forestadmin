@@ -16,7 +16,7 @@
 
 ## Test
 
-`pytest`
+`coverage run -m pytest`
 
 ## Coverage
 

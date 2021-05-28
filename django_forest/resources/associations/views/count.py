@@ -1,3 +1,4 @@
+from django.db.models import ManyToOneRel, ManyToManyRel
 from django.http import JsonResponse
 from django.views import generic
 
@@ -9,8 +10,18 @@ class CountView(generic.View):
         data = {'count': 0}
 
         Model = get_model(resource)
-        if Model is not None:
-            queryset = getattr(Model.objects.get(pk=pk), f'{association_resource.lower()}_set').count()
-            data['count'] = queryset
+        if Model is None:
+            return JsonResponse({'message': 'error no model found'}, status=400)
+
+        association_fields = [x for x in Model._meta.get_fields() if x.name == association_resource.lower()]
+        if not len(association_fields):
+            return JsonResponse({'error': 'cannot find relation'}, safe=False, status=400)
+
+        association_field = association_fields[0]
+        association_field_name = association_field.name
+        if isinstance(association_field, ManyToOneRel) or isinstance(association_field, ManyToManyRel):
+            association_field_name = f'{association_resource.lower()}_set'
+        queryset = getattr(Model.objects.get(pk=pk), association_field_name).count()
+        data['count'] = queryset
 
         return JsonResponse(data, safe=False)
