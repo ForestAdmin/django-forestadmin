@@ -14,7 +14,8 @@ class IndexView(SmartFieldMixin, generic.View):
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
-        association_fields = [x for x in Model._meta.get_fields() if x.related_model and x.related_model.__name__.lower() == association_resource.lower()]
+        association_fields = [x for x in Model._meta.get_fields()
+                              if x.related_model and x.related_model.__name__.lower() == association_resource.lower()]
         if not len(association_fields):
             return JsonResponse({'error': 'cannot find relation'}, safe=False, status=400)
 
