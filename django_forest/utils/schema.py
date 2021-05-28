@@ -91,7 +91,7 @@ def get_app_version():
     version = '0.0.0'
     try:
         version = metadata.version('django_forest')
-    except:
+    except Exception:
         pass
     finally:
         return version
@@ -106,7 +106,6 @@ class Schema:
             'orm_version': django.get_version()
         }
     }
-
 
     @classmethod
     def get_collection(cls, resource):
