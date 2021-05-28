@@ -93,7 +93,7 @@ class Schema:
         'meta': {
             'database_type': connection.vendor,
             'liana': 'django-forest',
-            'liana_version': metadata.version('django-forest'),
+            'liana_version': metadata.version('django_forest'),
             'orm_version': django.get_version()
         }
     }
