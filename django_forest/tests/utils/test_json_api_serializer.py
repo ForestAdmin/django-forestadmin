@@ -137,6 +137,24 @@ class UtilsJsonApiSerializerTests(TestCase):
             ]
         })
 
+    def test_json_api_serializer_pk_is_not_id(self):
+        Schema.handle_json_api_serializer()
+        schema = JsonApiSchema._registry['SessionSchema']
+        session = Session.objects.get(pk='foobar1234')
+        data = schema().dump(session)
+        self.assertEqual(data, {
+            'data': {
+                'type': 'session',
+                'attributes': {
+                    'session_key': 'foobar1234',
+                    'expire_date': '2021-06-02T13:48:36.039000+00:00',
+                    'session_data': 'foo',
+                    'id': 'foobar1234'
+                },
+                'id': 'foobar1234'
+            }
+        })
+
     def test_json_api_serializer_many_to_many(self):
         Schema.handle_json_api_serializer()
         schema = JsonApiSchema._registry['ArticleSchema']

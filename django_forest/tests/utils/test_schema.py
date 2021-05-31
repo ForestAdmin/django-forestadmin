@@ -8,7 +8,8 @@ import pytest
 from unittest import mock
 from django.test import TestCase, override_settings
 
-from django_forest.tests.fixtures.schema import test_schema, test_question_choice_schema, test_exclude_django_contrib_schema
+from django_forest.tests.fixtures.schema import test_schema, test_question_choice_schema, \
+    test_exclude_django_contrib_schema, test_serialized_schema
 from django_forest.utils.collection import Collection
 from django_forest.utils.json_api_serializer import JsonApiSchema
 from django_forest.utils.models import Models
@@ -170,6 +171,93 @@ class UtilsSchemaFileTests(TestCase):
     @pytest.mark.usefixtures('reset_config_dir_import')
     @override_settings(DEBUG=True)
     def test_handle_schema_file_debug(self):
+        Schema.handle_schema_file()
+        with open(file_path, 'r') as f:
+            data = f.read()
+            data = json.loads(data)
+            question = [c for c in data['collections'] if c['name'] == 'Question'][0]
+            self.assertEqual(len(question['fields']), 6)
+            foo_field = [f for f in question['fields'] if f['field'] == 'foo'][0]
+            self.assertFalse('get' in foo_field)
+            self.assertIsNotNone(Schema.schema_data)
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @override_settings(DEBUG=True)
+    def test_get_serialized_schema(self):
+        Schema.handle_schema_file()
+        serialized_schema = Schema.get_serialized_schema()
+        self.assertEqual(serialized_schema, test_serialized_schema)
+
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
+
+
+file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
+
+
+@pytest.fixture()
+def dumb_forestadmin_schema():
+    schema_data = json.dumps(test_schema, indent=2)
+    with open(file_path, 'w') as f:
+        f.write(schema_data)
+
+
+@pytest.fixture()
+def invalid_forestadmin_schema():
+    schema_data = 'invalid'
+    with open(file_path, 'w') as f:
+        f.write(schema_data)
+
+
+class UtilsSchemaFileTests(TestCase):
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, caplog):
+        self._caplog = caplog
+
+    def setUp(self):
+        Schema.build_schema()
+        Schema.add_smart_features()
+
+    def tearDown(self):
+        # reset _registry after each test
+        Collection._registry = {}
+        JsonApiSchema._registry = {}
+        Schema.schema_data = None
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    def test_handle_schema_file_no_file(self):
+        self.assertRaises(Exception, Schema.handle_schema_file())
+        self.assertIsNone(Schema.schema_data)
+        self.assertEqual(self._caplog.messages, [
+            'The .forestadmin-schema.json file does not exist.',
+            'The schema cannot be synchronized with Forest Admin servers.'
+        ])
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @pytest.mark.usefixtures('dumb_forestadmin_schema')
+    def test_handle_schema_file_production(self):
+        Schema.handle_schema_file()
+        self.assertIsNotNone(Schema.schema_data)
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @pytest.mark.usefixtures('invalid_forestadmin_schema')
+    def test_handle_schema_file_invalid_json_production(self):
+        self.assertRaises(Exception, Schema.handle_schema_file())
+        self.assertIsNone(Schema.schema_data)
+        self.assertEqual(self._caplog.messages, [
+            'The content of .forestadmin-schema.json file is not a correct JSON.',
+            'The schema cannot be synchronized with Forest Admin servers.'
+        ])
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @override_settings(DEBUG=True)
+    def test_handle_schema_file_debug(self):
         self.maxDiff = None
         Schema.handle_schema_file()
         with open(file_path, 'r') as f:
@@ -184,7 +272,6 @@ class UtilsSchemaFileTests(TestCase):
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsGetAppTests(TestCase):
-
     @mock.patch('importlib.metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
         from django_forest.utils.schema import get_app_version

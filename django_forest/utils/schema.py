@@ -17,6 +17,8 @@ if sys.version_info >= (3, 8):
 else:
     import importlib_metadata as metadata
 
+from django_forest.utils.forest_api_requester import ForestApiRequester
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -182,12 +184,6 @@ class Schema:
             create_json_api_schema(collection)
 
     @classmethod
-    def get_serialized_collection(cls, collection):
-        for index, field in enumerate(collection['fields']):
-            collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
-        return collection
-
-    @classmethod
     def handle_schema_file_production(cls, file_path):
         try:
             with open(file_path, 'r') as f:
@@ -202,15 +198,69 @@ class Schema:
             logger.error('The schema cannot be synchronized with Forest Admin servers.')
 
     @classmethod
+    def get_serialized_collection(cls, collection):
+        for index, field in enumerate(collection['fields']):
+            collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
+        return collection
+
+    @classmethod
     def handle_schema_file(cls):
         file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
         if settings.DEBUG:
-            schema = copy.deepcopy(cls.schema)
-            for index, collection in enumerate(schema['collections']):
-                schema['collections'][index] = cls.get_serialized_collection(collection)
+            cls.schema_data = copy.deepcopy(cls.schema)
+            for index, collection in enumerate(cls.schema_data['collections']):
+                cls.schema_data['collections'][index] = cls.get_serialized_collection(collection)
 
-            cls.schema_data = json.dumps(schema, indent=2)
             with open(file_path, 'w') as f:
-                f.write(cls.schema_data)
+                f.write(json.dumps(cls.schema_data, indent=2))
         else:
             cls.handle_schema_file_production(file_path)
+
+    @classmethod
+    def get_serialized_collection_relation(cls, collection, rel_type):
+        data = []
+        included = []
+        for rel in collection[rel_type]:
+            id = f"{collection['name']}.{rel['name']}"
+            data.append({'id': id, 'type': rel_type})
+            included.append({
+                'id': id,
+                'type': rel_type,
+                'attributes': rel
+            })
+        return data, included
+
+    @classmethod
+    def get_serialized_schema(cls):
+        data = []
+        included = []
+        for collection in copy.deepcopy(cls.schema_data['collections']):
+            actions_data, actions_included = cls.get_serialized_collection_relation(collection, 'actions')
+            segments_data, segments_included = cls.get_serialized_collection_relation(collection, 'segments')
+            c = {
+                'id': collection['name'],
+                'type': 'collections',
+                'attributes': cls.get_serialized_collection(collection),
+                'relationships': {
+                    'actions': {
+                        'data': actions_data
+                    },
+                    'segments': {
+                        'data': segments_data
+                    }
+                }
+            }
+            data.append(c)
+            included.extend(actions_included)
+            included.extend(segments_included)
+
+        return {
+            'data': data,
+            'included': included,
+            'meta': cls.schema_data['meta']
+        }
+
+    @classmethod
+    def send_apimap(cls):
+        serialized_schema = cls.get_serialized_schema()
+        ForestApiRequester.post('forest/apimaps', serialized_schema)
