@@ -3,16 +3,19 @@ from django_forest.utils.schema import Schema
 
 
 class SmartFieldMixin():
+    def _handle_get_method(self, smart_field, item, field, resource):
+        if 'get' in smart_field:
+            method = smart_field['get']
+            if isinstance(method, str):
+                setattr(item, field, getattr(Collection._registry[resource], method)(item))
+            elif callable(method):
+                setattr(item, field, method(item))
+
     # TODO: dumb smart field getter
     def add_smart_fields(self, item, collection, smart_fields, resource):
         for field in smart_fields:
             smart_field = [x for x in collection['fields'] if x['field'] == field][0]
-            if 'get' in smart_field:
-                method = smart_field['get']
-                if isinstance(method, str):
-                    setattr(item, field, getattr(Collection._registry[resource], method)(item))
-                elif callable(method):
-                    setattr(item, field, method(item))
+            self._handle_get_method(smart_field, item, field, resource)
 
     def handle_smart_fields(self, queryset, resource, Model, many=False):
         collection = Schema.get_collection(resource)

@@ -12,7 +12,7 @@ from django_forest.utils.json_api_serializer import JsonApiSchema
 
 class IndexView(SmartFieldMixin, generic.View):
 
-    def get(self, request, resource, *args, **kwargs):
+    def get(self, request, resource):
         Model = get_model(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
@@ -41,14 +41,7 @@ class IndexView(SmartFieldMixin, generic.View):
 
         return value
 
-    def post(self, request, resource, *args, **kwargs):
-        # TODO
-        Model = get_model(resource)
-        if Model is None:
-            return JsonResponse({'message': 'error no model found'}, status=400)
-
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
+    def fill_attribute(self, body, Model):
         fields = {x.name: x for x in Model._meta.get_fields()}
         fields_name = fields.keys()
         attributes = {}
@@ -59,6 +52,19 @@ class IndexView(SmartFieldMixin, generic.View):
             if k in fields_name:
                 attributes[k] = self.format(v, fields[k])
 
+        return attributes
+
+    def post(self, request, resource):
+        # TODO
+        Model = get_model(resource)
+        if Model is None:
+            return JsonResponse({'message': 'error no model found'}, status=400)
+
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+
+        attributes = self.fill_attribute(body, Model)
+
         obj = Model.objects.create(**attributes)
 
         # TODO handle many to many
@@ -67,7 +73,7 @@ class IndexView(SmartFieldMixin, generic.View):
         data = Schema().dump(obj)
         return JsonResponse(data, safe=False)
 
-    def delete(self, request, resource, *args, **kwargs):
+    def delete(self, request, resource):
         # TODO
         Model = get_model(resource)
         if Model is None:

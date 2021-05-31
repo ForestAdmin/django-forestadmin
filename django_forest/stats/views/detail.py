@@ -6,7 +6,7 @@ from django_forest.utils.get_model import get_model
 
 
 class DetailView(generic.View):
-    def get(self, request, resource, pk, *args, **kwargs):
+    def get(self, request, resource, pk):
         data = {}
         # TODO
 

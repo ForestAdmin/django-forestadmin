@@ -12,7 +12,7 @@ from django_forest.utils.json_api_serializer import JsonApiSchema
 
 class DetailView(SmartFieldMixin, generic.View):
 
-    def get(self, request, resource, pk, *args, **kwargs):
+    def get(self, request, resource, pk):
         Model = get_model(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
@@ -40,7 +40,7 @@ class DetailView(SmartFieldMixin, generic.View):
 
         return value
 
-    def put(self, request, resource, pk, *args, **kwargs):
+    def put(self, request, resource, pk):
         # TODO
         Model = get_model(resource)
         if Model is None:
@@ -59,7 +59,7 @@ class DetailView(SmartFieldMixin, generic.View):
         data = Schema().dump(obj)
         return JsonResponse(data, safe=False)
 
-    def delete(self, request, resource, pk, *args, **kwargs):
+    def delete(self, request, resource, pk):
         # TODO
         Model = get_model(resource)
         if Model is None:

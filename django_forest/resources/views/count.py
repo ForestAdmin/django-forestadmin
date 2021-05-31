@@ -5,7 +5,7 @@ from django_forest.utils.get_model import get_model
 
 
 class CountView(generic.View):
-    def get(self, request, resource, *args, **kwargs):
+    def get(self, request, resource):
         data = {'count': 0}
 
         Model = get_model(resource.lower())

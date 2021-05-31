@@ -9,20 +9,25 @@ from django_forest.utils.json_api_serializer import JsonApiSchema
 
 class IndexView(SmartFieldMixin, generic.View):
 
-    def get(self, request, resource, pk, association_resource, *args, **kwargs):
+    def _get_association_fields(self, Model, association_resource):
+        for field in Model._meta.get_fields():
+            if field.related_model and field.related_model.__name__.lower() == association_resource.lower():
+                return field
+        return None
+
+    def get(self, request, resource, pk, association_resource):
         Model = get_model(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
-        association_fields = [x for x in Model._meta.get_fields()
-                              if x.related_model and x.related_model.__name__.lower() == association_resource.lower()]
-        if not len(association_fields):
+        association_field = self._get_association_fields(Model, association_resource)
+        if association_field is None:
             return JsonResponse({'error': 'cannot find relation'}, safe=False, status=400)
 
-        association_field = association_fields[0]
         association_field_name = association_field.name
         if isinstance(association_field, ManyToOneRel) or isinstance(association_field, ManyToManyRel):
             association_field_name = f'{association_resource.lower()}_set'
+
         queryset = getattr(Model.objects.get(pk=pk), association_field_name).all()
 
         # handle smart fields
@@ -36,18 +41,24 @@ class IndexView(SmartFieldMixin, generic.View):
 
         return JsonResponse(data, safe=False)
 
-    def post(self, request, resource, pk, association_resource, *args, **kwargs):
+    def post(self, request, resource, pk, association_resource):
         # TODO
-        # Model = get_model(resource)
+        Model = get_model(resource)
+        if Model is None:
+            return JsonResponse({'message': 'error no model found'}, status=400)
         return JsonResponse({}, safe=False)
 
     # BelongsTo case
-    def put(self, request, resource, pk, association_resource, *args, **kwargs):
+    def put(self, request, resource, pk, association_resource):
         # TODO
-        # Model = get_model(resource)
+        Model = get_model(resource)
+        if Model is None:
+            return JsonResponse({'message': 'error no model found'}, status=400)
         return HttpResponse(status=204)
 
-    def delete(self, request, resource, pk, association_resource, *args, **kwargs):
+    def delete(self, request, resource, pk, association_resource):
         # TODO
-        # Model = get_model(resource)
+        Model = get_model(resource)
+        if Model is None:
+            return JsonResponse({'message': 'error no model found'}, status=400)
         return HttpResponse(status=204)
