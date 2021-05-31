@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest coverage pytest-django
+          pip install pytest coverage pytest-django pytest-pythonpath
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with pytest
         run: |
@@ -79,6 +79,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           persist-credentials: false # GITHUB_TOKEN must not be set for the semantic release
+          fetch-depth: 0
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}

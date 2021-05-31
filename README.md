@@ -18,6 +18,10 @@
 
 `pytest`
 
+## Coverage
+
+`coverage run -m pytest`
+
 Forest Admin provides an off-the-shelf administration panel based on a highly-extensible API plugged into your application.
 
 This project has been designed with scalability in mind to fit requirements from small projects to mature companies.
