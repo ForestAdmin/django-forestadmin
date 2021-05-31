@@ -6,6 +6,7 @@ from marshmallow_jsonapi import Schema, fields
 from django_forest.utils.models import Models
 from django_forest.utils.get_type import get_type
 
+
 TYPE_CHOICES = {
     'String': fields.Str,
     'Number': fields.Number,
