@@ -29,7 +29,7 @@ class IndexView(SmartFieldMixin, generic.View):
 
         return JsonResponse(data, safe=False)
 
-    def format(self, value, field):
+    def _format(self, value, field):
         # TODO other special fields, put in a mixin
         if isinstance(field, models.DateTimeField):
             return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
@@ -41,16 +41,19 @@ class IndexView(SmartFieldMixin, generic.View):
 
         return value
 
-    def fill_attribute(self, body, Model):
+    def _get_attributes(self, body, fields, fields_name):
+        attributes = {}
+        for k, v in body.items():
+            if k in fields_name:
+                attributes[k] = self._format(v, fields[k])
+        return attributes
+
+    def _populate_attribute(self, body, Model):
         fields = {x.name: x for x in Model._meta.get_fields()}
         fields_name = fields.keys()
         attributes = {}
-        for k, v in body['data']['attributes'].items():
-            if k in fields_name:
-                attributes[k] = self.format(v, fields[k])
-        for k, v in body['data']['relationships'].items():
-            if k in fields_name:
-                attributes[k] = self.format(v, fields[k])
+        attributes.update(self._get_attributes(body['data']['attributes'], fields, fields_name))
+        attributes.update(self._get_attributes(body['data']['relationships'], fields, fields_name))
 
         return attributes
 
@@ -63,7 +66,7 @@ class IndexView(SmartFieldMixin, generic.View):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
 
-        attributes = self.fill_attribute(body, Model)
+        attributes = self._populate_attribute(body, Model)
 
         obj = Model.objects.create(**attributes)
 

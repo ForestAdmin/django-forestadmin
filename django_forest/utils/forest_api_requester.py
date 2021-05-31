@@ -45,6 +45,14 @@ class ForestApiRequester:
             return r
 
     @classmethod
+    def _get_url(cls, route):
+        if route.startswith('https://'):
+            url = route
+        else:
+            url = urljoin(cls.forest_api_url(), route)
+        return url
+
+    @classmethod
     def post(cls, route, body=None, query=None, headers=None):
         if body is None:
             body = {}
@@ -53,10 +61,7 @@ class ForestApiRequester:
         if headers is None:
             headers = {}
 
-        if route.startswith('https://'):
-            url = route
-        else:
-            url = urljoin(cls.forest_api_url(), route)
+        url = cls._get_url(route)
         try:
             r = requests.post(url,
                               data=json.dumps(body),

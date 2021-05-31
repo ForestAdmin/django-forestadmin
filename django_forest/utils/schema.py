@@ -130,23 +130,45 @@ class Schema:
         return obj
 
     @classmethod
+    def _get_type(cls, many):
+        # TODO review, maybe not a Number
+        if many:
+            return ['Number']
+        return 'Number'
+
+    @classmethod
+    def _get_relationship(cls, many):
+        # TODO review for HasOne
+        if many:
+            return 'HasMany'
+        return 'BelongsTo'
+
+    @classmethod
+    def handle_relation(cls, field, f):
+        if field.is_relation:
+            many = field.one_to_many or field.many_to_many
+            f['type'] = cls._get_type(many)
+            f['relationship'] = cls._get_relationship(many)
+            f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'  # TODO review
+        return f
+
+    @classmethod
+    def add_fields(cls, model, collection):
+        for field in model._meta.get_fields():
+            f = cls.get_default_field({
+                'field': field.name,
+                'type': cls.get_type(field.get_internal_type())
+            })
+            f = cls.handle_relation(field, f)
+            collection['fields'].append(f)
+
+    @classmethod
     def build_schema(cls):
         # TODO support included/excluded, smart collection
         models = apps.get_models()
         for model in models:
             collection = cls.get_default_collection({'name': model.__name__})
-            for field in model._meta.get_fields():
-                f = cls.get_default_field({
-                    'field': field.name,
-                    'type': cls.get_type(field.get_internal_type())
-                })
-                if field.is_relation:
-                    many = field.one_to_many or field.many_to_many
-                    f['type'] = ['Number'] if many else 'Number'  # TODO review, maybe not a Number
-                    f['relationship'] = 'HasMany' if many else 'BelongsTo'
-                    f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'  # TODO review
-
-                collection['fields'].append(f)
+            cls.add_fields(model, collection)
             cls.schema['collections'].append(collection)
         return cls.schema
 
