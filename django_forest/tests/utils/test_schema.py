@@ -87,12 +87,12 @@ class UtilsSchemaTests(TestCase):
 
     def test_get_collection(self):
         from django_forest.utils.schema import Schema
+        Schema.schema = test_schema
         collection = Schema.get_collection('Question')
         self.assertEqual(collection, [x for x in test_schema['collections'] if x['name'] == 'Question'][0])
 
     def test_get_collection_inexist(self):
         from django_forest.utils.schema import Schema
-
         collection = Schema.get_collection('Foo')
         self.assertEqual(collection, None)
 
