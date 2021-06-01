@@ -53,7 +53,8 @@ class IndexView(SmartFieldMixin, generic.View):
         fields_name = fields.keys()
         attributes = {}
         attributes.update(self._get_attributes(body['data']['attributes'], fields, fields_name))
-        attributes.update(self._get_attributes(body['data']['relationships'], fields, fields_name))
+        if 'relationships' in body['data']:
+            attributes.update(self._get_attributes(body['data']['relationships'], fields, fields_name))
 
         return attributes
 
