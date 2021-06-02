@@ -1,0 +1,20 @@
+[
+{
+    "model": "tests.choice",
+    "pk": 1,
+    "fields": {
+        "question": 1,
+        "choice_text": "yes",
+        "votes": 0
+    }
+},
+{
+    "model": "tests.choice",
+    "pk": 2,
+    "fields": {
+        "question": 1,
+        "choice_text": "no",
+        "votes": 1
+    }
+}
+]
