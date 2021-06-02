@@ -1,0 +1,10 @@
+[
+{
+    "model": "tests.session",
+    "pk": "foobar1234",
+    "fields": {
+        "session_data": "foo",
+        "expire_date": "2021-06-02T13:48:36.039Z"
+    }
+}
+]

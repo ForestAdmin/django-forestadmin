@@ -1,0 +1,30 @@
+[
+{
+    "model": "tests.publication",
+    "pk": 1,
+    "fields": {
+        "title": "The Python Journal"
+    }
+},
+{
+    "model": "tests.publication",
+    "pk": 2,
+    "fields": {
+        "title": "Science News"
+    }
+},
+{
+    "model": "tests.publication",
+    "pk": 3,
+    "fields": {
+        "title": "Science Weekly"
+    }
+},
+{
+    "model": "tests.publication",
+    "pk": 4,
+    "fields": {
+        "title": "Highlights for Children"
+    }
+}
+]

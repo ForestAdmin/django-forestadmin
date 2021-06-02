@@ -1,0 +1,25 @@
+[
+{
+    "model": "tests.article",
+    "pk": 1,
+    "fields": {
+        "headline": "Django lets you build Web apps easily",
+        "publications": [
+            1
+        ]
+    }
+},
+{
+    "model": "tests.article",
+    "pk": 2,
+    "fields": {
+        "headline": "NASA uses Python",
+        "publications": [
+            1,
+            2,
+            3,
+            4
+        ]
+    }
+}
+]

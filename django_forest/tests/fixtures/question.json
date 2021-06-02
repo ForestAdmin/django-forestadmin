@@ -1,0 +1,10 @@
+[
+{
+    "model": "tests.question",
+    "pk": 1,
+    "fields": {
+        "question_text": "what is your favorite color?",
+        "pub_date": "2021-06-02T13:52:53.528Z"
+    }
+}
+]
