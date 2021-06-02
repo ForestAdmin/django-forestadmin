@@ -199,3 +199,50 @@ class UtilsJsonApiSerializerTests(TestCase):
                 }
             ]
         })
+
+    def test_json_api_serializer_many_to_many(self):
+        Schema.handle_json_api_serializer()
+        schema = JsonApiSchema._registry['ArticleSchema']
+        article = Article.objects.get(pk=1)
+        data = schema(include_data=['publications']).dump([article], many=True)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'article', 'id': 1.0,
+                    'attributes': {
+                        'headline': 'Django lets you build Web apps easily',
+                        'id': 1.0
+                    },
+                    'relationships': {
+                        'publications': {
+                            'links': {
+                                'related': '/forest/Article/1/relationships/Publication'
+                            },
+                            'data': [
+                                {
+                                    'type': 'publication',
+                                    'id': '1'
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            'included': [
+                {
+                    'type': 'publication',
+                    'attributes': {
+                        'title': 'The Python Journal',
+                        'id': 1.0
+                    },
+                    'id': 1.0,
+                    'relationships': {
+                        'article': {
+                            'links': {
+                                'related': '/forest/Publication/1/relationships/Article'
+                            }
+                        }
+                    }
+                }
+            ]
+        })
