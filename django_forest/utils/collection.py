@@ -23,13 +23,12 @@ class Collection:
         pass
 
     def handle_smart_fields(self, collection):
-        # TODO, this is a dumb implementation
+        # TODO, this is a dumb implementation, handle reference, handle position and other fields
         existing_fields = [f['field'] for f in collection['fields']]
         for field in self.fields:
             if field['field'] in existing_fields:  # update
-                # TODO review
                 fi = [f for f in collection['fields'] if f['field'] == field['field']][0]
-                fi = Schema.get_default_field(fi)
+                fi.update({'is_virtual': True})
             else:  # add
                 field.update({'is_virtual': True})
                 collection['fields'].append(Schema.get_default_field(field))
@@ -56,6 +55,5 @@ class Collection:
             self.handle_smart_fields(collection)
             self.handle_smart_actions(collection)
             self.handle_smart_segments(collection)
-            # TODO handle smart collection
 
         super().__init__()

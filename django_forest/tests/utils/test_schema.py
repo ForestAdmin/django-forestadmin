@@ -1,3 +1,4 @@
+import copy
 import sys
 
 import django
@@ -6,20 +7,35 @@ from unittest import mock
 from django.test import TestCase
 
 from django_forest.tests.fixtures.schema import test_schema
+from django_forest.utils.collection import Collection
+from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.schema import Schema
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsSchemaTests(TestCase):
 
+    def setUp(self):
+        Schema.schema = copy.deepcopy(test_schema)
+
+    def tearDown(self):
+        # reset _registry after each test
+        Collection._registry = {}
+        JsonApiSchema._registry = {}
+
     @mock.patch.object(django, 'get_version', return_value='9.9.9')
     @mock.patch('importlib.metadata.version', return_value='0.0.0')
-    def setUp(self, mock_version, mock_orm_version):
-        # import Schema directly here for all tests
-        from django_forest.utils.schema import Schema
-        Schema.schema = test_schema
-
-    def test_build_schema(self):
-        from django_forest.utils.schema import Schema
+    def test_build_schema(self, mock_version, mock_orm_version):
+        # reset schema
+        Schema.schema = {
+            'collections': [],
+            'meta': {
+                'database_type': 'sqlite',
+                'liana': 'django-forest',
+                'liana_version': '0.0.0',
+                'orm_version': '9.9.9'
+            }
+        }
         schema = Schema.build_schema()
         self.assertEqual(schema, test_schema)
 
@@ -47,7 +63,7 @@ class UtilsSchemaTests(TestCase):
         from django_forest.utils.json_api_serializer import JsonApiSchema
 
         Schema.handle_json_api_serializer()
-        self.assertEqual(len(JsonApiSchema._registry), 6)
+        self.assertEqual(len(JsonApiSchema._registry), 7)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")

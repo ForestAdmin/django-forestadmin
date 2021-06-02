@@ -5,6 +5,7 @@ from marshmallow_jsonapi import Schema, fields
 from marshmallow_jsonapi.fields import Relationship
 
 from django_forest.utils.get_model import get_model
+from django_forest.utils.get_type import get_type
 
 TYPE_CHOICES = {
     'String': fields.Str,
@@ -35,16 +36,16 @@ def getTypeName(name):
     return re.sub(r"(\w)([A-Z])", r"\1 \2", name)
 
 
-def handle_id_attribute(attrs, collection_name, ForestSchema):
+def handle_id_attribute(attrs, collection_name):
     if 'id' not in attrs:
         Model = get_model(collection_name)
         if Model is not None:
-            attrs['id'] = TYPE_CHOICES.get(ForestSchema.get_type(Model._meta.pk.get_internal_type()), fields.Str)()
+            attrs['id'] = TYPE_CHOICES.get(get_type(Model._meta.pk.get_internal_type()), fields.Str)()
 
     return attrs
 
 
-def populate_attrs(collection, collection_name, ForestSchema):
+def populate_attrs(collection, collection_name):
     attrs = {}
     for field in collection['fields']:
         if field['reference'] is not None:
@@ -61,7 +62,7 @@ def populate_attrs(collection, collection_name, ForestSchema):
             attrs[field['field']] = TYPE_CHOICES.get(field['type'], fields.Str)()
 
     # Add id field if does not exist, taking pk (do not work for smart collection which need an id)
-    attrs = handle_id_attribute(attrs, collection_name, ForestSchema)
+    attrs = handle_id_attribute(attrs, collection_name)
 
     return attrs
 
@@ -106,9 +107,9 @@ class JsonApiSerializerSchema(Schema):
         return value
 
 
-def create_json_api_schema(collection, ForestSchema):
+def create_json_api_schema(collection):
     collection_name = collection['name']
-    attrs = populate_attrs(collection, collection_name, ForestSchema)
+    attrs = populate_attrs(collection, collection_name)
 
     class MarshmallowSchema(Schema):
         class Meta:

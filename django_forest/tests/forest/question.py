@@ -3,8 +3,7 @@ from django_forest.utils.collection import Collection
 
 
 class QuestionForest(Collection):
-    def load(self):
-        self.fields = []
+    pass
 
 
 Collection.register(QuestionForest, Question)

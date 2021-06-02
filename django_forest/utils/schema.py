@@ -1,6 +1,7 @@
 import copy
 import sys
 
+from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
 
 if sys.version_info >= (3, 8):
@@ -13,41 +14,6 @@ from django.apps import apps
 from django.db import connection
 from django.utils.module_loading import autodiscover_modules
 
-
-TYPE_CHOICES = {
-    'AutoField': 'String',
-    'BigAutoField': 'Number',
-    'BinaryField': 'String',
-    'BooleanField': 'Boolean',
-    'CharField': 'String',
-    'DateField': 'DateOnly',
-    'DateTimeField': 'Date',
-    'DecimalField': 'Number',
-    'DurationField': 'Number',
-    'FileField': 'String',
-    'FilePathField': 'String',
-    'FloatField': 'Number',
-    'IntegerField': 'Number',
-    'BigIntegerField': 'Number',
-    'IPAddressField': 'String',
-    'GenericIPAddressField': 'String',
-    'JSONField': 'Json',
-    'NullBooleanField': 'Boolean',
-    'OneToOneField': 'Number',
-    'PositiveBigIntegerField': 'Number',
-    'PositiveIntegerField': 'Number',
-    'PositiveSmallIntegerField': 'Number',
-    'SlugField': 'String',
-    'SmallAutoField': 'String',
-    'SmallIntegerField': 'Number',
-    'TextField': 'String',
-    'TimeField': 'Time',
-    'UUIDField': 'String',
-    'CICharField': 'String',
-    'CIEmailField': 'String',
-    'CITextField': 'String',
-    'HStoreField': 'Json',
-}
 
 FIELD = {
     'field': '',
@@ -125,7 +91,7 @@ class Schema:
         return obj
 
     @classmethod
-    def _get_type(cls, many):
+    def _get_relation_type(cls, many):
         # TODO review, maybe not a Number
         if many:
             return ['Number']
@@ -142,7 +108,7 @@ class Schema:
     def handle_relation(cls, field, f):
         if field.is_relation:
             many = field.one_to_many or field.many_to_many
-            f['type'] = cls._get_type(many)
+            f['type'] = cls._get_relation_type(many)
             f['relationship'] = cls._get_relationship(many)
             f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'  # TODO review
         return f
@@ -152,7 +118,7 @@ class Schema:
         for field in model._meta.get_fields():
             f = cls.get_default_field({
                 'field': field.name,
-                'type': cls.get_type(field.get_internal_type())
+                'type': get_type(field.get_internal_type())
             })
             f = cls.handle_relation(field, f)
             collection['fields'].append(f)
@@ -168,15 +134,6 @@ class Schema:
         return cls.schema
 
     @classmethod
-    def get_type(cls, field_type):
-        # TODO handle Enum
-        # handle ArrayField
-        # handle 'RangeField', 'IntegerRangeField', 'BigIntegerRangeField',
-        #     'DecimalRangeField', 'DateTimeRangeField', 'DateRangeField',
-        # See connection.data_types (different for each DB Engine)
-        return TYPE_CHOICES.get(field_type, 'default')  # TODO raise error, do not put default
-
-    @classmethod
     def add_smart_features(cls):
         # will load all files in <app>/forest folder from client
         autodiscover_modules('forest')
@@ -186,4 +143,4 @@ class Schema:
         for collection in cls.schema['collections']:
             # create marshmallow-jsonapi resource for json api serializer
             # TODO place in a registry
-            create_json_api_schema(collection, cls)
+            create_json_api_schema(collection)
