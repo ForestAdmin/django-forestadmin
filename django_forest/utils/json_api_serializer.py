@@ -40,7 +40,7 @@ def handle_id_attribute(attrs, collection_name):
     if 'id' not in attrs:
         Model = get_model(collection_name)
         if Model is not None:
-            attrs['id'] = TYPE_CHOICES.get(get_type(Model._meta.pk.get_internal_type()), fields.Str)()
+            attrs['id'] = TYPE_CHOICES.get(get_type(Model._meta.pk), fields.Str)()
 
     return attrs
 
@@ -59,7 +59,10 @@ def populate_attrs(collection, collection_name):
                 related_url_kwargs={f'{collection_name.lower()}_id': '<id>'},
             )
         else:
-            attrs[field['field']] = TYPE_CHOICES.get(field['type'], fields.Str)()
+            if isinstance(field['type'], list):
+                attrs[field['field']] = fields.List(TYPE_CHOICES.get(field['type'][0], fields.Str)())
+            else:
+                attrs[field['field']] = TYPE_CHOICES.get(field['type'], fields.Str)()
 
     # Add id field if does not exist, taking pk (do not work for smart collection which need an id)
     attrs = handle_id_attribute(attrs, collection_name)
@@ -83,7 +86,7 @@ class JsonApiSerializerSchema(Schema):
             ret['id'] = ret['attributes'][Model._meta.pk.name]
         return ret
 
-    # TODO, if we want modify how is returned the data, we need to override format_json_api_response
+    # if we want modify how is returned the data, we need to override format_json_api_response
     # https://marshmallow-jsonapi.readthedocs.io/en/latest/api_reference.html#marshmallow_jsonapi.Schema.format_json_api_response
     # format_items and format_item will need to be updated
 

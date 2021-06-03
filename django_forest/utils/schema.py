@@ -1,6 +1,12 @@
 import copy
+import os
 import sys
+import django
+from django.conf import settings
+from django.db import connection
+from django.utils.module_loading import autodiscover_modules
 
+from django_forest.utils.get_model import get_models
 from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
 
@@ -9,11 +15,20 @@ if sys.version_info >= (3, 8):
 else:
     import importlib_metadata as metadata
 
-import django
-from django.apps import apps
-from django.db import connection
-from django.utils.module_loading import autodiscover_modules
 
+COLLECTION = {
+    'name': '',
+    'is_virtual': False,
+    'icon': None,
+    'is_read_only': False,
+    'is_searchable': True,
+    'only_for_relationships': False,
+    'pagination_type': 'page',
+    'search_fields': None,
+    'actions': [],
+    'segments': [],
+    'fields': []
+}
 
 FIELD = {
     'field': '',
@@ -32,18 +47,18 @@ FIELD = {
     'validations': []
 }
 
-COLLECTION = {
-    'name': '',
-    'is_virtual': False,
-    'icon': None,
+ACTION_FIELD = {
+    'field': '',
+    'type': '',
     'is_read_only': False,
-    'is_searchable': True,
-    'only_for_relationships': False,
-    'pagination_type': 'page',
-    'search_fields': None,
-    'actions': [],
-    'segments': [],
-    'fields': []
+    'is_required': False,
+    'default_value': None,
+    'enums': None,
+    'integration': None,
+    'reference': None,
+    'description': None,
+    'widget': None,
+    'position': 0,
 }
 
 
@@ -67,6 +82,7 @@ class Schema:
             'orm_version': django.get_version()
         }
     }
+    models = get_models()
 
     @classmethod
     def get_collection(cls, resource):
@@ -77,13 +93,6 @@ class Schema:
         return None
 
     @classmethod
-    def get_default_field(cls, obj):
-        for key, value in copy.deepcopy(FIELD).items():
-            obj[key] = value if key not in obj else obj[key]
-
-        return obj
-
-    @classmethod
     def get_default_collection(cls, obj):
         for key, value in copy.deepcopy(COLLECTION).items():
             obj[key] = value if key not in obj else obj[key]
@@ -91,26 +100,47 @@ class Schema:
         return obj
 
     @classmethod
+    def get_default_field(cls, obj):
+        for key, value in copy.deepcopy(FIELD).items():
+            obj[key] = value if key not in obj else obj[key]
+
+        return obj
+
+    @classmethod
+    def get_default_action_field(cls, obj):
+        for key, value in copy.deepcopy(ACTION_FIELD).items():
+            obj[key] = value if key not in obj else obj[key]
+
+        return obj
+
+    @classmethod
     def _get_relation_type(cls, many):
-        # TODO review, maybe not a Number
         if many:
             return ['Number']
         return 'Number'
 
     @classmethod
-    def _get_relationship(cls, many):
-        # TODO review for HasOne
-        if many:
+    def _get_relationship(cls, field):
+        if field.one_to_many or field.many_to_many:
             return 'HasMany'
+        elif field.one_to_one:
+            return 'HasOne'
         return 'BelongsTo'
 
     @classmethod
     def handle_relation(cls, field, f):
         if field.is_relation:
+            # Notice: do not add if not in included/excluded models
+            if field.target_field.model not in cls.models:
+                return None
+
             many = field.one_to_many or field.many_to_many
             f['type'] = cls._get_relation_type(many)
-            f['relationship'] = cls._get_relationship(many)
-            f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'  # TODO review
+            f['relationship'] = cls._get_relationship(field)
+            # Notice: forest-rails always put id on the end, do we support polymorphic support?
+            f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'
+            f['is_filterable'] = not many
+            f['inverse_of'] = None if not hasattr(field, 'related_name') else field.related_name
         return f
 
     @classmethod
@@ -118,16 +148,16 @@ class Schema:
         for field in model._meta.get_fields():
             f = cls.get_default_field({
                 'field': field.name,
-                'type': get_type(field.get_internal_type())
+                'type': get_type(field)
             })
             f = cls.handle_relation(field, f)
-            collection['fields'].append(f)
+
+            if f is not None:
+                collection['fields'].append(f)
 
     @classmethod
     def build_schema(cls):
-        # TODO support included/excluded, smart collection
-        models = apps.get_models()
-        for model in models:
+        for model in cls.models:
             collection = cls.get_default_collection({'name': model.__name__})
             cls.add_fields(model, collection)
             cls.schema['collections'].append(collection)
@@ -135,12 +165,11 @@ class Schema:
 
     @classmethod
     def add_smart_features(cls):
-        # will load all files in <app>/forest folder from client
-        autodiscover_modules('forest')
+        # Notice: will load all files in <app>/forest folder from client
+        autodiscover_modules(getattr(settings, 'FOREST', {}).get('CONFIG_DIR', os.getenv('CONFIG_DIR', 'forest')))
 
     @classmethod
     def handle_json_api_serializer(cls):
         for collection in cls.schema['collections']:
-            # create marshmallow-jsonapi resource for json api serializer
-            # TODO place in a registry
+            # Notice: create marshmallow-jsonapi resource for json api serializer
             create_json_api_schema(collection)

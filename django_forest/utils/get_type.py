@@ -33,10 +33,19 @@ TYPE_CHOICES = {
     'HStoreField': 'Json',
 }
 
-def get_type(field_type):
-    # TODO handle Enum
-    # handle ArrayField
-    # handle 'RangeField', 'IntegerRangeField', 'BigIntegerRangeField',
-    #     'DecimalRangeField', 'DateTimeRangeField', 'DateRangeField',
+
+def get_type(field):
     # See connection.data_types (different for each DB Engine)
-    return TYPE_CHOICES.get(field_type, 'default')  # TODO raise error, do not put default
+    # ForestAdmin does not handle range fields: https://www.postgresql.org/docs/9.3/rangetypes.html
+    # 'RangeField'
+    # 'IntegerRangeField'
+    # 'BigIntegerRangeField'
+    # 'DecimalRangeField'
+    # 'DateTimeRangeField'
+    # 'DateRangeField'
+    if hasattr(field, 'choices') and field.choices is not None:
+        return 'Enum'
+    field_type = field.get_internal_type()
+    if field_type == 'ArrayField':
+        return [TYPE_CHOICES.get(field.base_field.get_internal_type(), 'unknown')]
+    return TYPE_CHOICES.get(field_type, 'unknown')

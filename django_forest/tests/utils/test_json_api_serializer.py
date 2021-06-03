@@ -23,7 +23,7 @@ class UtilsJsonApiSerializerTests(TestCase):
 
     def test_handle_json_api_serializer(self):
         Schema.handle_json_api_serializer()
-        self.assertEqual(len(JsonApiSchema._registry), 9)
+        self.assertEqual(len(JsonApiSchema._registry), 16)
 
     def test_json_api_serializer(self):
         Schema.handle_json_api_serializer()
