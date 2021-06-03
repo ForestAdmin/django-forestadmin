@@ -33,6 +33,7 @@ TYPE_CHOICES = {
     'HStoreField': 'Json',
 }
 
+
 def get_type(field):
     # See connection.data_types (different for each DB Engine)
     # ForestAdmin does not handle range fields: https://www.postgresql.org/docs/9.3/rangetypes.html
