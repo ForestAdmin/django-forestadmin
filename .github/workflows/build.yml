@@ -1,4 +1,4 @@
-name: Build, Test and Deploy
+name: Build, Test, Cover and Deploy
 
 on:
   push:
@@ -29,7 +29,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install flake8
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint commit message
         uses: wagoid/commitlint-github-action@v2
       - name: Lint with flake8
@@ -38,13 +37,26 @@ jobs:
           flake8 . --count --show-source --statistics
           # exit-zero treats all errors as warnings.
           flake8 . --count --exit-zero --statistics
-
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: django_forest
+          POSTGRES_USER: forest
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     strategy:
       matrix:
-        python-version: [ 3.9 ]
+        python-version: [ 3.6, 3.7, 3.8, 3.9 ]
     needs: [lint]
     steps:
       - uses: actions/checkout@v2
@@ -55,11 +67,41 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest coverage pytest-django pytest-pythonpath
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with pytest
         run: |
           coverage run -m pytest
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report.${{ matrix.python-version }}
+          path: .coverage
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.9 ]
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v2
+      - name: Combine reports
+        run: |
+          coverage combine ./code-coverage-report.*/.coverage
       - name: Send coverage
         uses: paambaati/codeclimate-action@v2.7.4
         env:
