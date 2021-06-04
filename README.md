@@ -9,18 +9,41 @@
 
 `python setup.py sdist`
 
-
 ## Lint
+
+### Install flake8
+
+`pip install flake8`
+
+### Lint files
 
 `flake8 .`
 
 ## Test
+
+### Run test database image
+
+`docker-compose up -d`
+
+### Launch tests suite
 
 `pytest`
 
 ## Coverage
 
 `coverage run -m pytest`
+
+You can see coverage, thanks to `coverage report`, `coverage xml`, `coverage html`.
+
+It is also possible to combine several coverage reports run with different python versions:
+```
+coverage3.6 run --parallel-mode -m pytest
+coverage3.9 run --parallel-mode -m pytest
+coverage combine
+coverage report
+```
+
+## In a nutshell
 
 Forest Admin provides an off-the-shelf administration panel based on a highly-extensible API plugged into your application.
 

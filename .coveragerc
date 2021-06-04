@@ -1,3 +1,6 @@
 [run]
 source=
     django_forest
+omit =
+    django_forest/tests/*
+    django_forest/apps.py
