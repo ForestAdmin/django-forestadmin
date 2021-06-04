@@ -82,7 +82,7 @@ class Schema:
             'orm_version': django.get_version()
         }
     }
-    models = get_models()
+    models = Models.list()
 
     @classmethod
     def get_collection(cls, resource):
