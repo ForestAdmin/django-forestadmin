@@ -102,6 +102,13 @@ class UtilsSchemaTests(TestCase):
         Schema.handle_json_api_serializer()
         self.assertEqual(len(JsonApiSchema._registry), 16)
 
+    def test_handle_schema_file(self):
+        from django_forest.utils.schema import Schema
+        from django_forest.utils.json_api_serializer import JsonApiSchema
+
+        Schema.handle_schema_file()
+        self.assertEqual(len(JsonApiSchema._registry), 16)
+
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsGetAppTests(TestCase):

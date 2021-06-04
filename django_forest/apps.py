@@ -12,3 +12,4 @@ class ForestConfig(AppConfig):
         Schema.build_schema()
         Schema.add_smart_features()
         Schema.handle_json_api_serializer()
+        Schema.handle_schema_file()

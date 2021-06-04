@@ -1,4 +1,5 @@
 import copy
+import json
 import os
 import sys
 import django
@@ -172,3 +173,24 @@ class Schema:
         for collection in cls.schema['collections']:
             # Notice: create marshmallow-jsonapi resource for json api serializer
             create_json_api_schema(collection)
+
+    @classmethod
+    def get_serialized_collection(cls, collection):
+        for index, field in enumerate(collection['fields']):
+            collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
+        return collection
+
+    @classmethod
+    def handle_schema_file(cls):
+        schema = copy.deepcopy(cls.schema)
+        for index, collection in enumerate(schema['collections']):
+            schema['collections'][index] = cls.get_serialized_collection(collection)
+
+        schema_data = json.dumps(schema, indent=2)
+        if settings.DEBUG:
+            file_path = os.path.join(os.getcwd(), 'forestadmin-schema.json')
+            with open(file_path, 'w') as f:
+                f.write(schema_data)
+        else:
+            # TODO read from file
+            pass
