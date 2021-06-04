@@ -2,7 +2,6 @@ import re
 
 from marshmallow.schema import SchemaMeta
 from marshmallow_jsonapi import Schema, fields
-from marshmallow_jsonapi.fields import Relationship
 
 from django_forest.utils.get_model import get_model
 from django_forest.utils.get_type import get_type
@@ -45,13 +44,19 @@ def handle_id_attribute(attrs, collection_name):
     return attrs
 
 
+def get_marshmallow_field(type):
+    if isinstance(type, list):
+        return fields.List(TYPE_CHOICES.get(type[0], fields.Str)())
+    return TYPE_CHOICES.get(type, fields.Str)()
+
+
 def populate_attrs(collection, collection_name):
     attrs = {}
     for field in collection['fields']:
+        field_name = field['field']
         if field['reference'] is not None:
             related_name = field['reference'].split('.')[0]
-            field_name = field['field']
-            attrs[field_name] = Relationship(
+            attrs[field_name] = fields.Relationship(
                 type_=getTypeName(related_name).lower(),
                 many=field['relationship'] == 'HasMany',
                 schema=f'{related_name}Schema',
@@ -59,10 +64,7 @@ def populate_attrs(collection, collection_name):
                 related_url_kwargs={f'{collection_name.lower()}_id': '<id>'},
             )
         else:
-            if isinstance(field['type'], list):
-                attrs[field['field']] = fields.List(TYPE_CHOICES.get(field['type'][0], fields.Str)())
-            else:
-                attrs[field['field']] = TYPE_CHOICES.get(field['type'], fields.Str)()
+            attrs[field_name] = get_marshmallow_field(field['type'])
 
     # Add id field if does not exist, taking pk (do not work for smart collection which need an id)
     attrs = handle_id_attribute(attrs, collection_name)
