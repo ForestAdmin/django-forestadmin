@@ -108,7 +108,7 @@ def reset_config_dir_import():
             del sys.modules[key]
 
 
-file_path = os.path.join(os.getcwd(), 'forestadmin-schema.json')
+file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
 
 
 @pytest.fixture()
@@ -126,6 +126,10 @@ def invalid_forestadmin_schema():
 
 
 class UtilsSchemaFileTests(TestCase):
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, caplog):
+        self._caplog = caplog
+
     def setUp(self):
         Schema.build_schema()
         Schema.add_smart_features()
@@ -142,6 +146,10 @@ class UtilsSchemaFileTests(TestCase):
     def test_handle_schema_file_no_file(self):
         self.assertRaises(Exception, Schema.handle_schema_file())
         self.assertIsNone(Schema.schema_data)
+        self.assertEqual(self._caplog.messages, [
+            'The .forestadmin-schema.json file does not exist.',
+            'The schema cannot be synchronized with Forest Admin servers.'
+        ])
 
     @pytest.mark.usefixtures('reset_config_dir_import')
     @pytest.mark.usefixtures('dumb_forestadmin_schema')
@@ -154,6 +162,10 @@ class UtilsSchemaFileTests(TestCase):
     def test_handle_schema_file_invalid_json_production(self):
         self.assertRaises(Exception, Schema.handle_schema_file())
         self.assertIsNone(Schema.schema_data)
+        self.assertEqual(self._caplog.messages, [
+            'The content of .forestadmin-schema.json file is not a correct JSON.',
+            'The schema cannot be synchronized with Forest Admin servers.'
+        ])
 
     @pytest.mark.usefixtures('reset_config_dir_import')
     @override_settings(DEBUG=True)
