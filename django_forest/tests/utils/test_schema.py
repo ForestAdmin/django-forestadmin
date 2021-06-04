@@ -8,8 +8,8 @@ from django.test import TestCase, override_settings
 
 from django_forest.tests.fixtures.schema import test_schema, test_question_choice_schema, test_exclude_django_contrib_schema
 from django_forest.utils.collection import Collection
-from django_forest.utils.get_model import get_models
 from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.models import Models
 from django_forest.utils.schema import Schema
 
 
@@ -37,7 +37,7 @@ class UtilsSchemaTests(TestCase):
                 'orm_version': '9.9.9'
             }
         }
-        Schema.models = get_models()
+        Schema.models = Models.list()
         schema = Schema.build_schema()
         self.assertEqual(schema, test_schema)
 
@@ -55,7 +55,7 @@ class UtilsSchemaTests(TestCase):
                 'orm_version': '9.9.9'
             }
         }
-        Schema.models = get_models()
+        Schema.models = Models.list(force=True)
         schema = Schema.build_schema()
         self.assertEqual(schema, test_question_choice_schema)
 
@@ -73,7 +73,7 @@ class UtilsSchemaTests(TestCase):
                 'orm_version': '9.9.9'
             }
         }
-        Schema.models = get_models()
+        Schema.models = Models.list(force=True)
         schema = Schema.build_schema()
         self.assertEqual(schema, test_exclude_django_contrib_schema)
 

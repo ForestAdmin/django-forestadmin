@@ -3,7 +3,7 @@ import re
 from marshmallow.schema import SchemaMeta
 from marshmallow_jsonapi import Schema, fields
 
-from django_forest.utils.get_model import get_model
+from django_forest.utils.models import Models
 from django_forest.utils.get_type import get_type
 
 TYPE_CHOICES = {
@@ -37,7 +37,7 @@ def getTypeName(name):
 
 def handle_id_attribute(attrs, collection_name):
     if 'id' not in attrs:
-        Model = get_model(collection_name)
+        Model = Models.get(collection_name)
         if Model is not None:
             attrs['id'] = TYPE_CHOICES.get(get_type(Model._meta.pk), fields.Str)()
 
@@ -82,7 +82,7 @@ class JsonApiSerializerSchema(Schema):
         return ret
 
     def _fallback_add_pk(self, ret):
-        Model = get_model(self.Meta.type_)
+        Model = Models.get(self.Meta.type_)
         if Model:
             ret['attributes']['id'] = ret['attributes'][Model._meta.pk.name]
             ret['id'] = ret['attributes'][Model._meta.pk.name]

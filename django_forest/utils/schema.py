@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import connection
 from django.utils.module_loading import autodiscover_modules
 
-from django_forest.utils.get_model import get_models
+from django_forest.utils.models import Models
 from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
 
@@ -82,7 +82,7 @@ class Schema:
             'orm_version': django.get_version()
         }
     }
-    models = get_models()
+    models = Models.list()
 
     @classmethod
     def get_collection(cls, resource):
