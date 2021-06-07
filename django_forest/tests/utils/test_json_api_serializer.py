@@ -137,24 +137,6 @@ class UtilsJsonApiSerializerTests(TestCase):
             ]
         })
 
-    def test_json_api_serializer_foreign_key(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['SessionSchema']
-        session = Session.objects.get(pk='foobar1234')
-        data = schema().dump(session)
-        self.assertEqual(data, {
-            'data': {
-                'type': 'session',
-                'attributes': {
-                    'session_key': 'foobar1234',
-                    'expire_date': '2021-06-02T13:48:36.039000+00:00',
-                    'session_data': 'foo',
-                    'id': 'foobar1234'
-                },
-                'id': 'foobar1234'
-            }
-        })
-
     def test_json_api_serializer_many_to_many(self):
         Schema.handle_json_api_serializer()
         schema = JsonApiSchema._registry['ArticleSchema']
@@ -216,49 +198,4 @@ class UtilsJsonApiSerializerTests(TestCase):
                 },
                 'id': 'foobar1234'
             }
-        })
-
-    def test_json_api_serializer_many_to_many(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['ArticleSchema']
-        article = Article.objects.get(pk=1)
-        data = schema(include_data=['publications']).dump(article)
-        self.assertEqual(data, {
-            'data': {
-                'type': 'article', 'id': 1.0,
-                'attributes': {
-                    'headline': 'Django lets you build Web apps easily',
-                    'id': 1.0
-                },
-                'relationships': {
-                    'publications': {
-                        'links': {
-                            'related': '/forest/Article/1/relationships/Publication'
-                        },
-                        'data': [
-                            {
-                                'type': 'publication',
-                                'id': '1'
-                            }
-                        ]
-                    }
-                }
-            },
-            'included': [
-                {
-                    'type': 'publication',
-                    'attributes': {
-                        'title': 'The Python Journal',
-                        'id': 1.0
-                    },
-                    'id': 1.0,
-                    'relationships': {
-                        'article': {
-                            'links': {
-                                'related': '/forest/Publication/1/relationships/Article'
-                            }
-                        }
-                    }
-                }
-            ]
         })
