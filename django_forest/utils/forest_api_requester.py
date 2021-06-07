@@ -54,7 +54,7 @@ class ForestApiRequester:
             r = requests.get(url,
                              params=query,
                              headers=cls.get_headers(headers),
-                             verify=not settings.DEBUG)  # TODO
+                             verify=not settings.DEBUG)
         except Exception:
             raise Exception(cls.error_msg(url))
         else:
@@ -70,7 +70,7 @@ class ForestApiRequester:
                               data=json.dumps(body),
                               headers=cls.get_headers(headers),
                               params=query,
-                              verify=not settings.DEBUG)  # TODO
+                              verify=not settings.DEBUG)
         except Exception:
             raise Exception(cls.error_msg(url))
         else:

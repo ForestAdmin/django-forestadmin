@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import connection
 from django.utils.module_loading import autodiscover_modules
 
+from django_forest.utils.apimap_errors import APIMAP_ERRORS
 from django_forest.utils.models import Models
 from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
@@ -115,21 +116,21 @@ class Schema:
 
         return None
 
-    @classmethod
-    def get_default(cls, obj, definition):
+    @staticmethod
+    def get_default(obj, definition):
         for key, value in copy.deepcopy(definition).items():
             obj[key] = value if key not in obj else obj[key]
 
         return obj
 
-    @classmethod
-    def _get_relation_type(cls, many):
+    @staticmethod
+    def _get_relation_type(many):
         if many:
             return ['Number']
         return 'Number'
 
-    @classmethod
-    def _get_relationship(cls, field):
+    @staticmethod
+    def _get_relationship(field):
         if field.one_to_many or field.many_to_many:
             return 'HasMany'
         elif field.one_to_one:
@@ -172,8 +173,8 @@ class Schema:
             cls.schema['collections'].append(collection)
         return cls.schema
 
-    @classmethod
-    def add_smart_features(cls):
+    @staticmethod
+    def add_smart_features():
         # Notice: will load all files in <app>/forest folder from client
         autodiscover_modules(getattr(settings, 'FOREST', {}).get('CONFIG_DIR', os.getenv('CONFIG_DIR', 'forest')))
 
@@ -197,8 +198,8 @@ class Schema:
             logger.error('The .forestadmin-schema.json file does not exist.')
             logger.error('The schema cannot be synchronized with Forest Admin servers.')
 
-    @classmethod
-    def get_serialized_collection(cls, collection):
+    @staticmethod
+    def get_serialized_collection(collection):
         for index, field in enumerate(collection['fields']):
             collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
         return collection
@@ -216,8 +217,8 @@ class Schema:
         else:
             cls.handle_schema_file_production(file_path)
 
-    @classmethod
-    def get_serialized_collection_relation(cls, collection, rel_type):
+    @staticmethod
+    def get_serialized_collection_relation(collection, rel_type):
         data = []
         included = []
         for rel in collection[rel_type]:
@@ -260,7 +261,22 @@ class Schema:
             'meta': cls.schema_data['meta']
         }
 
+    @staticmethod
+    def handle_apimap_error(status):
+        if APIMAP_ERRORS[status]['level'] == 'warning':
+            logger.warning(APIMAP_ERRORS[status]['message'])
+        else:
+            logger.error(APIMAP_ERRORS[status]['message'])
+
     @classmethod
     def send_apimap(cls):
         serialized_schema = cls.get_serialized_schema()
-        ForestApiRequester.post('forest/apimaps', serialized_schema)
+        r = ForestApiRequester.post('forest/apimaps', serialized_schema)
+        if r.status_code in (200, 202, 204):
+            r = r.json()
+            if 'warning' in r:
+                logger.warning(r['warning'])
+        elif r.status_code in APIMAP_ERRORS.keys():
+            cls.handle_apimap_error(r.status_code)
+        else:
+            logger.error('An error occured with the apimap sent to Forest. Please contact support@forestadmin.com for further investigations.')  # noqa E501
