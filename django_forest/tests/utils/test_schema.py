@@ -1,4 +1,6 @@
 import copy
+import json
+import os
 import sys
 
 import django
@@ -77,31 +79,107 @@ class UtilsSchemaTests(TestCase):
         schema = Schema.build_schema()
         self.assertEqual(schema, test_exclude_django_contrib_schema)
 
+    @pytest.mark.usefixtures('reset_config_dir_import')
     @mock.patch('django_forest.utils.collection.Collection')
     def test_add_smart_features(self, collection_mock):
-        from django_forest.utils.schema import Schema
         Schema.add_smart_features()
         from django_forest.tests.forest import QuestionForest
         from django_forest.tests.models import Question
         collection_mock.register.assert_called_once_with(QuestionForest, Question)
 
     def test_get_collection(self):
-        from django_forest.utils.schema import Schema
         collection = Schema.get_collection('Question')
         self.assertEqual(collection, [x for x in test_schema['collections'] if x['name'] == 'Question'][0])
 
     def test_get_collection_inexist(self):
-        from django_forest.utils.schema import Schema
-
         collection = Schema.get_collection('Foo')
         self.assertEqual(collection, None)
 
     def test_handle_json_api_serializer(self):
-        from django_forest.utils.schema import Schema
-        from django_forest.utils.json_api_serializer import JsonApiSchema
-
         Schema.handle_json_api_serializer()
         self.assertEqual(len(JsonApiSchema._registry), 16)
+
+
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
+
+
+file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
+
+
+@pytest.fixture()
+def dumb_forestadmin_schema():
+    schema_data = json.dumps(test_schema, indent=2)
+    with open(file_path, 'w') as f:
+        f.write(schema_data)
+
+
+@pytest.fixture()
+def invalid_forestadmin_schema():
+    schema_data = 'invalid'
+    with open(file_path, 'w') as f:
+        f.write(schema_data)
+
+
+class UtilsSchemaFileTests(TestCase):
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, caplog):
+        self._caplog = caplog
+
+    def setUp(self):
+        Schema.build_schema()
+        Schema.add_smart_features()
+
+    def tearDown(self):
+        # reset _registry after each test
+        Collection._registry = {}
+        JsonApiSchema._registry = {}
+        Schema.schema_data = None
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    def test_handle_schema_file_no_file(self):
+        self.assertRaises(Exception, Schema.handle_schema_file())
+        self.assertIsNone(Schema.schema_data)
+        self.assertEqual(self._caplog.messages, [
+            'The .forestadmin-schema.json file does not exist.',
+            'The schema cannot be synchronized with Forest Admin servers.'
+        ])
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @pytest.mark.usefixtures('dumb_forestadmin_schema')
+    def test_handle_schema_file_production(self):
+        Schema.handle_schema_file()
+        self.assertIsNotNone(Schema.schema_data)
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @pytest.mark.usefixtures('invalid_forestadmin_schema')
+    def test_handle_schema_file_invalid_json_production(self):
+        self.assertRaises(Exception, Schema.handle_schema_file())
+        self.assertIsNone(Schema.schema_data)
+        self.assertEqual(self._caplog.messages, [
+            'The content of .forestadmin-schema.json file is not a correct JSON.',
+            'The schema cannot be synchronized with Forest Admin servers.'
+        ])
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @override_settings(DEBUG=True)
+    def test_handle_schema_file_debug(self):
+        self.maxDiff = None
+        Schema.handle_schema_file()
+        with open(file_path, 'r') as f:
+            data = f.read()
+            data = json.loads(data)
+            question = [c for c in data['collections'] if c['name'] == 'Question'][0]
+            self.assertEqual(len(question['fields']), 6)
+            foo_field = [f for f in question['fields'] if f['field'] == 'foo'][0]
+            self.assertFalse('get' in foo_field)
+            self.assertIsNotNone(Schema.schema_data)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")

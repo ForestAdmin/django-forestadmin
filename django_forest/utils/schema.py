@@ -1,6 +1,8 @@
 import copy
+import json
 import os
 import sys
+import logging
 import django
 from django.conf import settings
 from django.db import connection
@@ -15,6 +17,8 @@ if sys.version_info >= (3, 8):
 else:
     import importlib_metadata as metadata
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 COLLECTION = {
     'name': '',
@@ -98,6 +102,9 @@ class Schema:
         }
     }
 
+    # schema to send to Forest Admin Server
+    schema_data = None
+
     @classmethod
     def get_collection(cls, resource):
         collections = [collection for collection in cls.schema['collections'] if collection['name'] == resource]
@@ -173,3 +180,37 @@ class Schema:
         for collection in cls.schema['collections']:
             # Notice: create marshmallow-jsonapi resource for json api serializer
             create_json_api_schema(collection)
+
+    @classmethod
+    def get_serialized_collection(cls, collection):
+        for index, field in enumerate(collection['fields']):
+            collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
+        return collection
+
+    @classmethod
+    def handle_schema_file_production(cls, file_path):
+        try:
+            with open(file_path, 'r') as f:
+                data = f.read()
+                try:
+                    cls.schema_data = json.loads(data)
+                except Exception:
+                    logger.error('The content of .forestadmin-schema.json file is not a correct JSON.')
+                    logger.error('The schema cannot be synchronized with Forest Admin servers.')
+        except Exception:
+            logger.error('The .forestadmin-schema.json file does not exist.')
+            logger.error('The schema cannot be synchronized with Forest Admin servers.')
+
+    @classmethod
+    def handle_schema_file(cls):
+        file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
+        if settings.DEBUG:
+            schema = copy.deepcopy(cls.schema)
+            for index, collection in enumerate(schema['collections']):
+                schema['collections'][index] = cls.get_serialized_collection(collection)
+
+            cls.schema_data = json.dumps(schema, indent=2)
+            with open(file_path, 'w') as f:
+                f.write(cls.schema_data)
+        else:
+            cls.handle_schema_file_production(file_path)
