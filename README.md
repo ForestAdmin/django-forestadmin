@@ -2,7 +2,7 @@
 
 [comment]: <> ([![pypi package]&#40;https://badge.fury.io/py/django-forest.svg&#41;]&#40;https://badge.fury.io/py/django-forest&#41;)
 [![CI status](https://github.com/ForestAdmin/django-forest/workflows/Build,%20Test%20and%20Deploy/badge.svg?branch=master)](https://github.com/ForestAdmin/django-forest/actions)
-[![Test Coverage](https://codeclimate.com/github/ForestAdmin/django-forest/test_coverage)](https://codeclimate.com/github/ForestAdmin/django-forest/test_coverage)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/1776407183b89bcc8910/test_coverage)](https://codeclimate.com/github/ForestAdmin/django-forest/test_coverage)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 ## Build
