@@ -82,7 +82,6 @@ class Schema:
             'orm_version': django.get_version()
         }
     }
-    models = Models.list()
 
     @classmethod
     def get_collection(cls, resource):
@@ -131,7 +130,7 @@ class Schema:
     def handle_relation(cls, field, f):
         if field.is_relation:
             # Notice: do not add if not in included/excluded models
-            if field.target_field.model not in cls.models:
+            if field.target_field.model not in Models.list():
                 return None
 
             many = field.one_to_many or field.many_to_many
@@ -157,7 +156,7 @@ class Schema:
 
     @classmethod
     def build_schema(cls):
-        for model in cls.models:
+        for model in Models.list():
             collection = cls.get_default_collection({'name': model.__name__})
             cls.add_fields(model, collection)
             cls.schema['collections'].append(collection)
