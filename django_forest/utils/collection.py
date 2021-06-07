@@ -1,21 +1,4 @@
-import copy
-
-from django_forest.utils.schema import Schema, COLLECTION
-
-ACTION = {
-    'name': '',
-    'type': 'bulk',
-    'baseUrl': None,
-    'endpoint': '',
-    'httpMethod': 'POST',
-    'redirect': None,
-    'download': False,
-    'fields': [],
-    'hooks': {
-        'load': False,
-        'change': []
-    }
-}
+from django_forest.utils.schema import Schema, COLLECTION, ACTION, ACTION_FIELD, FIELD
 
 
 class Collection:
@@ -45,12 +28,6 @@ class Collection:
     def load(self):
         pass
 
-    def get_default_action(self, obj):
-        for key, value in copy.deepcopy(ACTION).items():
-            obj[key] = value if key not in obj else obj[key]
-
-        return obj
-
     def override_collection(self, collection):
         for key in [k for k in COLLECTION.keys() if k not in ('fields', 'actions', 'segments')]:
             if hasattr(self, key) and getattr(self, key) is not None:
@@ -66,7 +43,7 @@ class Collection:
             # add
             else:
                 field.update({'is_virtual': True})
-                collection['fields'].append(Schema.get_default_field(field))
+                collection['fields'].append(Schema.get_default(field, FIELD))
 
     def handle_action_endpoint(self, action):
         if 'endpoint' not in action:
@@ -77,7 +54,7 @@ class Collection:
         res = []
         if 'fields' in action:
             for i, v in enumerate(action['fields']):
-                field = Schema.get_default_action_field(v)
+                field = Schema.get_default(v, ACTION_FIELD)
                 field['position'] = i
                 res.append(field)
         return res
@@ -102,7 +79,7 @@ class Collection:
                 'fields': self.handle_action_fields(action),
                 'hooks': self.handle_action_hooks(action)
             })
-            collection['actions'].append(self.get_default_action(action))
+            collection['actions'].append(Schema.get_default(action, ACTION))
 
     def handle_smart_segments(self, collection):
         for segment in self.segments:
@@ -116,10 +93,10 @@ class Collection:
             collection = Schema.get_collection(model.__name__)
         # create smart collection
         else:
-            collection = Schema.get_default_collection({
+            collection = Schema.get_default({
                 'name': self.__class__.__name__,
                 'is_virtual': True
-            })
+            }, COLLECTION)
             Schema.schema['collections'].append(collection)
 
         if collection is not None:

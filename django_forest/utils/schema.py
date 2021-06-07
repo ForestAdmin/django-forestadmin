@@ -47,6 +47,21 @@ FIELD = {
     'validations': []
 }
 
+ACTION = {
+    'name': '',
+    'type': 'bulk',
+    'baseUrl': None,
+    'endpoint': '',
+    'httpMethod': 'POST',
+    'redirect': None,
+    'download': False,
+    'fields': [],
+    'hooks': {
+        'load': False,
+        'change': []
+    }
+}
+
 ACTION_FIELD = {
     'field': '',
     'type': '',
@@ -92,22 +107,8 @@ class Schema:
         return None
 
     @classmethod
-    def get_default_collection(cls, obj):
-        for key, value in copy.deepcopy(COLLECTION).items():
-            obj[key] = value if key not in obj else obj[key]
-
-        return obj
-
-    @classmethod
-    def get_default_field(cls, obj):
-        for key, value in copy.deepcopy(FIELD).items():
-            obj[key] = value if key not in obj else obj[key]
-
-        return obj
-
-    @classmethod
-    def get_default_action_field(cls, obj):
-        for key, value in copy.deepcopy(ACTION_FIELD).items():
+    def get_default(cls, obj, definition):
+        for key, value in copy.deepcopy(definition).items():
             obj[key] = value if key not in obj else obj[key]
 
         return obj
@@ -145,10 +146,10 @@ class Schema:
     @classmethod
     def add_fields(cls, model, collection):
         for field in model._meta.get_fields():
-            f = cls.get_default_field({
+            f = cls.get_default({
                 'field': field.name,
                 'type': get_type(field)
-            })
+            }, FIELD)
             f = cls.handle_relation(field, f)
 
             if f is not None:
@@ -157,7 +158,7 @@ class Schema:
     @classmethod
     def build_schema(cls):
         for model in Models.list():
-            collection = cls.get_default_collection({'name': model.__name__})
+            collection = cls.get_default({'name': model.__name__}, COLLECTION)
             cls.add_fields(model, collection)
             cls.schema['collections'].append(collection)
         return cls.schema
