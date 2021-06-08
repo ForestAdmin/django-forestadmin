@@ -191,7 +191,7 @@ with an extensive activity log system.
 
 This repository is officially maintained by Forest Admin.
 We're always happy to get contributions for other fellow lumberjacks.
-All contributions will be reviewed by Forest Admin's team before being merged into master.
+All contributions will be reviewed by Forest Admin's team before being merged into main.
 
 Here is the contribution workflow:
 
