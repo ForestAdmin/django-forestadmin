@@ -103,11 +103,16 @@ jobs:
         run: |
           coverage combine ./code-coverage-report.*/.coverage
       - name: Send coverage
-        uses: paambaati/codeclimate-action@v2.7.4
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+          coverage xml
+          ./cc-test-reporter after-build --debug -t coverage.py --exit-code $?
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        with:
-          coverageCommand: coverage xml
+          GIT_COMMIT_SHA: ${{ github.sha }}
+          GIT_BRANCH: main
 
   deploy:
     name: Release package
