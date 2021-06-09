@@ -26,7 +26,12 @@ module.exports = {
       },
     ],
     '@semantic-release/github',
-    'semantic-release-pypi',
+    [
+      'semantic-release-pypi',
+      {
+        'repoUrl': 'https://test.pypi.org/legacy/'
+      }
+    ],
     [
       'semantic-release-slack-bot',
       {
