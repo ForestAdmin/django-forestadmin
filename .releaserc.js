@@ -32,42 +32,42 @@ module.exports = {
         'repoUrl': 'https://test.pypi.org/legacy/'
       }
     ],
-    [
-      'semantic-release-slack-bot',
-      {
-        markdownReleaseNotes: true,
-        notifyOnSuccess: true,
-        notifyOnFail: false,
-        onSuccessTemplate: {
-          text: "📦 $package_name@$npm_package_version has been released!",
-          blocks: [{
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: '*New `$package_name` package released!*'
-            }
-          }, {
-            type: 'context',
-            elements: [{
-              type: 'mrkdwn',
-              text: "📦  *Version:* <$repo_url/releases/tag/$npm_package_version|$npm_package_version>"
-            }]
-          }, {
-            type: 'divider',
-          }],
-          attachments: [{
-            blocks: [{
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: '*Changes* of version $release_notes',
-              },
-            }],
-          }],
-        },
-        packageName: 'django-forest',
-      }
-    ],
+    // [
+    //   'semantic-release-slack-bot',
+    //   {
+    //     markdownReleaseNotes: true,
+    //     notifyOnSuccess: true,
+    //     notifyOnFail: false,
+    //     onSuccessTemplate: {
+    //       text: "📦 $package_name@$npm_package_version has been released!",
+    //       blocks: [{
+    //         type: 'section',
+    //         text: {
+    //           type: 'mrkdwn',
+    //           text: '*New `$package_name` package released!*'
+    //         }
+    //       }, {
+    //         type: 'context',
+    //         elements: [{
+    //           type: 'mrkdwn',
+    //           text: "📦  *Version:* <$repo_url/releases/tag/$npm_package_version|$npm_package_version>"
+    //         }]
+    //       }, {
+    //         type: 'divider',
+    //       }],
+    //       attachments: [{
+    //         blocks: [{
+    //           type: 'section',
+    //           text: {
+    //             type: 'mrkdwn',
+    //             text: '*Changes* of version $release_notes',
+    //           },
+    //         }],
+    //       }],
+    //     },
+    //     packageName: 'django-forest',
+    //   }
+    // ],
   ],
   'branches': ['+([0-9])?(.{+([0-9]),x}).x', 'main', 'next', 'next-major', {name: 'beta', prerelease: true}, {name: 'alpha', prerelease: true}]
 }
