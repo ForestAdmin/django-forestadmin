@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/ForestAdmin/django-forest/compare/v1.1.0...v1.1.1) (2021-06-09)
+
+
+### Bug Fixes
+
+* fix setup.cfg ([#28](https://github.com/ForestAdmin/django-forest/issues/28)) ([44f8437](https://github.com/ForestAdmin/django-forest/commit/44f84374795679579caf2d6badefdbd0aed8e7eb))
+
 # [1.1.0](https://github.com/ForestAdmin/django-forest/compare/v1.0.0...v1.1.0) (2021-06-09)
 
 
