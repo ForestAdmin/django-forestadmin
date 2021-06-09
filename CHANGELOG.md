@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ForestAdmin/django-forest/compare/v1.0.0...v1.1.0) (2021-06-09)
+
+
+### Features
+
+* publish on pypi test repository ([#27](https://github.com/ForestAdmin/django-forest/issues/27)) ([2e1b42b](https://github.com/ForestAdmin/django-forest/commit/2e1b42bf93d60a2b96d7765fb3746026e1e04d5f))
+
 # 1.0.0 (2021-06-09)
 
 
