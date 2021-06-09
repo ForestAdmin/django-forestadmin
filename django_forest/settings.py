@@ -129,7 +129,8 @@ FOREST = {
     'AUTH_SECRET': 'foo',
     # 'INCLUDED_MODELS': [],
     # 'EXCLUDED_MODELS': ['Permission', 'Group', 'User', 'ContentType'],
-    # 'CONFIG_DIR': 'forest'
+    # 'CONFIG_DIR': 'forest',
+    # 'FOREST_DISABLE_AUTO_SCHEMA_APPLY': True
 }
 
 APPEND_SLASH = False

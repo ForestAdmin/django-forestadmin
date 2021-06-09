@@ -191,14 +191,18 @@ class UtilsSchemaSendTests(TestCase):
     def inject_fixtures(self, caplog):
         self._caplog = caplog
 
-    @pytest.mark.usefixtures('reset_config_dir_import')
-    @override_settings(DEBUG=True)
     def test_get_serialized_schema(self):
         Schema.schema_data = test_question_schema_data
         serialized_schema = Schema.get_serialized_schema()
         self.assertEqual(serialized_schema, test_serialized_schema)
 
-    @pytest.mark.usefixtures('reset_config_dir_import')
+    @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_APPLY': True})
+    @mock.patch.object(Schema, '_send_apimap')
+    def test_send_apimap_disable_apply(self, mocked_send_apimap):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        mocked_send_apimap.assert_not_called()
+
     @override_settings(DEBUG=True)
     @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
     def test_send_apimap(self, mocked_requests_post):
@@ -210,6 +214,18 @@ class UtilsSchemaSendTests(TestCase):
             headers={'Content-Type': 'application/json', 'forest-secret-key': 'foo'},
             params={},
             verify=False
+        )
+
+    @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
+    def test_send_apimap_production(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        mocked_requests_post.assert_called_once_with(
+            'https://api.test.forestadmin.com/forest/apimaps',
+            data=json.dumps(test_serialized_schema),
+            headers={'Content-Type': 'application/json', 'forest-secret-key': 'foo'},
+            params={},
+            verify=True
         )
 
     @mock.patch('requests.post', return_value=mocked_requests({'warning': 'foo'}, 200))

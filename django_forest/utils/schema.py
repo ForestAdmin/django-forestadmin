@@ -12,6 +12,7 @@ from django_forest.utils.apimap_errors import APIMAP_ERRORS
 from django_forest.utils.models import Models
 from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
+from django_forest.utils.to_bool import to_bool
 
 if sys.version_info >= (3, 8):
     from importlib import metadata
@@ -269,7 +270,7 @@ class Schema:
             logger.error(APIMAP_ERRORS[status]['message'])
 
     @classmethod
-    def send_apimap(cls):
+    def _send_apimap(cls):
         serialized_schema = cls.get_serialized_schema()
         r = ForestApiRequester.post('forest/apimaps', serialized_schema)
         if r.status_code in (200, 202, 204):
@@ -279,4 +280,12 @@ class Schema:
         elif r.status_code in APIMAP_ERRORS.keys():
             cls.handle_apimap_error(r.status_code)
         else:
-            logger.error('An error occured with the apimap sent to Forest. Please contact support@forestadmin.com for further investigations.')  # noqa E501
+            logger.error(
+                'An error occured with the apimap sent to Forest. Please contact support@forestadmin.com for further investigations.')  # noqa E501
+
+    @classmethod
+    def send_apimap(cls):
+        disable_auto_schema_apply = getattr(settings, 'FOREST', {}) \
+            .get('FOREST_DISABLE_AUTO_SCHEMA_APPLY', to_bool(os.getenv('FOREST_DISABLE_AUTO_SCHEMA_APPLY', False)))
+        if not disable_auto_schema_apply:
+            cls._send_apimap()
