@@ -46,32 +46,39 @@ class ForestApiRequester:
         return body, query, headers
 
     @classmethod
-    def get(cls, route, query=None, headers=None):
-        body, query, headers = cls.get_params(query=query, headers=headers)
-        url = urljoin(cls.forest_api_url(), route)
-
+    def run_method(cls, method, url, kwargs):
         try:
-            r = requests.get(url,
-                             params=query,
-                             headers=cls.get_headers(headers),
-                             verify=not settings.DEBUG)
+            r = method(url, **kwargs)
         except Exception:
             raise Exception(cls.error_msg(url))
         else:
             return r
 
     @classmethod
+    def get(cls, route, query=None, headers=None):
+        body, query, headers = cls.get_params(query=query, headers=headers)
+        url = urljoin(cls.forest_api_url(), route)
+
+        kwargs = {
+            'params': query,
+            'headers': cls.get_headers(headers)
+        }
+        if settings.DEBUG:
+            kwargs['verify'] = False
+
+        return cls.run_method(requests.get, url, kwargs)
+
+    @classmethod
     def post(cls, route, body=None, query=None, headers=None):
         body, query, headers = cls.get_params(body=body, query=query, headers=headers)
         url = cls._get_url(route)
 
-        try:
-            r = requests.post(url,
-                              data=json.dumps(body),
-                              headers=cls.get_headers(headers),
-                              params=query,
-                              verify=not settings.DEBUG)
-        except Exception:
-            raise Exception(cls.error_msg(url))
-        else:
-            return r
+        kwargs = {
+            'data': json.dumps(body),
+            'params': query,
+            'headers': cls.get_headers(headers)
+        }
+        if settings.DEBUG:
+            kwargs['verify'] = False
+
+        return cls.run_method(requests.post, url, kwargs)

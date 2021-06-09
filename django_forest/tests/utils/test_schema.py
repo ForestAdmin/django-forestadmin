@@ -225,7 +225,6 @@ class UtilsSchemaSendTests(TestCase):
             data=json.dumps(test_serialized_schema),
             headers={'Content-Type': 'application/json', 'forest-secret-key': 'foo'},
             params={},
-            verify=True
         )
 
     @mock.patch('requests.post', return_value=mocked_requests({'warning': 'foo'}, 200))
