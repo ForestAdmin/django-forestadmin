@@ -29,14 +29,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install flake8
-      - name: Lint commit message
-        uses: wagoid/commitlint-github-action@v2
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --show-source --statistics
           # exit-zero treats all errors as warnings.
           flake8 . --count --exit-zero --statistics
+      - name: Lint commit message
+        uses: wagoid/commitlint-github-action@v2
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -125,7 +126,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Build package
+      - name: Build python
         run: python setup.py sdist
       - uses: actions/setup-node@v1
         with:
@@ -134,6 +135,8 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: install dependencies
+        run: yarn install --frozen-lockfile --non-interactive --production=false
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
