@@ -117,17 +117,12 @@ jobs:
       matrix:
         python-version: [ 3.9 ]
     needs: [test]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
+    #if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
     steps:
       - uses: actions/checkout@v2
         with:
           persist-credentials: false # GITHUB_TOKEN must not be set for the semantic release
           fetch-depth: 0
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Build python
-        run: python setup.py sdist
       - uses: actions/setup-node@v1
         with:
           node-version: 12.13.0
