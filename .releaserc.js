@@ -16,7 +16,7 @@ module.exports = {
       '@semantic-release/exec',
       {
         prepareCmd: 'sed -i \'s/version = ".*"/version = "${nextRelease.version}"/g\' setup.cfg; sed -i \'s/"version": ".*"/"version": "${nextRelease.version}"/g\' package.json;',
-        successCmd: 'touch .trigger-pypi-release',
+        successCmd: 'touch .trigger-rubygem-release',
       },
     ],
     [
