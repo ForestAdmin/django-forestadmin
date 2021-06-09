@@ -125,7 +125,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Build package
+      - name: Build python package
         run: python setup.py sdist
       - uses: actions/setup-node@v1
         with:
@@ -134,6 +134,8 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Build package
+        run: yarn build
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
