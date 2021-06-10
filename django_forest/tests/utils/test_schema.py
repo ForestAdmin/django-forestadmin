@@ -281,7 +281,7 @@ class UtilsGetAppTests(TestCase):
 
     @mock.patch('importlib.metadata.version', side_effect=Exception('error'))
     def test_get_app_version_error(self, mock_version):
-        from django_forest.utils.schema.version  import get_app_version
+        from django_forest.utils.schema.version import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.0')
 
@@ -291,12 +291,12 @@ class UtilsGetAppOldPythonTests(TestCase):
 
     @mock.patch('importlib_metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
-        from django_forest.utils.schema import version
-        version = version()
+        from django_forest.utils.schema.version import get_app_version
+        version = get_app_version()
         self.assertEqual(version, '0.0.1')
 
     @mock.patch('importlib_metadata.version', side_effect=Exception('error'))
     def test_get_app_version_error(self, mock_version):
-        from django_forest.utils.schema import version
-        version = version()
+        from django_forest.utils.schema.version import get_app_version
+        version = get_app_version()
         self.assertEqual(version, '0.0.0')

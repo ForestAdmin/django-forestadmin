@@ -4,6 +4,8 @@ from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 
 
 class ForestApiRequester:
@@ -28,10 +30,14 @@ class ForestApiRequester:
 
     @classmethod
     def _get_url(cls, route):
-        if route.startswith('https://'):
-            url = route
-        else:
+        validate = URLValidator()
+
+        try:
+            validate(route)
+        except ValidationError:
             url = urljoin(cls.forest_api_url(), route)
+        else:
+            url = route
         return url
 
     @staticmethod
