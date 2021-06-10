@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
+from django_forest.utils.cors import set_cors
 from django_forest.utils.schema import Schema
 
 
@@ -8,6 +9,9 @@ class ForestConfig(AppConfig):
     name = 'django_forest'
 
     def ready(self):
+        # set cors
+        set_cors()
+
         # schema
         Schema.build_schema()
         Schema.add_smart_features()

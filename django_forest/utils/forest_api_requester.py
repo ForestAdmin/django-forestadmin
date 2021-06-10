@@ -1,5 +1,4 @@
 import json
-import os
 from urllib.parse import urljoin
 
 import requests
@@ -7,12 +6,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
+from django_forest.utils.get_forest_setting import get_forest_setting
+
 
 class ForestApiRequester:
 
     @staticmethod
     def get_headers(headers):
-        forest_secret_key = getattr(settings, 'FOREST', {}).get('FOREST_ENV_SECRET', os.getenv('FOREST_ENV_SECRET'))
+        forest_secret_key = get_forest_setting('FOREST_ENV_SECRET')
         base_headers = {
             'Content-Type': 'application/json',
             'forest-secret-key': forest_secret_key,
@@ -25,17 +26,14 @@ class ForestApiRequester:
         return f'Cannot reach Forest API at {url}, it seems to be down right now.'
 
     @staticmethod
-    def forest_api_url():
-        return getattr(settings, 'FOREST', {}).get('FOREST_URL', os.getenv('FOREST_URL', 'https://api.forestadmin.com'))
-
-    @classmethod
-    def _get_url(cls, route):
+    def _get_url(route):
         validate = URLValidator()
 
         try:
             validate(route)
         except ValidationError:
-            url = urljoin(cls.forest_api_url(), route)
+            forest_api_url = get_forest_setting('FOREST_URL', 'https://api.forestadmin.com')
+            url = urljoin(forest_api_url, route)
         else:
             url = route
         return url
@@ -63,7 +61,7 @@ class ForestApiRequester:
     @classmethod
     def get(cls, route, query=None, headers=None):
         body, query, headers = cls.get_params(query=query, headers=headers)
-        url = urljoin(cls.forest_api_url(), route)
+        url = cls._get_url(route)
 
         kwargs = {
             'params': query,

@@ -1,7 +1,6 @@
-import os
-
 from django.apps import apps
-from django.conf import settings
+
+from django_forest.utils.get_forest_setting import get_forest_setting
 
 
 class Models:
@@ -10,8 +9,8 @@ class Models:
     @classmethod
     def list(cls, force=False):
         if cls.models is None or force:
-            included_models = getattr(settings, 'FOREST', {}).get('INCLUDED_MODELS', os.getenv('INCLUDED_MODELS', None))
-            excluded_models = getattr(settings, 'FOREST', {}).get('EXCLUDED_MODELS', os.getenv('EXCLUDED_MODELS', None))
+            included_models = get_forest_setting('INCLUDED_MODELS')
+            excluded_models = get_forest_setting('EXCLUDED_MODELS')
             cls.models = apps.get_models()
             if included_models is not None:
                 cls.models = [m for m in cls.models if m.__name__ in included_models]
