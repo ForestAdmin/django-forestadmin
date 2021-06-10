@@ -1,7 +1,20 @@
+import os
+from distutils.util import strtobool
+
 from django.apps import AppConfig
 
 from django_forest.utils.cors import set_cors
 from django_forest.utils.schema import Schema
+
+import urllib3
+
+disable_warnings = os.getenv('URLLIB3_DISABLE_WARNINGS', 'False')
+try:
+    disable_warnings = strtobool(disable_warnings)
+except Exception:
+    disable_warnings = False
+if disable_warnings:
+    urllib3.disable_warnings()
 
 
 class ForestConfig(AppConfig):
