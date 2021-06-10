@@ -6,8 +6,10 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import base64
 import os
 from pathlib import Path
+import uuid
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -126,7 +128,7 @@ FOREST = {
     'FOREST_URL': 'https://api.test.forestadmin.com',
     'APPLICATION_URL': 'http://localhost:8000',
     'FOREST_ENV_SECRET': 'foo',
-    'AUTH_SECRET': 'foo',
+    'AUTH_SECRET': base64.urlsafe_b64encode(uuid.uuid4().bytes),
     # 'INCLUDED_MODELS': [],
     # 'EXCLUDED_MODELS': ['Permission', 'Group', 'User', 'ContentType'],
     # 'CONFIG_DIR': 'forest',
