@@ -1,6 +1,6 @@
-import os
-
 from django.conf import settings
+
+from django_forest.utils.get_forest_setting import get_forest_setting
 
 
 def set_cors():
@@ -11,8 +11,14 @@ def set_cors():
         common_middleware_index = 0
     settings.MIDDLEWARE.insert(common_middleware_index, 'corsheaders.middleware.CorsMiddleware')
 
-    settings.CORS_ALLOWED_ORIGINS = ['http://localhost:4200'] + getattr(settings, 'FOREST', {}).get('CORS_ALLOWED_ORIGINS', os.getenv('CORS_ALLOWED_ORIGINS', '')).split(',')
-    settings.CORS_ALLOWED_ORIGIN_REGEXES = [r'/\.forestadmin\.com$/'] + getattr(settings, 'FOREST', {}).get('CORS_ALLOWED_ORIGIN_REGEXES', os.getenv('CORS_ALLOWED_ORIGIN_REGEXES', '')).split(',')
+    default_cors_allowed_origins = ['http://localhost:4200']
+    cors_allowed_origins = get_forest_setting('CORS_ALLOWED_ORIGINS', '').split(',')
+
+    default_cors_allowed_origins_regexes = [r'/\.forestadmin\.com$/']
+    cors_allowed_origins_regexes = get_forest_setting('CORS_ALLOWED_ORIGIN_REGEXES', '').split(',')
+
+    settings.CORS_ALLOWED_ORIGINS = default_cors_allowed_origins.extend(cors_allowed_origins)
+    settings.CORS_ALLOWED_ORIGIN_REGEXES = default_cors_allowed_origins_regexes.extend(cors_allowed_origins_regexes)
     settings.CORS_URLS_REGEX = r'^/forest(/.*)?$'  # restrict it to /forest
     settings.CORS_PREFLIGHT_MAX_AGE = 86400  # one day
     settings.CORS_ALLOW_CREDENTIALS = True

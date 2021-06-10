@@ -2,7 +2,6 @@ import copy
 import json
 import os
 import logging
-from distutils.util import strtobool
 
 import django
 from django.conf import settings
@@ -20,6 +19,8 @@ from .version import get_app_version
 
 
 # Get an instance of a logger
+from ..get_forest_setting import get_forest_setting
+
 logger = logging.getLogger(__name__)
 
 
@@ -105,7 +106,7 @@ class Schema:
     @staticmethod
     def add_smart_features():
         # Notice: will load all files in <app>/forest folder from client
-        autodiscover_modules(getattr(settings, 'FOREST', {}).get('CONFIG_DIR', os.getenv('CONFIG_DIR', 'forest')))
+        autodiscover_modules(get_forest_setting('CONFIG_DIR', 'forest'))
 
     @classmethod
     def handle_json_api_serializer(cls):
@@ -201,21 +202,9 @@ class Schema:
         else:
             getattr(logger, APIMAP_ERRORS['error']['level'])(APIMAP_ERRORS['error']['message'])
 
-    @staticmethod
-    def get_disable_auto_schema_apply():
-        env_disable_auto_schema_apply = os.getenv('FOREST_DISABLE_AUTO_SCHEMA_APPLY', False)
-        disable_auto_schema_apply = getattr(settings, 'FOREST', {})\
-            .get('FOREST_DISABLE_AUTO_SCHEMA_APPLY', env_disable_auto_schema_apply)
-        if isinstance(disable_auto_schema_apply, str):
-            try:
-                disable_auto_schema_apply = strtobool(disable_auto_schema_apply)
-            except ValueError:
-                disable_auto_schema_apply = False
-        return disable_auto_schema_apply
-
     @classmethod
     def send_apimap(cls):
-        disable_auto_schema_apply = cls.get_disable_auto_schema_apply()
+        disable_auto_schema_apply = get_forest_setting('FOREST_DISABLE_AUTO_SCHEMA_APPLY', False)
         if not disable_auto_schema_apply:
             serialized_schema = cls.get_serialized_schema()
             try:
