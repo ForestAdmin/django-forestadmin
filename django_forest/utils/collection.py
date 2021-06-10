@@ -1,4 +1,5 @@
-from django_forest.utils.schema import Schema, COLLECTION, ACTION, ACTION_FIELD, FIELD
+from django_forest.utils.schema.definitions import COLLECTION, ACTION, ACTION_FIELD, FIELD
+from django_forest.utils.schema import Schema
 
 
 class Collection:

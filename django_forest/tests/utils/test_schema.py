@@ -8,7 +8,9 @@ import pytest
 from unittest import mock
 from django.test import TestCase, override_settings
 
-from django_forest.tests.fixtures.schema import test_schema, test_question_choice_schema, test_exclude_django_contrib_schema
+from django_forest.tests.fixtures.schema import test_schema, test_choice_schema, \
+    test_exclude_django_contrib_schema, test_serialized_schema, test_question_schema_data
+from django_forest.tests.utils.test_forest_api_requester import mocked_requests
 from django_forest.utils.collection import Collection
 from django_forest.utils.json_api_serializer import JsonApiSchema
 from django_forest.utils.models import Models
@@ -25,6 +27,8 @@ class UtilsSchemaTests(TestCase):
         # reset _registry after each test
         Collection._registry = {}
         JsonApiSchema._registry = {}
+        Schema.schema_data = None
+        Models.models = None
 
     @mock.patch.object(django, 'get_version', return_value='9.9.9')
     @mock.patch('importlib.metadata.version', return_value='0.0.0')
@@ -59,7 +63,7 @@ class UtilsSchemaTests(TestCase):
         }
         Schema.models = Models.list(force=True)
         schema = Schema.build_schema()
-        self.assertEqual(schema, test_question_choice_schema)
+        self.assertEqual(schema, test_choice_schema)
 
     @override_settings(FOREST={'EXCLUDED_MODELS': ['Permission', 'Group', 'User', 'ContentType']})
     @mock.patch.object(django, 'get_version', return_value='9.9.9')
@@ -139,6 +143,7 @@ class UtilsSchemaFileTests(TestCase):
         Collection._registry = {}
         JsonApiSchema._registry = {}
         Schema.schema_data = None
+        Models.models = None
         if os.path.exists(file_path):
             os.remove(file_path)
 
@@ -170,7 +175,6 @@ class UtilsSchemaFileTests(TestCase):
     @pytest.mark.usefixtures('reset_config_dir_import')
     @override_settings(DEBUG=True)
     def test_handle_schema_file_debug(self):
-        self.maxDiff = None
         Schema.handle_schema_file()
         with open(file_path, 'r') as f:
             data = f.read()
@@ -182,18 +186,102 @@ class UtilsSchemaFileTests(TestCase):
             self.assertIsNotNone(Schema.schema_data)
 
 
+class UtilsSchemaSendTests(TestCase):
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, caplog):
+        self._caplog = caplog
+
+    def test_get_serialized_schema(self):
+        Schema.schema_data = test_question_schema_data
+        serialized_schema = Schema.get_serialized_schema()
+        self.assertEqual(serialized_schema, test_serialized_schema)
+
+    @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_APPLY': True})
+    @mock.patch.object(Schema, 'get_serialized_schema')
+    def test_send_apimap_disable_apply(self, mocked_get_serialized_schema):
+        Schema.send_apimap()
+        mocked_get_serialized_schema.assert_not_called()
+
+    @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_APPLY': 'foo'})
+    def test_send_apimap_server_error(self):
+        self.assertRaises(Exception, Schema.send_apimap())
+
+    @override_settings(DEBUG=True)
+    @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
+    def test_send_apimap(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        mocked_requests_post.assert_called_once_with(
+            'https://api.test.forestadmin.com/forest/apimaps',
+            data=json.dumps(test_serialized_schema),
+            headers={'Content-Type': 'application/json', 'forest-secret-key': 'foo'},
+            params={},
+            verify=False
+        )
+
+    @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
+    def test_send_apimap_production(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        mocked_requests_post.assert_called_once_with(
+            'https://api.test.forestadmin.com/forest/apimaps',
+            data=json.dumps(test_serialized_schema),
+            headers={'Content-Type': 'application/json', 'forest-secret-key': 'foo'},
+            params={},
+        )
+
+    @mock.patch('requests.post', return_value=mocked_requests({'warning': 'foo'}, 200))
+    def test_send_apimap_warning(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        self.assertEqual(self._caplog.records[0].message,
+                         'foo')
+        self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
+
+    @mock.patch('requests.post', side_effect=Exception('foo'))
+    def test_send_apimap_zero(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        self.assertRaises(Exception, Schema.send_apimap())
+        self.assertEqual(self._caplog.records[0].message,
+                         'Cannot send the apimap to Forest. Are you online?')
+        self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
+
+    @mock.patch('requests.post', return_value=mocked_requests({}, 404))
+    def test_send_apimap_not_found(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        self.assertEqual(self._caplog.records[0].message,
+                         'Cannot find the project related to the envSecret you configured. Can you check on Forest that you copied it properly in the Forest settings?')
+        self.assertEqual(self._caplog.records[0].levelname, 'ERROR')
+
+    @mock.patch('requests.post', return_value=mocked_requests({}, 503))
+    def test_send_apimap_unavailable(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        self.assertEqual(self._caplog.records[0].message,
+                         'Forest is in maintenance for a few minutes. We are upgrading your experience in the forest. We just need a few more minutes to get it right.')
+        self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
+
+    @mock.patch('requests.post', return_value=mocked_requests({}, 500))
+    def test_send_apimap_error(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        self.assertEqual(self._caplog.records[0].message,
+                         'An error occured with the apimap sent to Forest. Please contact support@forestadmin.com for further investigations.')
+        self.assertEqual(self._caplog.records[0].levelname, 'ERROR')
+
+
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsGetAppTests(TestCase):
-
     @mock.patch('importlib.metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
-        from django_forest.utils.schema import get_app_version
+        from django_forest.utils.schema.version import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.1')
 
     @mock.patch('importlib.metadata.version', side_effect=Exception('error'))
     def test_get_app_version_error(self, mock_version):
-        from django_forest.utils.schema import get_app_version
+        from django_forest.utils.schema.version import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.0')
 
@@ -203,12 +291,12 @@ class UtilsGetAppOldPythonTests(TestCase):
 
     @mock.patch('importlib_metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
-        from django_forest.utils.schema import get_app_version
+        from django_forest.utils.schema.version import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.1')
 
     @mock.patch('importlib_metadata.version', side_effect=Exception('error'))
     def test_get_app_version_error(self, mock_version):
-        from django_forest.utils.schema import get_app_version
+        from django_forest.utils.schema.version import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.0')

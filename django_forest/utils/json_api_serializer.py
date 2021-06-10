@@ -41,7 +41,6 @@ def handle_id_attribute(attrs, collection_name):
         Model = Models.get(collection_name)
         if Model is not None:
             attrs['id'] = TYPE_CHOICES.get(get_type(Model._meta.pk), fields.Str)()
-
     return attrs
 
 

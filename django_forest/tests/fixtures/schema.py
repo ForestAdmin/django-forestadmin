@@ -146,7 +146,8 @@ test_schema = {'collections': [
      'fields': [{'field': 'id', 'type': 'Number', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
                  'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None,
                  'reference': None, 'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []},
-                {'field': 'board', 'type': ['String'], 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+                {'field': 'board', 'type': ['String'], 'is_filterable': True, 'is_sortable': True,
+                 'is_read_only': False,
                  'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None,
                  'reference': None, 'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []}]},
     {'name': 'Permission', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
@@ -261,7 +262,7 @@ test_schema = {'collections': [
     }
 }
 
-test_question_choice_schema = {
+test_choice_schema = {
     'collections': [
         {'name': 'Choice', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
          'only_for_relationships': False, 'pagination_type': 'page', 'search_fields': None, 'actions': [],
@@ -285,6 +286,38 @@ test_question_choice_schema = {
         'orm_version': '9.9.9'
     }
 }
+
+test_question_schema_data = {'collections': [
+    {'name': 'Question', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
+     'only_for_relationships': False, 'pagination_type': 'page', 'search_fields': None, 'actions': [
+        {'name': 'Send invoice', 'type': 'single', 'fields': [
+            {'field': 'country', 'type': 'Enum', 'enums': [], 'is_read_only': False, 'is_required': False,
+             'default_value': None, 'integration': None, 'reference': None, 'description': None, 'widget': None,
+             'position': 0},
+            {'field': 'city', 'type': 'String', 'is_read_only': False, 'is_required': False, 'default_value': None,
+             'enums': None, 'integration': None, 'reference': None, 'description': None, 'widget': None, 'position': 1},
+            {'field': 'zip code', 'type': 'String', 'is_read_only': False, 'is_required': False, 'default_value': None,
+             'enums': None, 'integration': None, 'reference': None, 'description': None, 'widget': None,
+             'position': 2}], 'hooks': {'load': True, 'change': ['city', 'zip code']},
+         'endpoint': '/forest/actions/send-invoice', 'baseUrl': None, 'httpMethod': 'POST', 'redirect': None,
+         'download': False}], 'segments': [{'name': 'Best questions'}], 'fields': [
+        {'field': 'id', 'type': 'Number', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+         'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None, 'reference': None,
+         'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []},
+        {'field': 'question_text', 'type': 'String', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+         'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None, 'reference': None,
+         'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []},
+        {'field': 'pub_date', 'type': 'Date', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+         'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None, 'reference': None,
+         'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []},
+        {'field': 'foo', 'is_virtual': True, 'type': '', 'is_filterable': True, 'is_sortable': True,
+         'is_read_only': False, 'is_required': False, 'default_value': None, 'integration': None, 'reference': None,
+         'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []},
+        {'field': 'bar', 'is_virtual': True, 'type': '', 'is_filterable': True, 'is_sortable': True,
+         'is_read_only': False, 'is_required': False, 'default_value': None, 'integration': None, 'reference': None,
+         'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []}]}],
+    'meta': {'database_type': 'sqlite', 'liana': 'django-forest', 'liana_version': '0.0.0',
+             'orm_version': '9.9.9'}}
 
 test_exclude_django_contrib_schema = {'collections': [
     {'name': 'Question', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
@@ -434,7 +467,8 @@ test_exclude_django_contrib_schema = {'collections': [
      'fields': [{'field': 'id', 'type': 'Number', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
                  'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None,
                  'reference': None, 'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []},
-                {'field': 'board', 'type': ['String'], 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+                {'field': 'board', 'type': ['String'], 'is_filterable': True, 'is_sortable': True,
+                 'is_read_only': False,
                  'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None,
                  'reference': None, 'inverse_of': None, 'relationship': None, 'widget': None, 'validations': []}]}],
     'meta': {
@@ -444,3 +478,85 @@ test_exclude_django_contrib_schema = {'collections': [
         'orm_version': '9.9.9'
     }
 }
+
+test_serialized_schema = {'data': [{'id': 'Question', 'type': 'collections',
+                                    'attributes': {'name': 'Question', 'is_virtual': False, 'icon': None,
+                                                   'is_read_only': False, 'is_searchable': True,
+                                                   'only_for_relationships': False, 'pagination_type': 'page',
+                                                   'search_fields': None, 'actions': [
+                                            {'name': 'Send invoice', 'type': 'single', 'fields': [
+                                                {'field': 'country', 'type': 'Enum', 'enums': [], 'is_read_only': False,
+                                                 'is_required': False, 'default_value': None, 'integration': None,
+                                                 'reference': None, 'description': None, 'widget': None, 'position': 0},
+                                                {'field': 'city', 'type': 'String', 'is_read_only': False,
+                                                 'is_required': False, 'default_value': None, 'enums': None,
+                                                 'integration': None, 'reference': None, 'description': None,
+                                                 'widget': None, 'position': 1},
+                                                {'field': 'zip code', 'type': 'String', 'is_read_only': False,
+                                                 'is_required': False, 'default_value': None, 'enums': None,
+                                                 'integration': None, 'reference': None, 'description': None,
+                                                 'widget': None, 'position': 2}],
+                                             'hooks': {'load': True, 'change': ['city', 'zip code']},
+                                             'endpoint': '/forest/actions/send-invoice', 'baseUrl': None,
+                                             'httpMethod': 'POST', 'redirect': None, 'download': False}],
+                                                   'segments': [{'name': 'Best questions'}], 'fields': [
+                                            {'field': 'id', 'type': 'Number', 'is_filterable': True,
+                                             'is_sortable': True, 'is_read_only': False, 'is_required': False,
+                                             'is_virtual': False, 'default_value': None, 'integration': None,
+                                             'reference': None, 'inverse_of': None, 'relationship': None,
+                                             'widget': None, 'validations': []},
+                                            {'field': 'question_text', 'type': 'String', 'is_filterable': True,
+                                             'is_sortable': True, 'is_read_only': False, 'is_required': False,
+                                             'is_virtual': False, 'default_value': None, 'integration': None,
+                                             'reference': None, 'inverse_of': None, 'relationship': None,
+                                             'widget': None, 'validations': []},
+                                            {'field': 'pub_date', 'type': 'Date', 'is_filterable': True,
+                                             'is_sortable': True, 'is_read_only': False, 'is_required': False,
+                                             'is_virtual': False, 'default_value': None, 'integration': None,
+                                             'reference': None, 'inverse_of': None, 'relationship': None,
+                                             'widget': None, 'validations': []},
+                                            {'field': 'foo', 'is_virtual': True, 'type': '', 'is_filterable': True,
+                                             'is_sortable': True, 'is_read_only': False, 'is_required': False,
+                                             'default_value': None, 'integration': None, 'reference': None,
+                                             'inverse_of': None, 'relationship': None, 'widget': None,
+                                             'validations': []},
+                                            {'field': 'bar', 'is_virtual': True, 'type': '', 'is_filterable': True,
+                                             'is_sortable': True, 'is_read_only': False, 'is_required': False,
+                                             'default_value': None, 'integration': None, 'reference': None,
+                                             'inverse_of': None, 'relationship': None, 'widget': None,
+                                             'validations': []}]}, 'relationships': {
+        'actions': {'data': [{'id': 'Question.Send invoice', 'type': 'actions'}]},
+        'segments': {'data': [{'id': 'Question.Best questions', 'type': 'segments'}]}}}], 'included': [
+    {'id': 'Question.Send invoice', 'type': 'actions', 'attributes': {'name': 'Send invoice', 'type': 'single',
+                                                                      'fields': [{'field': 'country', 'type': 'Enum',
+                                                                                  'enums': [], 'is_read_only': False,
+                                                                                  'is_required': False,
+                                                                                  'default_value': None,
+                                                                                  'integration': None,
+                                                                                  'reference': None,
+                                                                                  'description': None, 'widget': None,
+                                                                                  'position': 0},
+                                                                                 {'field': 'city', 'type': 'String',
+                                                                                  'is_read_only': False,
+                                                                                  'is_required': False,
+                                                                                  'default_value': None, 'enums': None,
+                                                                                  'integration': None,
+                                                                                  'reference': None,
+                                                                                  'description': None, 'widget': None,
+                                                                                  'position': 1},
+                                                                                 {'field': 'zip code', 'type': 'String',
+                                                                                  'is_read_only': False,
+                                                                                  'is_required': False,
+                                                                                  'default_value': None, 'enums': None,
+                                                                                  'integration': None,
+                                                                                  'reference': None,
+                                                                                  'description': None, 'widget': None,
+                                                                                  'position': 2}],
+                                                                      'hooks': {'load': True,
+                                                                                'change': ['city', 'zip code']},
+                                                                      'endpoint': '/forest/actions/send-invoice',
+                                                                      'baseUrl': None, 'httpMethod': 'POST',
+                                                                      'redirect': None, 'download': False}},
+    {'id': 'Question.Best questions', 'type': 'segments', 'attributes': {'name': 'Best questions'}}],
+                          'meta': {'database_type': 'sqlite', 'liana': 'django-forest', 'liana_version': '0.0.0',
+                                   'orm_version': '9.9.9'}}
