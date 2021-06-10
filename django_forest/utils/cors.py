@@ -18,7 +18,7 @@ def set_cors():
     cors_allowed_origins = ['http://localhost:4200']
     cors_allowed_origins.extend(get_list_setting('CORS_ALLOWED_ORIGINS'))
 
-    cors_allowed_origins_regexes = [r'/\.forestadmin\.com$/']
+    cors_allowed_origins_regexes = [r'.*\.forestadmin\.com.*']
     cors_allowed_origins_regexes.extend(get_list_setting('CORS_ALLOWED_ORIGIN_REGEXES'))
 
     settings.CORS_ALLOWED_ORIGINS = cors_allowed_origins
