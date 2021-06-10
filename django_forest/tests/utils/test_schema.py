@@ -197,11 +197,14 @@ class UtilsSchemaSendTests(TestCase):
         self.assertEqual(serialized_schema, test_serialized_schema)
 
     @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_APPLY': True})
-    @mock.patch.object(Schema, '_send_apimap')
-    def test_send_apimap_disable_apply(self, mocked_send_apimap):
-        Schema.schema_data = test_question_schema_data
+    @mock.patch.object(Schema, 'get_serialized_schema')
+    def test_send_apimap_disable_apply(self, mocked_get_serialized_schema):
         Schema.send_apimap()
-        mocked_send_apimap.assert_not_called()
+        mocked_get_serialized_schema.assert_not_called()
+
+    @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_APPLY': 'foo'})
+    def test_send_apimap_server_error(self):
+        self.assertRaises(Exception, Schema.send_apimap())
 
     @override_settings(DEBUG=True)
     @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
@@ -235,10 +238,10 @@ class UtilsSchemaSendTests(TestCase):
                          'foo')
         self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
 
-    @mock.patch('requests.post', return_value=mocked_requests({}, 0))
+    @mock.patch('requests.post', side_effect=Exception('foo'))
     def test_send_apimap_zero(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
-        Schema.send_apimap()
+        self.assertRaises(Exception, Schema.send_apimap())
         self.assertEqual(self._caplog.records[0].message,
                          'Cannot send the apimap to Forest. Are you online?')
         self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
@@ -248,7 +251,7 @@ class UtilsSchemaSendTests(TestCase):
         Schema.schema_data = test_question_schema_data
         Schema.send_apimap()
         self.assertEqual(self._caplog.records[0].message,
-                         'Cannot find the project related to the envSecret you configured. Can you check on Forest that you copied it properly in the Forest initialization?')
+                         'Cannot find the project related to the envSecret you configured. Can you check on Forest that you copied it properly in the Forest settings?')
         self.assertEqual(self._caplog.records[0].levelname, 'ERROR')
 
     @mock.patch('requests.post', return_value=mocked_requests({}, 503))
@@ -272,13 +275,13 @@ class UtilsSchemaSendTests(TestCase):
 class UtilsGetAppTests(TestCase):
     @mock.patch('importlib.metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
-        from django_forest.utils.schema import get_app_version
+        from django_forest.utils.schema.version import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.1')
 
     @mock.patch('importlib.metadata.version', side_effect=Exception('error'))
     def test_get_app_version_error(self, mock_version):
-        from django_forest.utils.schema import get_app_version
+        from django_forest.utils.schema.version  import get_app_version
         version = get_app_version()
         self.assertEqual(version, '0.0.0')
 
@@ -288,12 +291,12 @@ class UtilsGetAppOldPythonTests(TestCase):
 
     @mock.patch('importlib_metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
-        from django_forest.utils.schema import get_app_version
-        version = get_app_version()
+        from django_forest.utils.schema import version
+        version = version()
         self.assertEqual(version, '0.0.1')
 
     @mock.patch('importlib_metadata.version', side_effect=Exception('error'))
     def test_get_app_version_error(self, mock_version):
-        from django_forest.utils.schema import get_app_version
-        version = get_app_version()
+        from django_forest.utils.schema import version
+        version = version()
         self.assertEqual(version, '0.0.0')
