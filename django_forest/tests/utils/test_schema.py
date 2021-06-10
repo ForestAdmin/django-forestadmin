@@ -37,10 +37,12 @@ class UtilsSchemaTests(TestCase):
         Schema.schema = {
             'collections': [],
             'meta': {
-                'database_type': 'sqlite',
                 'liana': 'django-forest',
                 'liana_version': '0.0.0',
-                'orm_version': '9.9.9'
+                'stack': {
+                    'database_type': 'sqlite',
+                    'orm_version': '9.9.9'
+                },
             }
         }
         Schema.models = Models.list()
@@ -55,10 +57,12 @@ class UtilsSchemaTests(TestCase):
         Schema.schema = {
             'collections': [],
             'meta': {
-                'database_type': 'sqlite',
                 'liana': 'django-forest',
                 'liana_version': '0.0.0',
-                'orm_version': '9.9.9'
+                'stack': {
+                    'database_type': 'sqlite',
+                    'orm_version': '9.9.9'
+                },
             }
         }
         Schema.models = Models.list(force=True)
@@ -73,10 +77,12 @@ class UtilsSchemaTests(TestCase):
         Schema.schema = {
             'collections': [],
             'meta': {
-                'database_type': 'sqlite',
                 'liana': 'django-forest',
                 'liana_version': '0.0.0',
-                'orm_version': '9.9.9'
+                'stack': {
+                    'database_type': 'sqlite',
+                    'orm_version': '9.9.9'
+                },
             }
         }
         Schema.models = Models.list(force=True)
@@ -271,8 +277,17 @@ class UtilsSchemaSendTests(TestCase):
         self.assertEqual(self._caplog.records[0].levelname, 'ERROR')
 
 
+class UtilsSchemaInitTests(TestCase):
+    def test_schema_meta(self):
+        self.assertTrue('liana' in Schema.schema['meta'])
+        self.assertTrue('liana_version' in Schema.schema['meta'])
+        self.assertTrue('stack' in Schema.schema['meta'])
+        self.assertTrue('database_type' in Schema.schema['meta']['stack'])
+        self.assertTrue('orm_version' in Schema.schema['meta']['stack'])
+
+
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
-class UtilsGetAppTests(TestCase):
+class UtilsGetAppVersionTests(TestCase):
     @mock.patch('importlib.metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):
         from django_forest.utils.schema.version import get_app_version

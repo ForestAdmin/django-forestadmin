@@ -28,10 +28,12 @@ class Schema:
     schema = {
         'collections': [],
         'meta': {
-            'database_type': connection.vendor,
             'liana': 'django-forest',
             'liana_version': get_app_version(),
-            'orm_version': django.get_version()
+            'stack': {
+                'database_type': connection.vendor,
+                'orm_version': django.get_version(),
+            }
         }
     }
 
