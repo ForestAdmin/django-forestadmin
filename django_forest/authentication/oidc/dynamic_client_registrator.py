@@ -1,12 +1,10 @@
-import os
-
-from django.conf import settings
 from django_forest.utils.error_handler import MESSAGES
 from django_forest.utils.forest_api_requester import ForestApiRequester
+from django_forest.utils.get_forest_setting import get_forest_setting
 
 
 def register(metadata):
-    initial_access_token = getattr(settings, 'FOREST', {}).get('FOREST_ENV_SECRET', os.getenv('FOREST_ENV_SECRET'))
+    initial_access_token = get_forest_setting('FOREST_ENV_SECRET')
     headers = {}
     if initial_access_token:
         headers = {'Authorization': f'Bearer {initial_access_token}'}

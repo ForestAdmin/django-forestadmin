@@ -1,21 +1,16 @@
 import json
-import os
 from datetime import timedelta
-
-from django.conf import settings
 from jose import jwt
-
-
+from oic.oauth2 import AuthorizationResponse
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.generic import View
-from oic.oauth2 import AuthorizationResponse
 
 from django_forest.authentication.oidc.client_manager import OidcClientManager
 from django_forest.authentication.utils import get_callback_url
 from django_forest.utils.error_handler import MESSAGES
-
 from django_forest.utils.forest_api_requester import ForestApiRequester
+from django_forest.utils.get_forest_setting import get_forest_setting
 
 
 # Based on https://pyoidc.readthedocs.io/en/latest/examples/rp.html
@@ -63,7 +58,7 @@ class CallbackView(View):
         else:
             user = self.authenticate(rendering_id, {'forest_token': resp['access_token']})
 
-            AUTH_SECRET = getattr(settings, 'FOREST', {}).get('AUTH_SECRET', os.getenv('AUTH_SECRET'))
+            auth_secret = get_forest_setting('AUTH_SECRET')
             return jwt.encode({
                 'id': user['id'],
                 'email': user['email'],
@@ -73,7 +68,7 @@ class CallbackView(View):
                 'rendering_id': rendering_id,
                 'exp': self.expiration_in_seconds()
             },
-                AUTH_SECRET,
+                auth_secret,
                 algorithm='HS256')
 
     def get(self, request, *args, **kwargs):
@@ -81,10 +76,10 @@ class CallbackView(View):
             callback_url = get_callback_url()
             token = self.verify_code_and_generate_token(callback_url, request)
 
-            AUTH_SECRET = getattr(settings, 'FOREST', {}).get('AUTH_SECRET', os.getenv('AUTH_SECRET'))
+            auth_secret = get_forest_setting('AUTH_SECRET')
             result = {
                 'token': token,
-                'tokenData': jwt.decode(token, AUTH_SECRET, algorithms=['HS256'])
+                'tokenData': jwt.decode(token, auth_secret, algorithms=['HS256'])
             }
         except Exception as error:
             return JsonResponse({'errors': [{'status': 500, 'detail': error}]}, status=500)
