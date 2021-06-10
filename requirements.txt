@@ -1,5 +1,5 @@
 coverage==5.5
-Django==3.2.2
+Django==3.2.4
 django-cors-headers==3.7.0
 flake8==3.9.2
 marshmallow-jsonapi==0.24.0
