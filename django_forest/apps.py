@@ -8,13 +8,12 @@ from django_forest.utils.schema import Schema
 import urllib3
 
 disable_warnings = os.getenv('URLLIB3_DISABLE_WARNINGS', 'False')
-if isinstance(disable_warnings, str):
-    try:
-        disable_warnings = strtobool(disable_warnings)
-    except Exception:
-        disable_warnings = False
-    if disable_warnings:
-        urllib3.disable_warnings()
+try:
+    disable_warnings = strtobool(disable_warnings)
+except Exception:
+    disable_warnings = False
+if disable_warnings:
+    urllib3.disable_warnings()
 
 
 class ForestConfig(AppConfig):
