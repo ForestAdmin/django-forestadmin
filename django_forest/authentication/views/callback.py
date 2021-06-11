@@ -17,10 +17,10 @@ from django_forest.utils.get_forest_setting import get_forest_setting
 class CallbackView(View):
 
     # TODO review
-    def expiration_in_seconds(self):
+    def _expiration_in_seconds(self):
         return timezone.now() + timedelta(hours=1)
 
-    def authenticate(self, rendering_id, auth_data):
+    def _authenticate(self, rendering_id, auth_data):
         route = f'/liana/v2/renderings/{rendering_id}/authorization'
         headers = {'forest-token': auth_data['forest_token']}
         response = ForestApiRequester.get(route, headers=headers)
@@ -34,7 +34,12 @@ class CallbackView(View):
             # TODO
             raise Exception()
 
-    def verify_code_and_generate_token(self, redirect_url, request):
+    def _verify_code_and_generate_token(self, redirect_url, request):
+        if 'state' not in request.GET:
+            raise Exception(MESSAGES['SERVER_TRANSACTION']['INVALID_STATE_MISSING'])
+        if 'renderingId' not in request.GET['state']:
+            raise Exception(MESSAGES['SERVER_TRANSACTION']['INVALID_STATE_RENDERING_ID'])
+
         client = OidcClientManager.get_client_for_callback_url(redirect_url)
         aresp = client.parse_response(AuthorizationResponse,
                                       info=request.get_full_path_info(),
@@ -46,17 +51,12 @@ class CallbackView(View):
                                               authn_method='',
                                               request_args={'code': aresp['code']},
                                               verify=False)
-
-        if 'state' not in request.GET:
-            raise Exception(MESSAGES['SERVER_TRANSACTION']['INVALID_STATE_MISSING'])
-        if 'renderingId' not in request.GET['state']:
-            raise Exception(MESSAGES['SERVER_TRANSACTION']['INVALID_STATE_RENDERING_ID'])
         try:
             rendering_id = json.loads(request.GET['state'])['renderingId']
         except Exception:
             raise Exception(MESSAGES['SERVER_TRANSACTION']['INVALID_STATE_FORMAT'])
         else:
-            user = self.authenticate(rendering_id, {'forest_token': resp['access_token']})
+            user = self._authenticate(rendering_id, {'forest_token': resp['access_token']})
 
             auth_secret = get_forest_setting('AUTH_SECRET')
             return jwt.encode({
@@ -66,7 +66,7 @@ class CallbackView(View):
                 'last_name': user['last_name'],
                 'team': user['teams'][0],
                 'rendering_id': rendering_id,
-                'exp': self.expiration_in_seconds()
+                'exp': self._expiration_in_seconds()
             },
                 auth_secret,
                 algorithm='HS256')
@@ -74,7 +74,7 @@ class CallbackView(View):
     def get(self, request, *args, **kwargs):
         try:
             callback_url = get_callback_url()
-            token = self.verify_code_and_generate_token(callback_url, request)
+            token = self._verify_code_and_generate_token(callback_url, request)
 
             auth_secret = get_forest_setting('AUTH_SECRET')
             result = {
