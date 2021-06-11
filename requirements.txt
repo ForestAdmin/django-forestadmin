@@ -1,5 +1,5 @@
 coverage==5.5
-Django==3.2.2
+Django==3.2.4
 django-cors-headers==3.7.0
 flake8==3.9.2
 marshmallow-jsonapi==0.24.0
@@ -7,7 +7,7 @@ oic==1.2.1
 psycopg2==2.8.6
 pytest==6.2.4
 pytest-cov==2.12.0
-pytest-django==4.3.0
+pytest-django==4.4.0
 pytest-pythonpath==0.7.3
-python-jose==3.2.0
+python-jose==3.3.0
 requests==2.25.1
