@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 
 from django.test import TestCase
@@ -53,6 +54,42 @@ def mocked_requests_get(value, **args):
         return mocked_requests(mocked_user, 200)
 
 
+def mocked_requests_get_error_authorization(value, **args):
+    if value == 'https://api.development.forestadmin.com/oidc/jwks':
+        return mocked_requests(mocked_jwks, 200)
+    elif value == 'https://api.test.forestadmin.com/liana/v2/renderings/1/authorization':
+        raise Exception('Authorization error')
+
+
+def mocked_requests_get_not_found(value, **args):
+    if value == 'https://api.development.forestadmin.com/oidc/jwks':
+        return mocked_requests(mocked_jwks, 200)
+    elif value == 'https://api.test.forestadmin.com/liana/v2/renderings/1/authorization':
+        return mocked_requests({}, 404)
+
+
+def mocked_requests_get_422(value, **args):
+    if value == 'https://api.development.forestadmin.com/oidc/jwks':
+        return mocked_requests(mocked_jwks, 200)
+    elif value == 'https://api.test.forestadmin.com/liana/v2/renderings/1/authorization':
+        return mocked_requests({}, 422)
+
+
+def mocked_requests_get_bad_response_2fa(value, **args):
+    if value == 'https://api.development.forestadmin.com/oidc/jwks':
+        return mocked_requests(mocked_jwks, 200)
+    elif value == 'https://api.test.forestadmin.com/liana/v2/renderings/1/authorization':
+        return mocked_requests({'errors': [{'name': 'TwoFactorAuthenticationRequiredForbiddenError'}]}, 500)
+
+
+def mocked_requests_get_bad_response(value, **args):
+    if value == 'https://api.development.forestadmin.com/oidc/jwks':
+        return mocked_requests(mocked_jwks, 200)
+    elif value == 'https://api.test.forestadmin.com/liana/v2/renderings/1/authorization':
+        return mocked_requests({'errors': [{'name': 'error'}]}, 500)
+
+
+
 class AuthenticationCallbackViewTests(TestCase):
 
     def setUp(self):
@@ -66,6 +103,13 @@ class AuthenticationCallbackViewTests(TestCase):
         self.oidc_client = OidcClientManager.get_client_for_callback_url(callback_url)
         self.oidc_client.redirect_uris = ['http://localhost:8000/forest/authentication/callback']
 
+        url = reverse('authentication:callback')
+        query = {
+            'code': 'eslqHqk8Luo_3CIf5SanmXBpq_7ytlTV8HgoVFNPwUvmWKDiwnf9XV6Bo04zRon8',
+            'state': '{"renderingId": 1}'
+        }
+        self.url = f'{url}?{urlencode(query)}'
+
     def tearDown(self):
         OidcClientManager.client = None
         self.oidc_client = None
@@ -76,13 +120,7 @@ class AuthenticationCallbackViewTests(TestCase):
     @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def test_get(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
-        url = reverse('authentication:callback')
-        query = {
-            'code': 'eslqHqk8Luo_3CIf5SanmXBpq_7ytlTV8HgoVFNPwUvmWKDiwnf9XV6Bo04zRon8',
-            'state': '{"renderingId": 1}'
-        }
-        url = f'{url}?{urlencode(query)}'
-        response = self.client.get(url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         r = response.json()
         self.assertTrue('token' in r)
@@ -93,3 +131,154 @@ class AuthenticationCallbackViewTests(TestCase):
         self.assertEqual(r['tokenData']['last_name'], 'Cisco')
         self.assertEqual(r['tokenData']['team'], 'Operations')
         self.assertEqual(r['tokenData']['rendering_id'], 1)
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get_error_authorization)
+    def test_get_error(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        with self.assertLogs() as cm:
+            r = self.client.get(self.url)
+            self.assertEqual(r.status_code, 500)
+            r = r.json()
+            self.assertEqual(r, {
+                'errors': [
+                    {
+                        'status': 500,
+                        'detail': 'Cannot reach Forest API at https://api.test.forestadmin.com/liana/v2/renderings/1/authorization, it seems to be down right now.'
+                    }
+                ]
+            })
+
+            self.assertEqual(cm.output, [
+                'ERROR:django_forest.authentication.views.callback:Authorization error: Cannot reach Forest API at https://api.test.forestadmin.com/liana/v2/renderings/1/authorization, it seems to be down right now.',
+                'ERROR:django.request:Internal Server Error: //authentication/callback'
+            ])
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get_not_found)
+    def test_get_not_found(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Cannot retrieve the data from the Forest server. Can you check that you properly copied the Forest envSecret in your settings?'
+                }
+            ]
+        })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get_422)
+    def test_get_422(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Cannot retrieve the project you\'re trying to unlock. The envSecret and renderingId seems to be missing or inconsistent.'
+                }
+            ]
+        })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get_bad_response_2fa)
+    def test_get_bad_response_2fa(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Two factor authentication required'
+                }
+            ]
+        })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get_bad_response)
+    def test_get_bad_response(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Error while authorizing the user on Forest Admin'
+                }
+            ]
+        })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_get_state_missing(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        url = reverse('authentication:callback')
+        query = {
+            'code': 'eslqHqk8Luo_3CIf5SanmXBpq_7ytlTV8HgoVFNPwUvmWKDiwnf9XV6Bo04zRon8',
+        }
+        url = f'{url}?{urlencode(query)}'
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Invalid response from the authentication server: the state parameter is missing'
+                }
+            ]
+        })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_get_no_rendering_id(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        url = reverse('authentication:callback')
+        query = {
+            'code': 'eslqHqk8Luo_3CIf5SanmXBpq_7ytlTV8HgoVFNPwUvmWKDiwnf9XV6Bo04zRon8',
+            'state': '{"foo": 1}'
+        }
+        url = f'{url}?{urlencode(query)}'
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Invalid response from the authentication server: the state does not contain a renderingId'
+                }
+            ]
+        })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623431559)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_get_invalid_state(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        url = reverse('authentication:callback')
+        query = {
+            'code': 'eslqHqk8Luo_3CIf5SanmXBpq_7ytlTV8HgoVFNPwUvmWKDiwnf9XV6Bo04zRon8',
+            'state': '{"renderingId": error}'
+        }
+        url = f'{url}?{urlencode(query)}'
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 500)
+        r = r.json()
+        self.assertEqual(r, {
+            'errors': [
+                {
+                    'status': 500,
+                    'detail': 'Invalid response from the authentication server: the state parameter is not at the right format'
+                }
+            ]
+        })

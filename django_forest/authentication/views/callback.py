@@ -1,8 +1,8 @@
 import json
-from datetime import timedelta
+import logging
+from datetime import timedelta, datetime
 from jose import jwt
 from oic.oauth2 import AuthorizationResponse
-from django.utils import timezone
 from django.http import JsonResponse
 from django.views.generic import View
 
@@ -13,26 +13,48 @@ from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.get_forest_setting import get_forest_setting
 
 
+logger = logging.getLogger(__name__)
+
+
 # Based on https://pyoidc.readthedocs.io/en/latest/examples/rp.html
 class CallbackView(View):
 
-    # TODO review
     def _expiration_in_seconds(self):
-        return timezone.now() + timedelta(hours=1)
+        return datetime.timestamp(datetime.utcnow() + timedelta(hours=1))
 
-    def _authenticate(self, rendering_id, auth_data):
-        route = f'/liana/v2/renderings/{rendering_id}/authorization'
-        headers = {'forest-token': auth_data['forest_token']}
-        response = ForestApiRequester.get(route, headers=headers)
+    def _handle_2fa_error(self, response):
+        body = response.json()
+        if 'errors' in body and isinstance(body['errors'], list) and len(body['errors']) > 0:
+            server_error = body['errors'][0]
+            if 'name' in server_error and server_error['name'] == 'TwoFactorAuthenticationRequiredForbiddenError':
+                raise Exception(MESSAGES['SERVER_TRANSACTION']['TWO_FACTOR_AUTHENTICATION_REQUIRED'])
 
+    def _handle_authent_response(self, response):
         if response.status_code == 200:
             body = response.json()
             user = body['data']['attributes']
             user['id'] = body['data']['id']
             return user
+        elif response.status_code == 404:
+            raise Exception(MESSAGES['SERVER_TRANSACTION']['SECRET_NOT_FOUND'])
+        elif response.status_code == 422:
+            raise Exception(MESSAGES['SERVER_TRANSACTION']['SECRET_AND_RENDERINGID_INCONSISTENT'])
         else:
-            # TODO
-            raise Exception()
+            self._handle_2fa_error(response)
+
+        raise Exception(MESSAGES['SERVER_TRANSACTION']['AUTHORIZATION'])
+
+    def _authenticate(self, rendering_id, auth_data):
+        route = f'/liana/v2/renderings/{rendering_id}/authorization'
+        headers = {'forest-token': auth_data['forest_token']}
+
+        try:
+            response = ForestApiRequester.get(route, headers=headers)
+        except Exception as e:
+            logger.error(f'Authorization error: {str(e)}')
+            raise e
+        else:
+            return self._handle_authent_response(response)
 
     def _verify_code_and_generate_token(self, redirect_url, request):
         if 'state' not in request.GET:
@@ -82,6 +104,6 @@ class CallbackView(View):
                 'tokenData': jwt.decode(token, auth_secret, algorithms=['HS256'])
             }
         except Exception as error:
-            return JsonResponse({'errors': [{'status': 500, 'detail': error}]}, status=500)
+            return JsonResponse({'errors': [{'status': 500, 'detail': str(error)}]}, status=500)
         else:
             return JsonResponse(result)
