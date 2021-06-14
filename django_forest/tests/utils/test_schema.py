@@ -136,10 +136,6 @@ def invalid_forestadmin_schema():
 
 
 class UtilsSchemaFileTests(TestCase):
-    @pytest.fixture(autouse=True)
-    def inject_fixtures(self, caplog):
-        self._caplog = caplog
-
     def setUp(self):
         Schema.build_schema()
         Schema.add_smart_features()
@@ -155,12 +151,13 @@ class UtilsSchemaFileTests(TestCase):
 
     @pytest.mark.usefixtures('reset_config_dir_import')
     def test_handle_schema_file_no_file(self):
-        self.assertRaises(Exception, Schema.handle_schema_file())
-        self.assertIsNone(Schema.schema_data)
-        self.assertEqual(self._caplog.messages, [
-            'The .forestadmin-schema.json file does not exist.',
-            'The schema cannot be synchronized with Forest Admin servers.'
-        ])
+        with self.assertLogs() as cm:
+            self.assertRaises(Exception, Schema.handle_schema_file())
+            self.assertIsNone(Schema.schema_data)
+            self.assertEqual(cm.output, [
+                'ERROR:django_forest.utils.schema:The .forestadmin-schema.json file does not exist.',
+                'ERROR:django_forest.utils.schema:The schema cannot be synchronized with Forest Admin servers.'
+            ])
 
     @pytest.mark.usefixtures('reset_config_dir_import')
     @pytest.mark.usefixtures('dumb_forestadmin_schema')
@@ -171,12 +168,13 @@ class UtilsSchemaFileTests(TestCase):
     @pytest.mark.usefixtures('reset_config_dir_import')
     @pytest.mark.usefixtures('invalid_forestadmin_schema')
     def test_handle_schema_file_invalid_json_production(self):
-        self.assertRaises(Exception, Schema.handle_schema_file())
-        self.assertIsNone(Schema.schema_data)
-        self.assertEqual(self._caplog.messages, [
-            'The content of .forestadmin-schema.json file is not a correct JSON.',
-            'The schema cannot be synchronized with Forest Admin servers.'
-        ])
+        with self.assertLogs() as cm:
+            self.assertRaises(Exception, Schema.handle_schema_file())
+            self.assertIsNone(Schema.schema_data)
+            self.assertEqual(cm.output, [
+                'ERROR:django_forest.utils.schema:The content of .forestadmin-schema.json file is not a correct JSON.',
+                'ERROR:django_forest.utils.schema:The schema cannot be synchronized with Forest Admin servers.'
+            ])
 
     @pytest.mark.usefixtures('reset_config_dir_import')
     @override_settings(DEBUG=True)
@@ -193,9 +191,6 @@ class UtilsSchemaFileTests(TestCase):
 
 
 class UtilsSchemaSendTests(TestCase):
-    @pytest.fixture(autouse=True)
-    def inject_fixtures(self, caplog):
-        self._caplog = caplog
 
     def test_get_serialized_schema(self):
         Schema.schema_data = test_question_schema_data
@@ -239,42 +234,47 @@ class UtilsSchemaSendTests(TestCase):
     @mock.patch('requests.post', return_value=mocked_requests({'warning': 'foo'}, 200))
     def test_send_apimap_warning(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
-        Schema.send_apimap()
-        self.assertEqual(self._caplog.records[0].message,
-                         'foo')
-        self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
+        with self.assertLogs() as cm:
+            Schema.send_apimap()
+            self.assertEqual(cm.records[0].message, 'foo')
+            self.assertEqual(cm.records[0].levelname, 'WARNING')
 
     @mock.patch('requests.post', side_effect=Exception('foo'))
     def test_send_apimap_zero(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
-        self.assertRaises(Exception, Schema.send_apimap())
-        self.assertEqual(self._caplog.records[0].message,
-                         'Cannot send the apimap to Forest. Are you online?')
-        self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
+        with self.assertLogs() as cm:
+            self.assertRaises(Exception, Schema.send_apimap())
+            self.assertEqual(cm.records[0].message,
+                             'Cannot send the apimap to Forest. Are you online?')
+            self.assertEqual(cm.records[0].levelname, 'WARNING')
 
     @mock.patch('requests.post', return_value=mocked_requests({}, 404))
     def test_send_apimap_not_found(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
-        Schema.send_apimap()
-        self.assertEqual(self._caplog.records[0].message,
-                         'Cannot find the project related to the envSecret you configured. Can you check on Forest that you copied it properly in the Forest settings?')
-        self.assertEqual(self._caplog.records[0].levelname, 'ERROR')
+        with self.assertLogs() as cm:
+            Schema.send_apimap()
+            self.assertEqual(cm.records[0].message,
+                             'Cannot find the project related to the envSecret you configured. Can you check on Forest that you copied it properly in the Forest settings?')
+            self.assertEqual(cm.records[0].levelname, 'ERROR')
 
     @mock.patch('requests.post', return_value=mocked_requests({}, 503))
     def test_send_apimap_unavailable(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
-        Schema.send_apimap()
-        self.assertEqual(self._caplog.records[0].message,
-                         'Forest is in maintenance for a few minutes. We are upgrading your experience in the forest. We just need a few more minutes to get it right.')
-        self.assertEqual(self._caplog.records[0].levelname, 'WARNING')
+        with self.assertLogs() as cm:
+            Schema.send_apimap()
+            self.assertEqual(cm.records[0].message,
+                             'Forest is in maintenance for a few minutes. We are upgrading your experience in the forest. We just need a few more minutes to get it right.')
+            self.assertEqual(cm.records[0].levelname, 'WARNING')
 
     @mock.patch('requests.post', return_value=mocked_requests({}, 500))
     def test_send_apimap_error(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
-        Schema.send_apimap()
-        self.assertEqual(self._caplog.records[0].message,
-                         'An error occured with the apimap sent to Forest. Please contact support@forestadmin.com for further investigations.')
-        self.assertEqual(self._caplog.records[0].levelname, 'ERROR')
+
+        with self.assertLogs() as cm:
+            Schema.send_apimap()
+            self.assertEqual(cm.records[0].message,
+                             'An error occured with the apimap sent to Forest. Please contact support@forestadmin.com for further investigations.')
+            self.assertEqual(cm.records[0].levelname, 'ERROR')
 
 
 class UtilsSchemaInitTests(TestCase):
