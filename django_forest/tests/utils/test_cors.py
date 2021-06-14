@@ -12,7 +12,7 @@ class UtilsCorsTests(TestCase):
         common_middleware_index = settings.MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
         self.assertEqual(settings.MIDDLEWARE.index('corsheaders.middleware.CorsMiddleware'), common_middleware_index - 1)
         self.assertEqual(settings.CORS_ALLOWED_ORIGINS, ['http://localhost:4200'])
-        self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, [r'/\.forestadmin\.com$/'])
+        self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, ['.*\\.forestadmin\\.com.*'])
         self.assertEqual(settings.CORS_URLS_REGEX, r'^/forest(/.*)?$')
         self.assertEqual(settings.CORS_PREFLIGHT_MAX_AGE, 86400)
         self.assertEqual(settings.CORS_ALLOW_CREDENTIALS, True)
@@ -27,4 +27,4 @@ class UtilsCorsTests(TestCase):
     def test_set_cors_forest_settings(self):
         set_cors()
         self.assertEqual(settings.CORS_ALLOWED_ORIGINS, ['http://localhost:4200', 'http://foo.com', 'https://bar.com'])
-        self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, [r'/\.forestadmin\.com$/', r'/\.foo\.com$/', r'/\.bar\.com$/'])
+        self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, ['.*\\.forestadmin\\.com.*', '/\\.foo\\.com$/', '/\\.bar\\.com$/'])
