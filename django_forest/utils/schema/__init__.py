@@ -5,8 +5,6 @@ import logging
 
 import django
 from django.conf import settings
-from django.core.validators import MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator, \
-    RegexValidator
 from django.db import connection
 from django.utils.module_loading import autodiscover_modules
 
@@ -16,6 +14,7 @@ from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from .definitions import COLLECTION, FIELD
+from .validations import handle_validations
 
 from .version import get_app_version
 
@@ -86,58 +85,6 @@ class Schema:
             f['inverse_of'] = None if not hasattr(field, 'related_name') else field.related_name
         return f
 
-    @staticmethod
-    def _get_default_validation(type, message, value):
-        return {
-            'type': type,
-            'message': message,
-            'value': value
-        }
-
-    @classmethod
-    def handle_validations(cls, field, f):
-        if not field.is_relation:
-            if len(field.validators):
-                for validator in field.validators:
-                    if isinstance(validator, MaxLengthValidator):
-                        f['validations'].append(cls._get_default_validation(
-                            'is shorter than',
-                            f'Ensure this value has at most {validator.limit_value} characters',
-                            validator.limit_value))
-                    elif isinstance(validator, MinLengthValidator):
-                        f['validations'].append(cls._get_default_validation(
-                            'is longer than',
-                            f'Ensure this value has at least {validator.limit_value} characters',
-                            validator.limit_value))
-                    elif isinstance(validator, MaxValueValidator):
-                        f['validations'].append(cls._get_default_validation(
-                            'is less than',
-                            f'Ensure this value is less than or equal to {validator.limit_value}.',
-                            validator.limit_value))
-                    elif isinstance(validator, MinValueValidator):
-                        f['validations'].append(cls._get_default_validation(
-                            'is greater than',
-                            f'Ensure this value is greater than or equal to {validator.limit_value}.',
-                            validator.limit_value))
-                    elif isinstance(validator, RegexValidator):
-                        message = validator.message
-                        if not isinstance(validator.message, str):
-                            message = 'Ensure this value match your pattern'
-                        f['validations'].append(cls._get_default_validation(
-                            'is like',
-                            message,
-                            validator.regex.pattern))
-            if not field.blank or not field.null:
-                f['validations'].append({
-                    'type': 'is present',
-                    'message': 'Ensure this value is not null or not empty',
-                })
-
-        if len(f['validations']) == 0:
-            del f['validations']
-
-        return f
-
     @classmethod
     def add_fields(cls, model, collection):
         for field in model._meta.get_fields():
@@ -145,7 +92,7 @@ class Schema:
                 'field': field.name,
                 'type': get_type(field)
             }, FIELD)
-            f = cls.handle_validations(field, f)
+            f = handle_validations(field, f)
             f = cls.handle_relation(field, f)
 
             if f is not None:
