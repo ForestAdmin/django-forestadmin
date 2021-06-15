@@ -2,7 +2,7 @@ from django.db.models import ManyToOneRel, ManyToManyRel
 from django.http import JsonResponse
 from django.views import generic
 
-from django_forest.utils.get_model import get_model
+from django_forest.utils.models import Models
 
 
 class CountView(generic.View):
@@ -15,7 +15,7 @@ class CountView(generic.View):
     def get(self, request, resource, pk, association_resource):
         data = {'count': 0}
 
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 

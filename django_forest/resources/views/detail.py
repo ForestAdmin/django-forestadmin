@@ -1,19 +1,17 @@
 import json
-from datetime import datetime
 
-from django.db import models
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin
-from django_forest.utils.get_model import get_model
+from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin
 from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.models import Models
 
 
-class DetailView(SmartFieldMixin, generic.View):
+class DetailView(SmartFieldMixin, FormatFieldMixin, generic.View):
 
     def get(self, request, resource, pk):
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
@@ -28,21 +26,9 @@ class DetailView(SmartFieldMixin, generic.View):
 
         return JsonResponse(data, safe=False)
 
-    def format(self, value, field):
-        # TODO other special fields, put in a mixin
-        if isinstance(field, models.DateTimeField):
-            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
-        elif isinstance(field, models.ForeignKey):
-            model = get_model(value['data']['type'])
-            if model:
-                return model.objects.get(pk=value['data']['id'])
-            return None
-
-        return value
-
     def put(self, request, resource, pk):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
@@ -61,7 +47,7 @@ class DetailView(SmartFieldMixin, generic.View):
 
     def delete(self, request, resource, pk):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 

@@ -1,14 +1,14 @@
 from django.http import JsonResponse
 from django.views import generic
 
-from django_forest.utils.get_model import get_model
+from django_forest.utils.models import Models
 
 
 class CountView(generic.View):
     def get(self, request, resource):
         data = {'count': 0}
 
-        Model = get_model(resource.lower())
+        Model = Models.get(resource.lower())
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 

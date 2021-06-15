@@ -1,4 +1,5 @@
 from django.conf import settings
+from corsheaders.defaults import default_headers
 
 from django_forest.utils.get_forest_setting import get_forest_setting
 
@@ -26,3 +27,7 @@ def set_cors():
     settings.CORS_URLS_REGEX = r'^/forest(/.*)?$'  # restrict it to /forest
     settings.CORS_PREFLIGHT_MAX_AGE = 86400  # one day
     settings.CORS_ALLOW_CREDENTIALS = True
+
+    settings.CORS_ALLOW_HEADERS = list(default_headers) + [
+        'forest-context-url',
+    ]

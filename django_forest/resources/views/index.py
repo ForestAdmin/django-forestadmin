@@ -1,23 +1,43 @@
 import json
-from datetime import datetime
 
-from django.db import models
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin
-from django_forest.utils.get_model import get_model
+from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, PaginationMixin, FiltersMixin
 from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.models import Models
 
 
-class IndexView(SmartFieldMixin, generic.View):
+class IndexView(SmartFieldMixin, FormatFieldMixin, PaginationMixin, FiltersMixin,
+                generic.View):
 
+    # TODO handle filter/search/fields
     def get(self, request, resource):
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
-        queryset = Model.objects.all()  # TODO handle filter/search/fields
+        params = request.GET.dict()
+
+        # default
+        queryset = Model.objects.all()
+        # filters
+        if 'filters' in params:
+            queryset = self.get_filters(params, Model)
+
+        # search
+        # TODO
+
+        # sort
+        if 'sort' in params:
+            queryset = queryset.order_by(params['sort'].replace('.', '__'))
+
+        # limit fields
+        # TODO
+
+        # pagination
+        _from, _to = self.get_pagination(params)
+        queryset = queryset[_from:_to]
 
         # handle smart fields
         self.handle_smart_fields(queryset, resource, Model, many=True)
@@ -29,23 +49,11 @@ class IndexView(SmartFieldMixin, generic.View):
 
         return JsonResponse(data, safe=False)
 
-    def _format(self, value, field):
-        # TODO other special fields, put in a mixin
-        if isinstance(field, models.DateTimeField):
-            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
-        elif isinstance(field, models.ForeignKey):
-            model = get_model(value['data']['type'])
-            if model:
-                return model.objects.get(pk=value['data']['id'])
-            return None
-
-        return value
-
     def _get_attributes(self, body, fields, fields_name):
         attributes = {}
         for k, v in body.items():
             if k in fields_name:
-                attributes[k] = self._format(v, fields[k])
+                attributes[k] = self.format(v, fields[k])
         return attributes
 
     def _populate_attribute(self, body, Model):
@@ -60,7 +68,7 @@ class IndexView(SmartFieldMixin, generic.View):
 
     def post(self, request, resource):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
@@ -79,7 +87,7 @@ class IndexView(SmartFieldMixin, generic.View):
 
     def delete(self, request, resource):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 

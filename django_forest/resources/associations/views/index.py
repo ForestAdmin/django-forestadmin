@@ -2,12 +2,12 @@ from django.db.models import ManyToOneRel, ManyToManyRel
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin
-from django_forest.utils.get_model import get_model
+from django_forest.resources.utils import SmartFieldMixin, PaginationMixin
 from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.models import Models
 
 
-class IndexView(SmartFieldMixin, generic.View):
+class IndexView(SmartFieldMixin, PaginationMixin, generic.View):
 
     def _get_association_fields(self, Model, association_resource):
         for field in Model._meta.get_fields():
@@ -16,7 +16,7 @@ class IndexView(SmartFieldMixin, generic.View):
         return None
 
     def get(self, request, resource, pk, association_resource):
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
@@ -28,10 +28,21 @@ class IndexView(SmartFieldMixin, generic.View):
         if isinstance(association_field, ManyToOneRel) or isinstance(association_field, ManyToManyRel):
             association_field_name = f'{association_resource.lower()}_set'
 
+        params = request.GET.dict()
+
+        # default
         queryset = getattr(Model.objects.get(pk=pk), association_field_name).all()
 
+        # sort
+        if 'sort' in params:
+            queryset = queryset.order_by(params['sort'].replace('.', '__'))
+
+        # pagination
+        _from, _to = self.get_pagination(params)
+        queryset = queryset[_from:_to]
+
         # handle smart fields
-        RelatedModel = get_model(association_resource)
+        RelatedModel = Models.get(association_resource)
         self.handle_smart_fields(queryset, association_resource, RelatedModel, many=True)
 
         # json api serializer
@@ -43,7 +54,7 @@ class IndexView(SmartFieldMixin, generic.View):
 
     def post(self, request, resource, pk, association_resource):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
         return JsonResponse({}, safe=False)
@@ -51,14 +62,14 @@ class IndexView(SmartFieldMixin, generic.View):
     # BelongsTo case
     def put(self, request, resource, pk, association_resource):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
         return HttpResponse(status=204)
 
     def delete(self, request, resource, pk, association_resource):
         # TODO
-        Model = get_model(resource)
+        Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
         return HttpResponse(status=204)
