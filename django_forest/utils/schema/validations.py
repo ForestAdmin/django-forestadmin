@@ -53,15 +53,20 @@ def handle_validators(validators, f):
     return f
 
 
+def handle_is_present(field, f):
+    if not field.blank or not field.null:
+        f['validations'].append({
+            'type': 'is present',
+            'message': 'Ensure this value is not null or not empty',
+        })
+
+    return f
+
+
 def handle_validations(field, f):
     if not field.is_relation and not field.auto_created:
         f = handle_validators(field.validators, f)
-
-        if not field.blank or not field.null:
-            f['validations'].append({
-                'type': 'is present',
-                'message': 'Ensure this value is not null or not empty',
-            })
+        f = handle_is_present(field, f)
 
     if len(f['validations']) == 0:
         del f['validations']
