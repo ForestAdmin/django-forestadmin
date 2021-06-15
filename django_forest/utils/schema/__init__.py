@@ -16,6 +16,7 @@ from django_forest.utils.forest_api_requester import ForestApiRequester
 from .definitions import COLLECTION, FIELD
 from .validations import handle_validations
 from .enums import handle_enums
+from .default import handle_default_value
 
 from .version import get_app_version
 
@@ -93,6 +94,7 @@ class Schema:
                 'field': field.name,
                 'type': get_type(field)
             }, FIELD)
+            f = handle_default_value(field, f)
             f = handle_validations(field, f)
             f = handle_enums(field, f)
             f = cls.handle_relation(field, f)
