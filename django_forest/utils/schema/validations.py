@@ -54,7 +54,7 @@ def handle_validators(validators, f):
 
 
 def handle_validations(field, f):
-    if not field.is_relation:
+    if not field.is_relation and not field.auto_created:
         f = handle_validators(field.validators, f)
 
         if not field.blank or not field.null:
