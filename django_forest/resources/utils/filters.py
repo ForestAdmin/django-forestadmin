@@ -5,6 +5,7 @@ from pytz import timezone
 
 from django_forest.resources.utils.date_filters import DATE_OPERATORS, handle_date_operator
 from django_forest.utils.get_type import get_type
+from django_forest.utils.models import Models
 
 OPERATORS = {
     'not': '',
@@ -23,7 +24,7 @@ OPERATORS = {
 }
 
 
-# TODO handle related data operators, smart fields
+# TODO handle smart fields
 class FiltersMixin:
 
     def get_basic_expression(self, field, operator, value):
@@ -47,7 +48,7 @@ class FiltersMixin:
 
     def get_expression(self, condition, field_type, tz):
         operator = condition['operator']
-        field = condition['field']
+        field = condition['field'].replace(':', '__')
         value = condition['value']
 
         # special case date, blank and present
@@ -69,10 +70,21 @@ class FiltersMixin:
                 q_objects &= self.get_expression(condition, field_type, tz)
         return Model.objects.filter(q_objects)
 
+    def get_field_type(self, field, Model):
+        if ':' in field:
+            fields = field.split(':')
+            RelatedModel = Models.get(fields[0])
+            field_type = get_type(RelatedModel._meta.get_field(fields[1]))
+        else:
+            field_type = get_type(Model._meta.get_field(field))
+
+        return field_type
+
     def get_filters(self, params, Model):
         filters = json.loads(params['filters'])
         tz = timezone(params['timezone'])
-        field_type = get_type(Model._meta.get_field(filters['field']))
+
+        field_type = self.get_field_type(filters['field'], Model)
         if 'aggregator' in filters:
             queryset = self.handle_aggregator(filters, field_type, Model, tz)
         else:
