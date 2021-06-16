@@ -11,9 +11,9 @@ class FormatFieldMixin:
         if isinstance(field, models.DateTimeField):
             return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
         elif isinstance(field, models.ForeignKey):
-            model = Models.get(value['data']['type'])
-            if model:
-                return model.objects.get(pk=value['data']['id'])
+            Model = Models.get(value['data']['type'])
+            if Model is not None:
+                return Model.objects.get(pk=value['data']['id'])
             return None
 
         return value

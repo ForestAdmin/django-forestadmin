@@ -1,13 +1,13 @@
-from django.db.models import ManyToOneRel, ManyToManyRel
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin, PaginationMixin
+from django_forest.resources.associations.utils import get_association_field_name
+from django_forest.resources.utils import SmartFieldMixin, EnhanceQuerysetMixin
 from django_forest.utils.json_api_serializer import JsonApiSchema
 from django_forest.utils.models import Models
 
 
-class IndexView(SmartFieldMixin, PaginationMixin, generic.View):
+class IndexView(SmartFieldMixin, EnhanceQuerysetMixin, generic.View):
 
     def _get_association_fields(self, Model, association_resource):
         for field in Model._meta.get_fields():
@@ -24,22 +24,10 @@ class IndexView(SmartFieldMixin, PaginationMixin, generic.View):
         if association_field is None:
             return JsonResponse({'error': 'cannot find relation'}, safe=False, status=400)
 
-        association_field_name = association_field.name
-        if isinstance(association_field, ManyToOneRel) or isinstance(association_field, ManyToManyRel):
-            association_field_name = f'{association_resource.lower()}_set'
+        association_field_name = get_association_field_name(association_field, association_resource)
 
-        params = request.GET.dict()
-
-        # default
         queryset = getattr(Model.objects.get(pk=pk), association_field_name).all()
-
-        # sort
-        if 'sort' in params:
-            queryset = queryset.order_by(params['sort'].replace('.', '__'))
-
-        # pagination
-        _from, _to = self.get_pagination(params)
-        queryset = queryset[_from:_to]
+        queryset = self.enhance_queryset(queryset, request.GET.dict(), Model)
 
         # handle smart fields
         RelatedModel = Models.get(association_resource)

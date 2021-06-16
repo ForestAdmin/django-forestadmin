@@ -1,7 +1,7 @@
-from django.db.models import ManyToOneRel, ManyToManyRel
 from django.http import JsonResponse
 from django.views import generic
 
+from django_forest.resources.associations.utils import get_association_field_name
 from django_forest.utils.models import Models
 
 
@@ -23,9 +23,7 @@ class CountView(generic.View):
         if association_field is None:
             return JsonResponse({'error': 'cannot find relation'}, safe=False, status=400)
 
-        association_field_name = association_field.name
-        if isinstance(association_field, ManyToOneRel) or isinstance(association_field, ManyToManyRel):
-            association_field_name = f'{association_resource.lower()}_set'
+        association_field_name = get_association_field_name(association_field, association_resource)
         queryset = getattr(Model.objects.get(pk=pk), association_field_name).count()
         data['count'] = queryset
 

@@ -3,41 +3,22 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, PaginationMixin, FiltersMixin
+from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin
 from django_forest.utils.json_api_serializer import JsonApiSchema
 from django_forest.utils.models import Models
 
 
-class IndexView(SmartFieldMixin, FormatFieldMixin, PaginationMixin, FiltersMixin,
+class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin,
                 generic.View):
 
-    # TODO handle filter/search/fields
     def get(self, request, resource):
         Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
-        params = request.GET.dict()
-
         # default
         queryset = Model.objects.all()
-        # filters
-        if 'filters' in params:
-            queryset = self.get_filters(params, Model)
-
-        # search
-        # TODO
-
-        # sort
-        if 'sort' in params:
-            queryset = queryset.order_by(params['sort'].replace('.', '__'))
-
-        # limit fields
-        # TODO
-
-        # pagination
-        _from, _to = self.get_pagination(params)
-        queryset = queryset[_from:_to]
+        queryset = self.enhance_queryset(queryset, request.GET.dict(), Model)
 
         # handle smart fields
         self.handle_smart_fields(queryset, resource, Model, many=True)
