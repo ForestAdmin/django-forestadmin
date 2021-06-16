@@ -1,6 +1,7 @@
 import json
 
 from django.db.models import Q
+from pytz import timezone
 
 from django_forest.resources.utils.date_filters import DATE_OPERATORS, handle_date_operator
 from django_forest.utils.get_type import get_type
@@ -44,14 +45,14 @@ class FiltersMixin:
             return Q(Q(**{f'{field}__isnull': True}) | Q(**{f'{field}__exact': ''}))
         return Q(**{f'{field}__isnull': True})
 
-    def get_expression(self, condition, field_type):
+    def get_expression(self, condition, field_type, tz):
         operator = condition['operator']
         field = condition['field']
         value = condition['value']
 
         # special case date, blank and present
         if operator in DATE_OPERATORS:
-            return handle_date_operator(operator, field, value)
+            return handle_date_operator(operator, field, value, tz)
         if operator == 'blank':
             return self.handle_blank(field_type, field)
         elif operator == 'present':
@@ -59,22 +60,23 @@ class FiltersMixin:
         else:
             return self.get_basic_expression(field, operator, value)
 
-    def handle_aggregator(self, filters, field_type, Model):
+    def handle_aggregator(self, filters, field_type, Model, tz):
         q_objects = Q()
         for condition in filters['conditions']:
             if filters['aggregator'] == 'or':
-                q_objects |= self.get_expression(condition, field_type)
+                q_objects |= self.get_expression(condition, field_type, tz)
             else:
-                q_objects &= self.get_expression(condition, field_type)
+                q_objects &= self.get_expression(condition, field_type, tz)
         return Model.objects.filter(q_objects)
 
     def get_filters(self, params, Model):
         filters = json.loads(params['filters'])
+        tz = timezone(params['timezone'])
         field_type = get_type(Model._meta.get_field(filters['field']))
         if 'aggregator' in filters:
-            queryset = self.handle_aggregator(filters, field_type, Model)
+            queryset = self.handle_aggregator(filters, field_type, Model, tz)
         else:
-            q_object = self.get_expression(filters, field_type)
+            q_object = self.get_expression(filters, field_type, tz)
             queryset = Model.objects.filter(q_object)
 
         return queryset
