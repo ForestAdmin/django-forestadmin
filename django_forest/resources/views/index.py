@@ -3,12 +3,13 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin
+from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin, \
+    JsonApiSerializerMixin
 from django_forest.utils.json_api_serializer import JsonApiSchema
 from django_forest.utils.models import Models
 
 
-class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin,
+class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin, JsonApiSerializerMixin,
                 generic.View):
 
     def get(self, request, resource):
@@ -16,17 +17,20 @@ class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin,
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
+        params = request.GET.dict()
+
         # default
         queryset = Model.objects.all()
-        queryset = self.enhance_queryset(queryset, request.GET.dict(), Model)
+        queryset = self.enhance_queryset(queryset, params, Model)
 
         # handle smart fields
         self.handle_smart_fields(queryset, resource, Model, many=True)
 
         # json api serializer
         Schema = JsonApiSchema._registry[f'{resource}Schema']
-        include_data = [x.name for x in Model._meta.get_fields() if x.is_relation]
-        data = Schema(include_data=include_data).dump(queryset, many=True) if queryset else {'data': []}
+        include_data = [x.name for x in Model._meta.get_fields() if x.is_relation and (x.many_to_many or x.many_to_one)]
+        only = self.get_only(params, Model)
+        data = Schema(include_data=include_data, only=only).dump(queryset, many=True) if queryset else {'data': []}
 
         return JsonResponse(data, safe=False)
 
