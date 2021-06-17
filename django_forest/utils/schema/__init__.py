@@ -134,7 +134,8 @@ class Schema:
     @staticmethod
     def get_serialized_collection(collection):
         for index, field in enumerate(collection['fields']):
-            collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
+            fields = list(FIELD.keys()) + ['validations', 'enums']
+            collection['fields'][index] = {x: field[x] for x in field if x in fields}
         return collection
 
     @classmethod

@@ -25,8 +25,7 @@ FIELD = {
     'reference': None,
     'inverse_of': None,
     'relationship': None,
-    'widget': None,
-    'validations': []
+    'widget': None
 }
 
 ACTION = {
@@ -50,7 +49,6 @@ ACTION_FIELD = {
     'is_read_only': False,
     'is_required': False,
     'default_value': None,
-    'enums': None,
     'integration': None,
     'reference': None,
     'description': None,

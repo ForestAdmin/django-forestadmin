@@ -1,6 +1,4 @@
-from django.core.validators import MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator, \
-    RegexValidator
-
+from django.core.validators import RegexValidator
 
 VALIDATORS = {
     'max_length': {
@@ -22,26 +20,29 @@ VALIDATORS = {
 }
 
 
+def add_validation(f, _type, message, value=None):
+    validation = {
+        'type': _type,
+        'message': message,
+    }
+    if value is not None:
+        validation['value'] = value
+    if 'validations' not in f:
+        f['validations'] = []
+    f['validations'].append(validation)
+    return f
+
+
 def handle_validator(validator, f):
-    if isinstance(validator, MaxLengthValidator) \
-            or isinstance(validator, MinLengthValidator) \
-            or isinstance(validator, MaxValueValidator) \
-            or isinstance(validator, MinValueValidator):
+    if validator.code in VALIDATORS.keys():
         v = VALIDATORS[validator.code]
-        f['validations'].append({
-            'type': v['type'],
-            'message': v['message'] % {'limit_value': validator.limit_value},
-            'value': validator.limit_value
-        })
+        message = v['message'] % {'limit_value': validator.limit_value}
+        f = add_validation(f, v['type'], message, validator.limit_value)
     elif isinstance(validator, RegexValidator):
         message = validator.message
         if not isinstance(validator.message, str):
             message = 'Ensure this value match your pattern'
-        f['validations'].append({
-            'type': 'is like',
-            'message': message,
-            'value': validator.regex.pattern
-        })
+        f = add_validation(f, 'is like', message, validator.regex.pattern)
     return f
 
 
@@ -55,10 +56,7 @@ def handle_validators(validators, f):
 
 def handle_is_present(field, f):
     if not field.blank or not field.null:
-        f['validations'].append({
-            'type': 'is present',
-            'message': 'Ensure this value is not null or not empty',
-        })
+        f = add_validation(f, 'is present', 'Ensure this value is not null or not empty')
 
     return f
 
@@ -67,8 +65,5 @@ def handle_validations(field, f):
     if not field.is_relation and not field.auto_created:
         f = handle_validators(field.validators, f)
         f = handle_is_present(field, f)
-
-    if len(f['validations']) == 0:
-        del f['validations']
 
     return f
