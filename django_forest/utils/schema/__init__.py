@@ -14,9 +14,9 @@ from django_forest.utils.get_type import get_type
 from django_forest.utils.json_api_serializer import create_json_api_schema
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from .definitions import COLLECTION, FIELD
+from .validations import handle_validations
 
 from .version import get_app_version
-
 
 # Get an instance of a logger
 from ..get_forest_setting import get_forest_setting
@@ -92,6 +92,7 @@ class Schema:
                 'field': field.name,
                 'type': get_type(field)
             }, FIELD)
+            f = handle_validations(field, f)
             f = cls.handle_relation(field, f)
 
             if f is not None:
@@ -133,7 +134,8 @@ class Schema:
     @staticmethod
     def get_serialized_collection(collection):
         for index, field in enumerate(collection['fields']):
-            collection['fields'][index] = {x: field[x] for x in field if x in FIELD.keys()}
+            fields = list(FIELD.keys()) + ['validations', 'enums']
+            collection['fields'][index] = {x: field[x] for x in field if x in fields}
         return collection
 
     @classmethod

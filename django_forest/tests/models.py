@@ -1,10 +1,11 @@
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 
 # ForeignKey example
 class Question(models.Model):
-    question_text = models.CharField(max_length=200)
+    question_text = models.CharField(max_length=200, validators=[MinLengthValidator(1)])
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):

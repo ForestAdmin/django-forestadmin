@@ -26,7 +26,7 @@ class QuestionForest(Collection):
                     {
                         'field': 'country',
                         'type': 'Enum',
-                        'enums': []
+                        'enums': ['FR', 'US']
                     },
                     {
                         'field': 'city',

@@ -70,7 +70,7 @@ class QuestionForest(Collection):
                     {
                         'field': 'country',
                         'type': 'Enum',
-                        'enums': []
+                        'enums': ['FR', 'US']
                     },
                     {
                         'field': 'city',
@@ -202,7 +202,6 @@ class UtilsCollectionTests(TestCase):
                     'is_required': True,
                     'is_read_only': False,
                     'default_value': None,
-                    'enums': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -215,7 +214,6 @@ class UtilsCollectionTests(TestCase):
                     'is_required': True,
                     'is_read_only': False,
                     'default_value': None,
-                    'enums': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -228,7 +226,6 @@ class UtilsCollectionTests(TestCase):
                     'is_required': True,
                     'is_read_only': False,
                     'default_value': None,
-                    'enums': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -241,7 +238,6 @@ class UtilsCollectionTests(TestCase):
                     'is_required': True,
                     'is_read_only': False,
                     'default_value': None,
-                    'enums': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -264,7 +260,7 @@ class UtilsCollectionTests(TestCase):
                 {
                     'field': 'country',
                     'type': 'Enum',
-                    'enums': [],
+                    'enums': ['FR', 'US'],
                     'is_read_only': False,
                     'is_required': False,
                     'default_value': None,
@@ -280,7 +276,6 @@ class UtilsCollectionTests(TestCase):
                     'is_read_only': False,
                     'is_required': False,
                     'default_value': None,
-                    'enums': None,
                     'integration': None,
                     'reference': None,
                     'description': None,
@@ -292,7 +287,6 @@ class UtilsCollectionTests(TestCase):
                     'is_read_only': False,
                     'is_required': False,
                     'default_value': None,
-                    'enums': None,
                     'integration': None,
                     'reference': None,
                     'description': None,
