@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinLengthValidator
 from django.db import models
@@ -5,8 +7,8 @@ from django.db import models
 
 # ForeignKey example
 class Question(models.Model):
-    question_text = models.CharField(max_length=200, validators=[MinLengthValidator(1)])
-    pub_date = models.DateTimeField('date published')
+    question_text = models.CharField(max_length=200, validators=[MinLengthValidator(1)], default='how are you?')
+    pub_date = models.DateTimeField('date published', default=datetime.datetime(2020, 5, 17))
 
     def __str__(self):
         return self.question_text
