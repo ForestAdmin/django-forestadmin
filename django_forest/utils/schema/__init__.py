@@ -15,6 +15,7 @@ from django_forest.utils.json_api_serializer import create_json_api_schema
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from .definitions import COLLECTION, FIELD
 from .validations import handle_validations
+from .enums import handle_enums
 
 from .version import get_app_version
 
@@ -93,6 +94,7 @@ class Schema:
                 'type': get_type(field)
             }, FIELD)
             f = handle_validations(field, f)
+            f = handle_enums(field, f)
             f = cls.handle_relation(field, f)
 
             if f is not None:
