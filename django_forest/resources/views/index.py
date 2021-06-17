@@ -21,7 +21,7 @@ class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin, JsonApi
 
         # default
         queryset = Model.objects.all()
-        queryset = self.enhance_queryset(queryset, params, Model)
+        queryset = self.enhance_queryset(queryset, params, Model, resource)
 
         # handle smart fields
         self.handle_smart_fields(queryset, resource, Model, many=True)

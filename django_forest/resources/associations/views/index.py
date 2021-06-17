@@ -31,7 +31,7 @@ class IndexView(SmartFieldMixin, EnhanceQuerysetMixin, JsonApiSerializerMixin, g
         params = request.GET.dict()
 
         queryset = getattr(Model.objects.get(pk=pk), association_field_name).all()
-        queryset = self.enhance_queryset(queryset, params, RelatedModel)
+        queryset = self.enhance_queryset(queryset, params, RelatedModel, association_resource)
 
         # handle smart fields
         self.handle_smart_fields(queryset, association_resource, RelatedModel, many=True)
