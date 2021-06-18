@@ -75,14 +75,14 @@ class Schema:
     def handle_relation(cls, field, f):
         if field.is_relation:
             # Notice: do not add if not in included/excluded models
-            if field.target_field.model not in Models.list():
+            if field.related_model not in Models.list():
                 return None
 
             many = field.one_to_many or field.many_to_many
             f['type'] = cls._get_relation_type(many)
             f['relationship'] = cls._get_relationship(field)
             # Notice: forest-rails always put id on the end, do we support polymorphic support?
-            f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'
+            f['reference'] = f'{field.related_model.__name__}.{field.target_field.name}'
             f['is_filterable'] = not many
             f['inverse_of'] = None if not hasattr(field, 'related_name') else field.related_name
         return f

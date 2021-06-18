@@ -61,14 +61,14 @@ class FiltersMixin:
         else:
             return self.get_basic_expression(field, operator, value)
 
-    def handle_aggregator(self, filters, field_type, Model, tz):
+    def handle_aggregator(self, filters, field_type, tz):
         q_objects = Q()
         for condition in filters['conditions']:
             if filters['aggregator'] == 'or':
                 q_objects |= self.get_expression(condition, field_type, tz)
             else:
                 q_objects &= self.get_expression(condition, field_type, tz)
-        return Model.objects.filter(q_objects)
+        return q_objects
 
     def get_field_type(self, field, Model):
         if ':' in field:
@@ -86,9 +86,6 @@ class FiltersMixin:
 
         field_type = self.get_field_type(filters['field'], Model)
         if 'aggregator' in filters:
-            queryset = self.handle_aggregator(filters, field_type, Model, tz)
-        else:
-            q_object = self.get_expression(filters, field_type, tz)
-            queryset = Model.objects.filter(q_object)
+            return self.handle_aggregator(filters, field_type, tz)
 
-        return queryset
+        return self.get_expression(filters, field_type, tz)

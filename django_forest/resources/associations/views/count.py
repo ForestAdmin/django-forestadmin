@@ -8,7 +8,9 @@ from django_forest.utils.models import Models
 class CountView(generic.View):
     def _get_association_fields(self, Model, association_resource):
         for field in Model._meta.get_fields():
-            if field.name == association_resource.lower():
+            if field.is_relation and \
+                    (field.name == association_resource or
+                     field.related_model.__name__.lower() == association_resource.lower()):
                 return field
         return None
 
@@ -23,7 +25,7 @@ class CountView(generic.View):
         if association_field is None:
             return JsonResponse({'error': 'cannot find relation'}, safe=False, status=400)
 
-        association_field_name = get_association_field_name(association_field, association_resource)
+        association_field_name = get_association_field_name(association_field)
         queryset = getattr(Model.objects.get(pk=pk), association_field_name).count()
         data['count'] = queryset
 

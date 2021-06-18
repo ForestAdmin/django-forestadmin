@@ -87,10 +87,11 @@ def handle_range_date_operator(operator, field, value, now):
     _from = start_of_today
     _to = now
 
-    if 'from' in RANGE_DATE_OPERATORS[operator]:
-        _from = RANGE_DATE_OPERATORS[operator]['from'](start_of_today, value)
-    if 'to' in RANGE_DATE_OPERATORS[operator]:
-        _to = RANGE_DATE_OPERATORS[operator]['to'](end_of_today, value)
+    range_date_operator = RANGE_DATE_OPERATORS[operator]
+    if 'from' in range_date_operator:
+        _from = range_date_operator['from'](start_of_today, value)
+    if 'to' in range_date_operator:
+        _to = range_date_operator['to'](end_of_today, value)
 
     return Q(**{f'{field}__range': [_from, _to]})
 

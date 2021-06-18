@@ -9,7 +9,7 @@ class Collection:
     icon = None
     only_for_relationships = None
     pagination_type = None
-    search_fields = []
+    search_fields = None
     actions = []
     fields = []
     segments = []

@@ -21,35 +21,15 @@ class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin, JsonApi
 
         # default
         queryset = Model.objects.all()
-        queryset = self.enhance_queryset(queryset, params, Model, resource)
+        queryset = self.enhance_queryset(queryset, resource, Model, params)
 
         # handle smart fields
         self.handle_smart_fields(queryset, resource, Model, many=True)
 
         # json api serializer
-        Schema = JsonApiSchema._registry[f'{resource}Schema']
-        include_data = [x.name for x in Model._meta.get_fields() if x.is_relation and (x.many_to_many or x.many_to_one)]
-        only = self.get_only(params, Model)
-        data = Schema(include_data=include_data, only=only).dump(queryset, many=True) if queryset else {'data': []}
+        data = self.serialize(queryset, resource, Model, params)
 
         return JsonResponse(data, safe=False)
-
-    def _get_attributes(self, body, fields, fields_name):
-        attributes = {}
-        for k, v in body.items():
-            if k in fields_name:
-                attributes[k] = self.format(v, fields[k])
-        return attributes
-
-    def _populate_attribute(self, body, Model):
-        fields = {x.name: x for x in Model._meta.get_fields()}
-        fields_name = fields.keys()
-        attributes = {}
-        attributes.update(self._get_attributes(body['data']['attributes'], fields, fields_name))
-        if 'relationships' in body['data']:
-            attributes.update(self._get_attributes(body['data']['relationships'], fields, fields_name))
-
-        return attributes
 
     def post(self, request, resource):
         # TODO
@@ -60,7 +40,7 @@ class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin, JsonApi
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
 
-        attributes = self._populate_attribute(body, Model)
+        attributes = self.populate_attribute(body, Model)
 
         obj = Model.objects.create(**attributes)
 
@@ -71,13 +51,13 @@ class IndexView(SmartFieldMixin, FormatFieldMixin, EnhanceQuerysetMixin, JsonApi
         return JsonResponse(data, safe=False)
 
     def delete(self, request, resource):
-        # TODO
         Model = Models.get(resource)
         if Model is None:
             return JsonResponse({'message': 'error no model found'}, status=400)
 
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        # Notice: this do not run pre/post_delete signals
-        Model.objects.filter(pk__in=body['data']['attributes']['ids']).delete()
+        # Notice: this does not run pre/post_delete signals
+        ids = body['data']['attributes']['ids']
+        Model.objects.filter(pk__in=ids).delete()
         return HttpResponse(status=204)
