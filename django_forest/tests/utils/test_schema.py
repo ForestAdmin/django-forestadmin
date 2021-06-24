@@ -74,6 +74,7 @@ class UtilsSchemaTests(TestCase):
     @mock.patch('importlib.metadata.version', return_value='0.0.0')
     def test_build_schema_excluded_models(self, mock_version, mock_orm_version):
         # reset schema
+        self.maxDiff = None
         Schema.schema = {
             'collections': [],
             'meta': {

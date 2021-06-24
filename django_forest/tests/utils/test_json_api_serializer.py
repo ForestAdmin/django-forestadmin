@@ -33,19 +33,24 @@ class UtilsJsonApiSerializerTests(TestCase):
         self.assertEqual(data, {
             'data': {
                 'type': 'question',
+                'id': 1,
                 'relationships': {
-                    'choice': {
+                    'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/Choice'
+                            'related': '/forest/Question/1/relationships/choice_set'
                         }
                     }
                 },
                 'attributes': {
-                    'question_text': 'what is your favorite color?',
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
-                    'id': 1.0
+                    'question_text': 'what is your favorite color?'
                 },
-                'id': 1.0
+                'links': {
+                    'self': '/forest/Question/1'
+                }
+            },
+            'links': {
+                'self': '/forest/Question/1'
             }
         })
 
@@ -58,35 +63,39 @@ class UtilsJsonApiSerializerTests(TestCase):
             'data': [
                 {
                     'type': 'question',
+                    'id': 1,
                     'relationships': {
-                        'choice': {
+                        'choice_set': {
                             'links': {
-                                'related': '/forest/Question/1/relationships/Choice'
+                                'related': '/forest/Question/1/relationships/choice_set'
                             }
                         }
                     },
                     'attributes': {
-                        'question_text': 'what is your favorite color?',
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
-                        'id': 1.0
+                        'question_text': 'what is your favorite color?'
                     },
-                    'id': 1.0
+                    'links': {
+                        'self': '/forest/Question/1'
+                    }
                 },
                 {
                     'type': 'question',
+                    'id': 2,
                     'relationships': {
-                        'choice': {
+                        'choice_set': {
                             'links': {
-                                'related': '/forest/Question/2/relationships/Choice'
+                                'related': '/forest/Question/2/relationships/choice_set'
                             }
                         }
                     },
                     'attributes': {
-                        'question_text': 'do you like chocolate?',
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
-                        'id': 2.0
+                        'question_text': 'do you like chocolate?'
                     },
-                    'id': 2.0
+                    'links': {
+                        'self': '/forest/Question/2'
+                    }
                 }
             ]
         })
@@ -100,38 +109,45 @@ class UtilsJsonApiSerializerTests(TestCase):
             'data': {
                 'type': 'choice',
                 'attributes': {
-                    'votes': 0.0,
                     'choice_text': 'yes',
-                    'id': 1.0
+                    'votes': 0
                 },
-                'id': 1.0,
+                'id': 1,
                 'relationships': {
                     'question': {
                         'links': {
-                            'related': '/forest/Choice/1/relationships/Question'
+                            'related': '/forest/Choice/1/relationships/question'
                         },
                         'data': {
                             'type': 'question',
                             'id': '1'
                         }
                     }
+                },
+                'links': {
+                    'self': '/forest/Choice/1'
                 }
+            },
+            'links': {
+                'self': '/forest/Choice/1'
             },
             'included': [
                 {
                     'type': 'question',
-                    'attributes': {
-                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
-                        'question_text': 'what is your favorite color?',
-                        'id': 1.0
-                    },
-                    'id': 1.0,
+                    'id': 1,
                     'relationships': {
-                        'choice': {
+                        'choice_set': {
                             'links': {
-                                'related': '/forest/Question/1/relationships/Choice'
+                                'related': '/forest/Question/1/relationships/choice_set'
                             }
                         }
+                    },
+                    'attributes': {
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'question_text': 'what is your favorite color?'
+                    },
+                    'links': {
+                        'self': '/forest/Question/1'
                     }
                 }
             ]
@@ -149,10 +165,15 @@ class UtilsJsonApiSerializerTests(TestCase):
                     'session_key': 'foobar1234',
                     'expire_date': '2021-06-02T13:48:36.039000+00:00',
                     'session_data': 'foo',
-                    'id': 'foobar1234'
                 },
-                'id': 'foobar1234'
-            }
+                'id': 'foobar1234',
+                'links': {
+                    'self': '/forest/Session/foobar1234'
+                },
+            },
+            'links': {
+                'self': '/forest/Session/foobar1234'
+            },
         })
 
     def test_json_api_serializer_many_to_many(self):
@@ -162,15 +183,11 @@ class UtilsJsonApiSerializerTests(TestCase):
         data = schema(include_data=['publications']).dump(article)
         self.assertEqual(data, {
             'data': {
-                'type': 'article', 'id': 1.0,
-                'attributes': {
-                    'headline': 'Django lets you build Web apps easily',
-                    'id': 1.0
-                },
+                'type': 'article',
                 'relationships': {
                     'publications': {
                         'links': {
-                            'related': '/forest/Article/1/relationships/Publication'
+                            'related': '/forest/Article/1/relationships/publications'
                         },
                         'data': [
                             {
@@ -179,22 +196,34 @@ class UtilsJsonApiSerializerTests(TestCase):
                             }
                         ]
                     }
+                },
+                'id': 1,
+                'attributes': {
+                    'headline': 'Django lets you build Web apps easily'
+                },
+                'links': {
+                    'self': '/forest/Article/1'
                 }
+            },
+            'links': {
+                'self': '/forest/Article/1'
             },
             'included': [
                 {
                     'type': 'publication',
-                    'attributes': {
-                        'title': 'The Python Journal',
-                        'id': 1.0
-                    },
-                    'id': 1.0,
                     'relationships': {
-                        'article': {
+                        'article_set': {
                             'links': {
-                                'related': '/forest/Publication/1/relationships/Article'
+                                'related': '/forest/Publication/1/relationships/article_set'
                             }
                         }
+                    },
+                    'id': 1,
+                    'attributes': {
+                        'title': 'The Python Journal'
+                    },
+                    'links': {
+                        'self': '/forest/Publication/1'
                     }
                 }
             ]

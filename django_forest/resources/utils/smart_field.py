@@ -16,7 +16,8 @@ class SmartFieldMixin:
             smart_field = [x for x in collection['fields'] if x['field'] == field][0]
             self._handle_get_method(smart_field, item, field, resource)
 
-    def handle_smart_fields(self, queryset, resource, Model, many=False):
+    def handle_smart_fields(self, queryset, Model, many=False):
+        resource = Model.__name__
         collection = Schema.get_collection(resource)
         smart_fields = [x['field'] for x in collection['fields'] if
                         x['field'] not in [x.name for x in Model._meta.get_fields()]]

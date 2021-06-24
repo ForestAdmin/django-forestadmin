@@ -1,18 +1,13 @@
 from django.http import JsonResponse
 from django.views import generic
 
-from django_forest.utils.models import Models
+from django_forest.resources.utils import ResourceMixin
 
 
-class CountView(generic.View):
+class CountView(ResourceMixin, generic.View):
     def get(self, request, resource):
-        data = {'count': 0}
-
-        Model = Models.get(resource.lower())
-        if Model is None:
-            return JsonResponse({'message': 'error no model found'}, status=400)
+        Model = self.get_model(resource)
 
         queryset = Model.objects.count()
-        data['count'] = queryset
 
-        return JsonResponse(data, safe=False)
+        return JsonResponse({'count': queryset}, safe=False)

@@ -17,6 +17,7 @@ if disable_warnings:
     urllib3.disable_warnings()
 
 
+# TODO, override runserver command instead (this code run on makmigrations, migrate and all others commands...)
 class ForestConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'django_forest'

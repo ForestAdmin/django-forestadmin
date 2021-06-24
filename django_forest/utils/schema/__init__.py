@@ -71,6 +71,13 @@ class Schema:
             return 'HasOne'
         return 'BelongsTo'
 
+    @staticmethod
+    def _get_relation_name(field):
+        if hasattr(field, 'get_accessor_name'):
+            return field.get_accessor_name()
+        else:
+            return field.name
+
     @classmethod
     def handle_relation(cls, field, f):
         if field.is_relation:
@@ -79,20 +86,28 @@ class Schema:
                 return None
 
             many = field.one_to_many or field.many_to_many
+            f['field'] = cls._get_relation_name(field)
             f['type'] = cls._get_relation_type(many)
             f['relationship'] = cls._get_relationship(field)
-            # Notice: forest-rails always put id on the end, do we support polymorphic support?
-            f['reference'] = f'{field.related_model.__name__}.{field.target_field.name}'
+            # Notice: forest-rails always put id on the end (it should not), do we handle polymorphic support?
+            f['reference'] = f'{field.related_model.__name__}.{field.target_field.column}'
             f['is_filterable'] = not many
-            f['inverse_of'] = None if not hasattr(field, 'related_name') else field.related_name
+            f['inverse_of'] = cls._get_relation_name(field.remote_field)
         return f
+
+    @staticmethod
+    def get_type(field):
+        type = get_type(field)
+        if type in ('Integer', 'Float'):
+            return 'Number'
+        return type
 
     @classmethod
     def add_fields(cls, model, collection):
         for field in model._meta.get_fields():
             f = cls.get_default({
                 'field': field.name,
-                'type': get_type(field)
+                'type': cls.get_type(field)
             }, FIELD)
             f = handle_default_value(field, f)
             f = handle_validations(field, f)
