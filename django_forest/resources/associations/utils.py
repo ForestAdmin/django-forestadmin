@@ -1,23 +1,14 @@
-from django.db.models import ManyToManyField
 from django.http import JsonResponse
 
-from django_forest.utils import Holder
+from django_forest.utils import get_accessor_name
 
 
 class AssociationMixin:
-    def get_accessor_name(self, field):
-        if isinstance(field, ManyToManyField):
-            accessor_name = field.name
-        else:
-            accessor_name = field.get_accessor_name()
-
-        return accessor_name
-
     def get_association_field(self, Model, association_resource):
-        for field in Model._meta.get_fields():
-            h = Holder()  # hack for code climate, set variable in if statement
-            if field.is_relation and h.set(self.get_accessor_name(field)) == association_resource.lower():
-                return field, h.get()
+        accessors = [(x, get_accessor_name(x)) for x in Model._meta.get_fields() if x.is_relation]
+        for (field, accessor_name) in accessors:
+            if accessor_name == association_resource.lower():
+                return field, accessor_name
         else:
             message = f'cannot find association resource {association_resource} for Model {Model.__name__}'
             return JsonResponse({'errors': [{'detail': message}]}, safe=False, status=400)
@@ -29,7 +20,8 @@ class AssociationMixin:
 
         return objects, fields_to_update
 
-    def handle_modification(self, instance, obj, accessor_name, method):
+    def handle_modification(self, instance, obj, field, method):
+        accessor_name = get_accessor_name(field)
         try:
             getattr(getattr(obj, accessor_name), method)(instance)
         except Exception:
@@ -39,5 +31,4 @@ class AssociationMixin:
     def handle_association(self, instance, objects, fields_to_update, method):
         for field in fields_to_update:
             for obj in objects:
-                accessor_name = self.get_accessor_name(field)
-                self.handle_modification(instance, obj, accessor_name, method)
+                self.handle_modification(instance, obj, field, method)

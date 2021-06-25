@@ -1,9 +1,10 @@
-# Notice: holder class for setting variable in if statement
-# helpful for code climate code complexity to respect
-class Holder(object):
-    def set(self, value):
-        self.value = value
-        return value
+from django.db.models import ManyToManyField, ForeignKey
 
-    def get(self):
-        return self.value
+
+def get_accessor_name(field):
+    if isinstance(field, ManyToManyField) or isinstance(field, ForeignKey):
+        accessor_name = field.name
+    else:
+        accessor_name = field.get_accessor_name()
+
+    return accessor_name

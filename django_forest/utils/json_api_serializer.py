@@ -46,11 +46,16 @@ def handle_id_attribute(attrs, Model):
     return attrs
 
 
-def get_marshmallow_field(field, model_fields):
-    type = get_type([x for x in model_fields if x.name == field['field']][0])
-    if isinstance(type, list):
-        return fields.List(TYPE_CHOICES.get(type[0], fields.Str)())
-    return TYPE_CHOICES.get(type, fields.Str)()
+def get_marshmallow_field(field, Model):
+    # Notice, handle Model is None (Smart Collection)
+    model_fields = [] if Model is None else Model._meta.get_fields()
+
+    # Notice, handle smart field, default to type
+    _type = next((get_type(x) for x in model_fields if x.name == field['field']), field['type'])
+
+    if isinstance(_type, list):
+        return fields.List(TYPE_CHOICES.get(_type[0], fields.Str)())
+    return TYPE_CHOICES.get(_type, fields.Str)()
 
 
 def populate_attrs(collection, collection_name):
@@ -69,7 +74,7 @@ def populate_attrs(collection, collection_name):
                 id_field='pk'
             )
         else:
-            attrs[field_name] = get_marshmallow_field(field, Model._meta.get_fields())
+            attrs[field_name] = get_marshmallow_field(field, Model)
 
     # Add pk field if id not present
     attrs = handle_id_attribute(attrs, Model)
