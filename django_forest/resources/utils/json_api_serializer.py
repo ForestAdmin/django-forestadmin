@@ -1,4 +1,4 @@
-from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
 class JsonApiSerializerMixin:

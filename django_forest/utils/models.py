@@ -1,6 +1,6 @@
 from django.apps import apps
 
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 
 class Models:

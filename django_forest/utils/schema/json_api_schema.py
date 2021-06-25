@@ -6,7 +6,7 @@ from marshmallow_jsonapi.fields import DocumentMeta, ResourceMeta, BaseRelations
 from marshmallow_jsonapi.schema import TYPE
 
 from django_forest.utils.models import Models
-from django_forest.utils.get_type import get_type
+from django_forest.utils.type_mapping import get_type
 
 
 TYPE_CHOICES = {
@@ -30,6 +30,12 @@ class JsonApiSchema(type):
         mcs._registry[model_name] = klass
         return klass
 
+    @classmethod
+    def get(mcs, model_name):
+        model_name = f'{model_name}Schema'
+        if model_name in mcs._registry:
+            return mcs._registry[model_name]
+        raise Exception(f'This {model_name} does not exist in the JsonApiSchema. Make sure you correctly set it.')
 
 # Notice: handle metaclass conflict
 class MarshmallowType(JsonApiSchema, SchemaMeta):

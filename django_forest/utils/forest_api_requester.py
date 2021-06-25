@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 
 class ForestApiRequester:

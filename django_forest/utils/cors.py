@@ -1,7 +1,7 @@
 from django.conf import settings
 from corsheaders.defaults import default_headers
 
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 
 def get_list_setting(setting):

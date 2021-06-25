@@ -2,7 +2,7 @@ import json
 
 from django_forest.utils.error_handler import MESSAGES
 from django_forest.utils.forest_api_requester import ForestApiRequester
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 
 def register(metadata):

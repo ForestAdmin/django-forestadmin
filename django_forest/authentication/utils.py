@@ -1,7 +1,7 @@
 from urllib.parse import urljoin
 from django.urls import reverse
 
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 
 def get_callback_url():

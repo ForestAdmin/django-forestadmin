@@ -12,7 +12,7 @@ from django_forest.tests.fixtures.schema import test_schema, test_choice_schema,
     test_exclude_django_contrib_schema, test_serialized_schema, test_question_schema_data
 from django_forest.tests.utils.test_forest_api_requester import mocked_requests
 from django_forest.utils.collection import Collection
-from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.models import Models
 from django_forest.utils.schema import Schema
 

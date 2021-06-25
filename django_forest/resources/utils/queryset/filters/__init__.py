@@ -3,8 +3,8 @@ import json
 from django.db.models import Q
 from pytz import timezone
 
-from django_forest.resources.utils.date_filters import DATE_OPERATORS, handle_date_operator
-from django_forest.utils.get_type import get_type
+from django_forest.resources.utils.queryset.filters.date import DATE_OPERATORS, handle_date_operator
+from django_forest.utils.type_mapping import get_type
 from django_forest.utils.models import Models
 
 OPERATORS = {

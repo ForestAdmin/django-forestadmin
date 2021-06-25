@@ -6,7 +6,7 @@ from django_forest.tests.fixtures.schema import test_schema
 from django_forest.tests.models import Article, Session, Question, Choice
 
 from django_forest.utils.collection import Collection
-from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.schema import Schema
 
 

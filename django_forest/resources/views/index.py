@@ -3,7 +3,7 @@ from django.views import generic
 
 from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, QuerysetMixin, \
     JsonApiSerializerMixin, ResourceMixin
-from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
 class IndexView(SmartFieldMixin, FormatFieldMixin, QuerysetMixin, ResourceMixin, JsonApiSerializerMixin,
