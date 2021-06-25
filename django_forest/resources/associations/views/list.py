@@ -7,7 +7,7 @@ from django_forest.resources.associations.utils import AssociationMixin
 from django_forest.resources.utils import SmartFieldMixin, QuerysetMixin, JsonApiSerializerMixin, ResourceMixin
 
 
-class IndexView(QuerysetMixin, SmartFieldMixin, ResourceMixin, AssociationMixin, JsonApiSerializerMixin, generic.View):
+class ListView(QuerysetMixin, SmartFieldMixin, ResourceMixin, AssociationMixin, JsonApiSerializerMixin, generic.View):
 
     def get(self, request, resource, pk, association_resource):
         Model = self.get_model(resource)

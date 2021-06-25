@@ -6,8 +6,7 @@ from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, Que
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
-class IndexView(SmartFieldMixin, FormatFieldMixin, QuerysetMixin, ResourceMixin, JsonApiSerializerMixin,
-                generic.View):
+class ListView(SmartFieldMixin, FormatFieldMixin, QuerysetMixin, ResourceMixin, JsonApiSerializerMixin, generic.View):
 
     def get(self, request, resource):
         Model = self.get_model(resource)

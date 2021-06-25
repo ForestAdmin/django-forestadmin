@@ -1,4 +1,4 @@
 from django_forest.resources.associations.views.count import CountView
-from django_forest.resources.associations.views.index import IndexView
+from django_forest.resources.associations.views.list import ListView
 
-__all__ = ['IndexView', 'CountView']
+__all__ = ['ListView', 'CountView']
