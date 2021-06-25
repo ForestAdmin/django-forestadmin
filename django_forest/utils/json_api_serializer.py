@@ -36,14 +36,21 @@ class MarshmallowType(JsonApiSchema, SchemaMeta):
     pass
 
 
-def getTypeName(name):
-    return re.sub(r"(\w)([A-Z])", r"\1 \2", name)
+def get_type_name(name):
+    return re.sub(r'(\w)([A-Z])', r'\1 \2', name)
 
 
-def handle_id_attribute(attrs, Model):
+def handle_pk_attribute(attrs, Model):
     if 'id' not in attrs:
         attrs['pk'] = TYPE_CHOICES.get(get_type(Model._meta.pk), fields.Str)()
     return attrs
+
+
+def get_pk_name(collection_name):
+    Model = Models.get(collection_name)
+    if Model is not None and Model._meta.pk.name != 'id':
+        return 'pk'
+    return 'id'
 
 
 def get_marshmallow_field(field, Model):
@@ -66,7 +73,7 @@ def populate_attrs(collection, collection_name):
         if field['reference'] is not None:
             related_name = field['reference'].split('.')[0]
             attrs[field_name] = fields.Relationship(
-                type_=getTypeName(related_name).lower(),
+                type_=get_type_name(related_name).lower(),
                 many=field['relationship'] == 'HasMany',
                 schema=f'{related_name}Schema',
                 related_url=f'/forest/{collection_name}/{{{collection_name.lower()}_id}}/relationships/{field_name}',
@@ -77,11 +84,12 @@ def populate_attrs(collection, collection_name):
             attrs[field_name] = get_marshmallow_field(field, Model)
 
     # Add pk field if id not present
-    attrs = handle_id_attribute(attrs, Model)
+    attrs = handle_pk_attribute(attrs, Model)
 
     return attrs
 
 
+# override Marshmallow Schema for Django needs
 class DjangoSchema(Schema):
     # Notice override init for not having id error, as we are working with pk
     def __init__(self, *args, **kwargs):
@@ -101,9 +109,6 @@ class DjangoSchema(Schema):
         self.included_data = {}
         self.document_meta = {}
 
-
-# override Marshmallow Schema for Django needs
-class JsonApiSerializerSchema(DjangoSchema):
     def handle_document_meta(self, value):
         if not self.document_meta:
             self.document_meta = self.dict_class()
@@ -168,7 +173,7 @@ class JsonApiSerializerSchema(DjangoSchema):
 
         links = self.get_resource_links(item)
         if links:
-            ret["links"] = links
+            ret['links'] = links
         return ret
 
     def get_attribute(self, obj, attr, default):
@@ -178,22 +183,15 @@ class JsonApiSerializerSchema(DjangoSchema):
         return value
 
 
-def get_pk_name(collection_name):
-    Model = Models.get(collection_name)
-    if Model is not None and Model._meta.pk.name != 'id':
-        return 'pk'
-    return 'id'
-
-
 def create_json_api_schema(collection):
     collection_name = collection['name']
     attrs = populate_attrs(collection, collection_name)
 
     class MarshmallowSchema(DjangoSchema):
         class Meta:
-            type_ = getTypeName(collection_name).lower()
+            type_ = get_type_name(collection_name).lower()
             self_url = f'/forest/{collection_name}/{{{collection_name.lower()}_id}}'
             self_url_kwargs = {f'{collection_name.lower()}_id': f'<{get_pk_name(collection_name)}>'}
             strict = True
 
-    return MarshmallowType(f'{collection_name}Schema', (MarshmallowSchema, JsonApiSerializerSchema), attrs)
+    return MarshmallowType(f'{collection_name}Schema', (MarshmallowSchema,), attrs)
