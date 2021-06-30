@@ -1,0 +1,10 @@
+[
+  {
+    "model": "tests.restaurant",
+    "pk": 1,
+    "fields": {
+      "serves_hot_dogs": true,
+      "serves_pizza": true
+    }
+  }
+]

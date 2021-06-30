@@ -11,7 +11,7 @@ class SmartFieldMixin:
             elif callable(method):
                 setattr(item, field, method(item))
 
-    def add_smart_fields(self, item, collection, smart_fields, resource):
+    def _add_smart_fields(self, item, collection, smart_fields, resource):
         for field in smart_fields:
             smart_field = [x for x in collection['fields'] if x['field'] == field][0]
             self._handle_get_method(smart_field, item, field, resource)
@@ -23,6 +23,6 @@ class SmartFieldMixin:
                         x['field'] not in [x.name for x in Model._meta.get_fields()]]
         if many:
             for item in queryset:
-                self.add_smart_fields(item, collection, smart_fields, resource)
+                self._add_smart_fields(item, collection, smart_fields, resource)
         else:
-            self.add_smart_fields(queryset, collection, smart_fields, resource)
+            self._add_smart_fields(queryset, collection, smart_fields, resource)

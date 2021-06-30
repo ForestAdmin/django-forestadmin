@@ -1,0 +1,18 @@
+[
+  {
+      "model": "tests.place",
+      "pk": 1,
+      "fields": {
+          "name": "San Marco",
+          "address": "Venezia, Italia"
+      }
+  },
+  {
+    "model": "tests.place",
+    "pk": 2,
+    "fields": {
+        "name": "Red",
+        "address": "Moscou, Russia"
+    }
+  }
+]

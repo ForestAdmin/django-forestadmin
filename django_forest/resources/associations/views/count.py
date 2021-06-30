@@ -8,9 +8,13 @@ from django_forest.resources.utils import ResourceMixin
 class CountView(ResourceMixin, AssociationMixin, generic.View):
 
     def get(self, request, resource, pk, association_resource):
-        Model = self.get_model(resource)
-        association_field, association_field_name = self.get_association_field(Model, association_resource)
+        try:
+            Model = self.get_model(resource)
+        except Exception as e:
+            return self.no_model_error(e)
+        else:
+            association_field, association_field_name = self.get_association_field(Model, association_resource)
 
-        queryset = getattr(Model.objects.get(pk=pk), association_field_name).count()
+            queryset = getattr(Model.objects.get(pk=pk), association_field_name).count()
 
-        return JsonResponse({'count': queryset}, safe=False)
+            return JsonResponse({'count': queryset}, safe=False)

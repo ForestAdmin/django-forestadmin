@@ -17,7 +17,7 @@ TYPE_CHOICES = {
     'GenericIPAddressField': 'String',
     'JSONField': 'Json',
     'NullBooleanField': 'Boolean',
-    'OneToOneField': 'Number',
+    'OneToOneField': 'Integer',
     'PositiveBigIntegerField': 'Integer',
     'PositiveIntegerField': 'Integer',
     'PositiveSmallIntegerField': 'Integer',

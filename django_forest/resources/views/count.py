@@ -6,8 +6,11 @@ from django_forest.resources.utils import ResourceMixin
 
 class CountView(ResourceMixin, generic.View):
     def get(self, request, resource):
-        Model = self.get_model(resource)
+        try:
+            Model = self.get_model(resource)
+        except Exception as e:
+            return self.no_model_error(e)
+        else:
+            queryset = Model.objects.count()
 
-        queryset = Model.objects.count()
-
-        return JsonResponse({'count': queryset}, safe=False)
+            return JsonResponse({'count': queryset}, safe=False)
