@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.utils.timezone import make_aware
 
 
 class FormatFieldMixin:
@@ -23,7 +24,7 @@ class FormatFieldMixin:
     def format(self, name, value, field):
         # TODO other special fields
         if isinstance(field, models.DateTimeField):
-            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
+            return make_aware(datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ'), timezone.utc)
         elif isinstance(field, models.ForeignKey):
             return self.handle_foreign_key(name, value)
 
