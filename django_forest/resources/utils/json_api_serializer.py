@@ -37,12 +37,16 @@ class JsonApiSerializerMixin:
     def serialize(self, queryset, Model, params):
         Schema = JsonApiSchema._registry[f'{Model.__name__}Schema']
 
-        only = self.get_only(params, Model)
-        include_data = self.get_include_data(Model)
+        kwargs = {
+            'include_data': self.get_include_data(Model)
+        }
+
+        if f'fields[{Model.__name__}]' in params or 'context[field]' in params:
+            kwargs['only'] = self.get_only(params, Model)
 
         if not queryset:
             data = {'data': []}
         else:
-            data = Schema(include_data=include_data, only=only).dump(queryset, many=True)
+            data = Schema(**kwargs).dump(queryset, many=True)
 
         return data

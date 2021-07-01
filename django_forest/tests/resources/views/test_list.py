@@ -5,18 +5,24 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
-from django_forest.tests.models import Question
+from django_forest.tests.models import Question, Restaurant
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
 class ResourceListViewTests(TransactionTestCase):
-    fixtures = ['article.json', 'publication.json', 'session.json', 'question.json', 'choice.json']
+    fixtures = ['article.json', 'publication.json',
+                'session.json',
+                'question.json', 'choice.json',
+                'place.json', 'restaurant.json']
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_serializer()
         self.url = reverse('resources:list', kwargs={'resource': 'Question'})
+        self.reverse_url = reverse('resources:list', kwargs={'resource': 'Choice'})
+        self.no_data_url = reverse('resources:list', kwargs={'resource': 'Waiter'})
+        self.one_to_one_url = reverse('resources:list', kwargs={'resource': 'Restaurant'})
         self.bad_url = reverse('resources:list', kwargs={'resource': 'Foo'})
 
     def tearDown(self):
@@ -31,26 +37,166 @@ class ResourceListViewTests(TransactionTestCase):
             'data': [
                 {
                     'type': 'question',
+                    'relationships': {
+                        'choice_set': {
+                            'links': {
+                                'related': '/forest/Question/1/relationships/choice_set'
+                            }
+                        }
+                    },
+                    'attributes': {
+                        'question_text': 'what is your favorite color?',
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00'},
                     'id': 1,
                     'links': {
                         'self': '/forest/Question/1'
                     }
-                },
-                {
+                }, {
                     'type': 'question',
-                    'id': 2,
-                    'links': {
+                    'relationships': {
+                        'choice_set': {
+                            'links': {
+                                'related': '/forest/Question/2/relationships/choice_set'
+                            }
+                        }
+                    },
+                    'attributes': {
+                        'question_text': 'do you like chocolate?',
+                        'pub_date': '2021-06-02T15:52:53.528000+00:00'
+                    },
+                    'id': 2, 'links': {
                         'self': '/forest/Question/2'
                     }
                 }
             ]
         })
 
+    def test_get_no_data(self):
+        response = self.client.get(self.no_data_url)
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {'data': []})
+
     def test_get_no_model(self):
         response = self.client.get(self.bad_url, {'page[number]': '1', 'page[size]': '15'})
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+
+    def test_get_search(self):
+        response = self.client.get(self.reverse_url, {
+            'context[relationship]': 'HasMany',
+            'context[field]': 'choice_set',
+            'context[collection]': 'Question',
+            'context[recordId]': '1',
+            'search': 'yes',
+            'searchToEdit': 'true'
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'choice',
+                    'id': 1,
+                    'attributes': {
+                        'choice_text': 'yes',
+                        'votes': 0
+                    },
+                    'relationships': {
+                        'question': {
+                            'links': {
+                                'related': '/forest/Choice/1/relationships/question'
+                            },
+                            'data': {
+                                'type': 'question',
+                                'id': '1'
+                            }
+                        }
+                    },
+                    'links': {
+                        'self': '/forest/Choice/1'
+                    }
+                },
+            ],
+            'included': [
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'question_text': 'what is your favorite color?',
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00'
+                    },
+                    'id': 1, 'relationships': {
+                    'choice_set': {
+                        'links': {
+                            'related': '/forest/Question/1/relationships/choice_set'
+                        }
+                    }
+                },
+                    'links': {
+                        'self': '/forest/Question/1'
+                    }
+                }
+            ]
+        })
+
+    def test_get_search_pk_no_id(self):
+        response = self.client.get(self.one_to_one_url, {
+            'context[relationship]': 'BelongsTo',
+            'context[field]': 'restaurant',
+            'context[collection]': 'Place',
+            'context[recordId]': '1',
+            'fields[Restaurant]': 'id',
+            'search': '1',
+            'searchToEdit': 'true'
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'restaurant',
+                    'id': 1,
+                    'attributes': {
+                        'serves_hot_dogs': True,
+                        'serves_pizza': True
+                    },
+                    'relationships': {
+                        'place': {
+                            'links': {
+                                'related': '/forest/Restaurant/1/relationships/place'
+                            },
+                            'data': {
+                                'type': 'place',
+                                'id': '1'
+                            }
+                        }
+                    },
+                    'links': {
+                        'self': '/forest/Restaurant/1'
+                    }
+                }
+            ],
+            'included': [
+                {
+                    'type': 'place',
+                    'relationships': {
+                        'restaurant': {
+                            'links': {
+                                'related': '/forest/Place/1/relationships/restaurant'
+                            }
+                        }
+                    },
+                    'attributes': {
+                        'address': 'Venezia, Italia',
+                        'name': 'San Marco'},
+                    'id': 1,
+                    'links': {
+                        'self': '/forest/Place/1'
+                    }
+                }
+            ]
+        })
 
     def test_post(self):
         body = {
@@ -107,6 +253,91 @@ class ResourceListViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+
+    def test_post_related_data(self):
+        body = {
+            'data': {
+                'attributes': {
+                    'serves_hot_dogs': False,
+                    'serves_pizzas': False
+                },
+                'relationships': {
+                    'place': {
+                        'data': {
+                            'type': 'Places',
+                            'id': 2,
+                        }
+                    },
+                }
+            }
+        }
+        self.assertEqual(Restaurant.objects.count(), 1)
+        response = self.client.post(self.one_to_one_url,
+                                    json.dumps(body),
+                                    content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': {
+                'type': 'restaurant',
+                'relationships': {
+                    'waiter_set': {
+                        'links': {
+                            'related': '/forest/Restaurant/2/relationships/waiter_set'
+                        }
+                    },
+                    'place': {
+                        'links': {
+                            'related': '/forest/Restaurant/2/relationships/place'
+                        }
+                    }
+                },
+                'attributes': {
+                    'serves_hot_dogs': False,
+                    'serves_pizza': False
+                },
+                'id': 2,
+                'links': {
+                    'self': '/forest/Restaurant/2'
+                }
+            },
+            'links': {
+                'self': '/forest/Restaurant/2'
+            }
+        })
+        self.assertEqual(Restaurant.objects.count(), 2)
+
+    def test_post_related_data_do_not_exist(self):
+        body = {
+            'data': {
+                'attributes': {
+                    'serves_hot_dogs': False,
+                    'serves_pizzas': False
+                },
+                'relationships': {
+                    'place': {
+                        'data': {
+                            'type': 'Places',
+                            'id': 3,
+                        }
+                    },
+                }
+            }
+        }
+        self.assertEqual(Restaurant.objects.count(), 1)
+        response = self.client.post(self.one_to_one_url,
+                                    json.dumps(body),
+                                    content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data, {
+            'errors': [
+                {
+                    'detail': 'Instance Place with pk 3 does not exists'
+                }
+            ]
+        })
+        self.assertEqual(Question.objects.count(), 2)
 
     def test_post_error(self):
         url = reverse('resources:list', kwargs={'resource': 'Question'})

@@ -5,56 +5,44 @@ from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, Jso
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
-class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, ResourceMixin, generic.View):
+class DetailView(ResourceMixin, SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, generic.View):
 
-    def get(self, request, resource, pk):
+    def get(self, request, pk):
+        queryset = self.Model.objects.get(pk=pk)
+
+        # handle smart fields
+        self.handle_smart_fields(queryset, self.Model)
+
+        # json api serializer
+        include_data = self.get_include_data(self.Model)
+        Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
+        data = Schema(include_data=include_data).dump(queryset)
+
+        return JsonResponse(data, safe=False)
+
+    def put(self, request, pk):
+        body = self.get_body(request.body)
+
         try:
-            Model = self.get_model(resource)
-        except Exception as e:
-            return self.no_model_error(e)
-        else:
-            queryset = Model.objects.get(pk=pk)
-
-            # handle smart fields
-            self.handle_smart_fields(queryset, Model)
-
-            # json api serializer
-            include_data = self.get_include_data(Model)
-            Schema = JsonApiSchema._registry[f'{Model.__name__}Schema']
-            data = Schema(include_data=include_data).dump(queryset)
-
-            return JsonResponse(data, safe=False)
-
-    def put(self, request, resource, pk):
-        try:
-            Model = self.get_model(resource)
-        except Exception as e:
-            return self.no_model_error(e)
-        else:
-            body = self.get_body(request.body)
-
-            attributes = self.populate_attribute(body, Model)
-            instance = Model.objects.get(pk=pk)
+            attributes = self.populate_attribute(body)
+            instance = self.Model.objects.get(pk=pk)
             for k, v in attributes.items():
                 setattr(instance, k, v)
             instance.save()
-
+        except Exception as e:
+            return self.error_response(e)
+        else:
             # Notice: one to one case, where a new object is created with a new pk
             # It needs to be deleted, as django orm will create a new object
-            if instance.pk != pk:
-                Model.objects.filter(pk=pk).delete()
+            if str(instance.pk) != pk:
+                self.Model.objects.filter(pk=pk).delete()
 
             # json api serializer
-            Schema = JsonApiSchema._registry[f'{resource}Schema']
+            Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
             data = Schema().dump(instance)
             return JsonResponse(data, safe=False)
 
-    def delete(self, request, resource, pk):
-        try:
-            Model = self.get_model(resource)
-        except Exception as e:
-            return self.no_model_error(e)
-        else:
-            instance = Model.objects.get(pk=pk)
-            instance.delete()
-            return HttpResponse(status=204)
+    def delete(self, request, pk):
+        instance = self.Model.objects.get(pk=pk)
+        instance.delete()
+        return HttpResponse(status=204)

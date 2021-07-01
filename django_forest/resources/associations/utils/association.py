@@ -1,9 +1,8 @@
-from django.http import JsonResponse
-
+from django_forest.resources.utils import ResourceMixin
 from django_forest.utils import get_accessor_name
 
 
-class AssociationMixin:
+class AssociationMixin(ResourceMixin):
     def get_association_field(self, Model, association_resource):
         accessors = [(x, get_accessor_name(x)) for x in Model._meta.get_fields() if x.is_relation]
         for (field, accessor_name) in accessors:
@@ -11,7 +10,7 @@ class AssociationMixin:
                 return field, accessor_name
         else:
             message = f'cannot find association resource {association_resource} for Model {Model.__name__}'
-            return JsonResponse({'errors': [{'detail': message}]}, safe=False, status=400)
+            raise Exception(message)
 
     def get_association_utils(self, Model, RelatedModel, ids):
         objects = RelatedModel.objects.filter(pk__in=ids)
@@ -22,11 +21,7 @@ class AssociationMixin:
 
     def handle_modification(self, instance, obj, field, method):
         accessor_name = get_accessor_name(field)
-        try:
-            getattr(getattr(obj, accessor_name), method)(instance)
-        except Exception:
-            verb = 'dissociate' if method == 'remove' else 'add'
-            raise Exception(f'You cannot {verb} this field')
+        getattr(getattr(obj, accessor_name), method)(instance)
 
     def handle_association(self, instance, objects, fields_to_update, method):
         for field in fields_to_update:

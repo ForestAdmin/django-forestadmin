@@ -21,6 +21,7 @@ class ResourceLDetailViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_serializer()
         self.url = reverse('resources:detail', kwargs={'resource': 'Question', 'pk': '1'})
+        self.reverse_url = reverse('resources:detail', kwargs={'resource': 'Choice', 'pk': '1'})
         self.one_to_one_url = reverse('resources:detail', kwargs={'resource': 'Restaurant', 'pk': '1'})
         self.bad_url = reverse('resources:detail', kwargs={'resource': 'Foo', 'pk': '1'})
 
@@ -99,7 +100,7 @@ class ResourceLDetailViewTests(TransactionTestCase):
             }
         })
 
-    def test_put_one_to_one(self):
+    def test_put_related_data(self):
         body = {
             'data': {
                 'attributes': {
@@ -108,7 +109,7 @@ class ResourceLDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'place': {
                         'data': {
-                            'type': 'place',
+                            'type': 'Places',
                             'id': 2,
                         }
                     },
@@ -153,7 +154,75 @@ class ResourceLDetailViewTests(TransactionTestCase):
         self.assertEqual(Restaurant.objects.count(), 1)
         self.assertEqual(Place.objects.count(), 2)
 
-    # TODO, test one_to_one with primarykey to a charfield
+    def test_put_related_data_none(self):
+        body = {
+            'data': {
+                'attributes': {},
+                'relationships': {
+                    'question': {
+                        'data': None
+                    },
+                }
+            }
+        }
+        response = self.client.put(self.reverse_url,
+                                   json.dumps(body),
+                                   content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': {
+                'type': 'choice',
+                'id': 1,
+                'attributes': {
+                    'choice_text': 'yes',
+                    'votes': 0
+                },
+                'relationships': {
+                    'question': {
+                        'links': {
+                            'related': '/forest/Choice/1/relationships/question'
+                        }
+                    }},
+                'links': {
+                    'self': '/forest/Choice/1'
+                }
+            },
+            'links': {
+                'self': '/forest/Choice/1'
+            }
+        })
+
+    def test_put_related_data_do_not_exist(self):
+        body = {
+            'data': {
+                'attributes': {
+                    'serves_hot_dogs': True,
+                },
+                'relationships': {
+                    'place': {
+                        'data': {
+                            'type': 'Places',
+                            'id': 3,
+                        }
+                    },
+                }
+            }
+        }
+        self.assertEqual(Restaurant.objects.count(), 1)
+        response = self.client.put(self.one_to_one_url,
+                                   json.dumps(body),
+                                   content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data, {
+            'errors': [
+                {
+                    'detail': 'Instance Place with pk 3 does not exists'
+                }
+            ]
+        })
+        self.assertEqual(Question.objects.count(), 2)
 
     def test_put_no_model(self):
         body = {

@@ -1,40 +1,46 @@
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-
-from django_forest.utils.models import Models
 
 
 class FormatFieldMixin:
-    def handle_foreign_key(self, value):
+    def get_association_instance(self, association, value):
+        pk = value['data']['id']
+        try:
+            instance = association.related_model.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise Exception(f'Instance {association.related_model.__name__} with pk {pk} does not exists')
+        else:
+            return instance
+
+    def handle_foreign_key(self, name, value):
         if value['data'] is not None:
-            Model = Models.get(value['data']['type'])
-            if Model is not None:
-                return Model.objects.get(pk=value['data']['id'])
+            association = next((x for x in self.Model._meta.get_fields() if x.is_relation and x.name == name), None)
+            return self.get_association_instance(association, value)
         return None
 
-    def format(self, value, field):
+    def format(self, name, value, field):
         # TODO other special fields
         if isinstance(field, models.DateTimeField):
             return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
         elif isinstance(field, models.ForeignKey):
-            return self.handle_foreign_key(value)
+            return self.handle_foreign_key(name, value)
 
         return value
 
-    def get_attributes(self, body, fields, fields_name):
+    def get_attributes(self, body, fields):
         attributes = {}
         for k, v in body.items():
-            if k in fields_name:
-                attributes[k] = self.format(v, fields[k])
+            if k in fields.keys():
+                attributes[k] = self.format(k, v, fields[k])
         return attributes
 
-    def populate_attribute(self, body, Model):
-        fields = {x.name: x for x in Model._meta.get_fields()}
-        fields_name = fields.keys()
+    def populate_attribute(self, body):
+        fields = {x.name: x for x in self.Model._meta.get_fields()}
         attributes = {}
-        attributes.update(self.get_attributes(body['data']['attributes'], fields, fields_name))
+        attributes.update(self.get_attributes(body['data']['attributes'], fields))
         if 'relationships' in body['data']:
-            attributes.update(self.get_attributes(body['data']['relationships'], fields, fields_name))
+            attributes.update(self.get_attributes(body['data']['relationships'], fields))
 
         return attributes
