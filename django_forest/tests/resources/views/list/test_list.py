@@ -1,6 +1,5 @@
 import copy
 import json
-import sys
 
 import pytest
 from django.test import TransactionTestCase
