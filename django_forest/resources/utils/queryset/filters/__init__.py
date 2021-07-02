@@ -46,10 +46,11 @@ class FiltersMixin:
             return Q(Q(**{f'{field}__isnull': True}) | Q(**{f'{field}__exact': ''}))
         return Q(**{f'{field}__isnull': True})
 
-    def get_expression(self, condition, field_type, tz):
+    def get_expression(self, condition, Model, tz):
         operator = condition['operator']
         field = condition['field'].replace(':', '__')
         value = condition['value']
+        field_type = self.get_field_type(condition['field'], Model)
 
         # special case date, blank and present
         if operator in DATE_OPERATORS:
@@ -61,13 +62,13 @@ class FiltersMixin:
         else:
             return self.get_basic_expression(field, operator, value)
 
-    def handle_aggregator(self, filters, field_type, tz):
+    def handle_aggregator(self, filters, Model, tz):
         q_objects = Q()
         for condition in filters['conditions']:
             if filters['aggregator'] == 'or':
-                q_objects |= self.get_expression(condition, field_type, tz)
+                q_objects |= self.get_expression(condition, Model, tz)
             else:
-                q_objects &= self.get_expression(condition, field_type, tz)
+                q_objects &= self.get_expression(condition, Model, tz)
         return q_objects
 
     def get_field_type(self, field, Model):
@@ -84,8 +85,7 @@ class FiltersMixin:
         filters = json.loads(params['filters'])
         tz = timezone(params['timezone'])
 
-        field_type = self.get_field_type(filters['field'], Model)
         if 'aggregator' in filters:
-            return self.handle_aggregator(filters, field_type, tz)
+            return self.handle_aggregator(filters, Model, tz)
 
-        return self.get_expression(filters, field_type, tz)
+        return self.get_expression(filters, Model, tz)

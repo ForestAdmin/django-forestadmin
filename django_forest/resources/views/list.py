@@ -8,19 +8,24 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 class ListView(ResourceMixin, FormatFieldMixin, QuerysetMixin, SmartFieldMixin, JsonApiSerializerMixin, generic.View):
     def get(self, request):
-        params = request.GET.dict()
-
         # default
         queryset = self.Model.objects.all()
-        queryset = self.enhance_queryset(queryset, self.Model, params)
 
-        # handle smart fields
-        self.handle_smart_fields(queryset, self.Model, many=True)
+        params = request.GET.dict()
 
-        # json api serializer
-        data = self.serialize(queryset, self.Model, params)
+        try:
+            # enhance queryset
+            queryset = self.enhance_queryset(queryset, self.Model, params)
 
-        return JsonResponse(data, safe=False)
+            # handle smart fields
+            self.handle_smart_fields(queryset, self.Model, many=True)
+
+            # json api serializer
+            data = self.serialize(queryset, self.Model, params)
+        except Exception as e:
+            return self.error_response(e)
+        else:
+            return JsonResponse(data, safe=False)
 
     def post(self, request):
         body = self.get_body(request.body)

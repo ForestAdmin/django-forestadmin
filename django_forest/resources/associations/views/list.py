@@ -16,19 +16,24 @@ class ListView(AssociationMixin, QuerysetMixin, SmartFieldMixin, JsonApiSerializ
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model
-            params = request.GET.dict()
 
             # default
             queryset = getattr(self.Model.objects.get(pk=pk), association_field_name).all()
-            queryset = self.enhance_queryset(queryset, RelatedModel, params)
 
-            # handle smart fields
-            self.handle_smart_fields(queryset, RelatedModel, many=True)
+            params = request.GET.dict()
+            # enhance queryset
+            try:
+                queryset = self.enhance_queryset(queryset, RelatedModel, params)
 
-            # json api serializer
-            data = self.serialize(queryset, RelatedModel, params)
+                # handle smart fields
+                self.handle_smart_fields(queryset, RelatedModel, many=True)
 
-            return JsonResponse(data, safe=False)
+                # json api serializer
+                data = self.serialize(queryset, RelatedModel, params)
+            except Exception as e:
+                return self.error_response(e)
+            else:
+                return JsonResponse(data, safe=False)
 
     def post(self, request, pk, association_resource):
         try:
