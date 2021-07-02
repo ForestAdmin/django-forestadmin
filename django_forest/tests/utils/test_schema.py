@@ -106,8 +106,8 @@ class UtilsSchemaTests(TestCase):
         collection = Schema.get_collection('Foo')
         self.assertEqual(collection, None)
 
-    def test_handle_json_api_serializer(self):
-        Schema.handle_json_api_serializer()
+    def test_handle_json_api_schema(self):
+        Schema.handle_json_api_schema()
         self.assertEqual(len(JsonApiSchema._registry), 17)
 
 

@@ -1,4 +1,5 @@
 import copy
+from marshmallow_jsonapi import fields
 
 from django.test import TestCase
 
@@ -6,11 +7,11 @@ from django_forest.tests.fixtures.schema import test_schema
 from django_forest.tests.models import Article, Session, Question, Choice
 
 from django_forest.utils.collection import Collection
-from django_forest.utils.schema.json_api_schema import JsonApiSchema
+from django_forest.utils.schema.json_api_schema import JsonApiSchema, DjangoSchema
 from django_forest.utils.schema import Schema
 
 
-class UtilsJsonApiSerializerTests(TestCase):
+class UtilsJsonApiSchemaTests(TestCase):
     fixtures = ['article.json', 'publication.json', 'session.json', 'question.json', 'choice.json']
 
     def setUp(self):
@@ -21,13 +22,19 @@ class UtilsJsonApiSerializerTests(TestCase):
         Collection._registry = {}
         JsonApiSchema._registry = {}
 
-    def test_handle_json_api_serializer(self):
-        Schema.handle_json_api_serializer()
+    def test_handle_json_api_schema(self):
+        Schema.handle_json_api_schema()
         self.assertEqual(len(JsonApiSchema._registry), 17)
 
-    def test_json_api_serializer(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['QuestionSchema']
+    def test_json_api_schema_bad_name(self):
+        Schema.handle_json_api_schema()
+        with self.assertRaises(Exception) as cm:
+            JsonApiSchema.get('Foo')
+        self.assertEqual(cm.exception.args[0], 'The FooSchema does not exist in the JsonApiSchema. Make sure you correctly set it.')
+
+    def test_json_api_schema(self):
+        Schema.handle_json_api_schema()
+        schema = JsonApiSchema.get('Question')
         question = Question.objects.get(pk=1)
         data = schema().dump(question)
         self.assertEqual(data, {
@@ -54,9 +61,9 @@ class UtilsJsonApiSerializerTests(TestCase):
             }
         })
 
-    def test_json_api_serializer_many(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['QuestionSchema']
+    def test_json_api_schema_many(self):
+        Schema.handle_json_api_schema()
+        schema = JsonApiSchema.get('Question')
         queryset = Question.objects.all()
         data = schema().dump(queryset, many=True)
         self.assertEqual(data, {
@@ -100,9 +107,9 @@ class UtilsJsonApiSerializerTests(TestCase):
             ]
         })
 
-    def test_json_api_serializer_foreign_key(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['ChoiceSchema']
+    def test_json_api_schema_foreign_key(self):
+        Schema.handle_json_api_schema()
+        schema = JsonApiSchema.get('Choice')
         choice = Choice.objects.get(pk=1)
         data = schema(include_data=['question']).dump(choice)
         self.assertEqual(data, {
@@ -153,9 +160,9 @@ class UtilsJsonApiSerializerTests(TestCase):
             ]
         })
 
-    def test_json_api_serializer_pk_is_not_id(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['SessionSchema']
+    def test_json_api_schema_pk_is_not_id(self):
+        Schema.handle_json_api_schema()
+        schema = JsonApiSchema.get('Session')
         session = Session.objects.get(pk='foobar1234')
         data = schema().dump(session)
         self.assertEqual(data, {
@@ -176,9 +183,9 @@ class UtilsJsonApiSerializerTests(TestCase):
             },
         })
 
-    def test_json_api_serializer_many_to_many(self):
-        Schema.handle_json_api_serializer()
-        schema = JsonApiSchema._registry['ArticleSchema']
+    def test_json_api_schema_many_to_many(self):
+        Schema.handle_json_api_schema()
+        schema = JsonApiSchema.get('Article')
         article = Article.objects.get(pk=1)
         data = schema(include_data=['publications']).dump(article)
         self.assertEqual(data, {
@@ -228,3 +235,55 @@ class UtilsJsonApiSerializerTests(TestCase):
                 }
             ]
         })
+
+    # These are dumb tests for having 100% covering
+    # This is just some redefinition of Marshmallow Json Api for handling django
+    def test_django_schema(self):
+        with self.assertRaises(Exception) as cm:
+            DjangoSchema()
+        self.assertEqual(cm.exception.args[0], 'Must specify type_ class Meta option')
+
+    def test_django_schema_no_url(self):
+        with self.assertRaises(Exception) as cm:
+            class FooSchema(DjangoSchema):
+                class Meta:
+                    type_ = 'foo'
+                    self_url_kwargs = {'foo_id': f'<id>'}
+            FooSchema()
+
+        self.assertEqual(cm.exception.args[0], 'Must specify `self_url` Meta option when `self_url_kwargs` is specified')
+
+    def test_django_schema_handle_attribute_document_meta(self):
+        class FooSchema(DjangoSchema):
+            metadata = fields.DocumentMeta()
+            class Meta:
+                type_ = 'foo'
+
+        schema = FooSchema()
+        ret = {}
+        attribute = 'metadata'
+        field_name = 'metadata'
+        value = {'foo': 'bar'}
+        schema.handle_attribute(ret, attribute, field_name, value)
+        self.assertEqual(schema.document_meta, {'foo': 'bar'})
+
+    def test_django_schema_handle_attribute_resource_meta(self):
+        class FooSchema(DjangoSchema):
+            meta_resource = fields.ResourceMeta()
+            class Meta:
+                type_ = 'foo'
+
+        schema = FooSchema()
+        ret = {}
+        attribute = 'meta_resource'
+        field_name = 'meta_resource'
+        value = {'foo': 'bar'}
+        self.assertEqual(schema.handle_attribute(ret, attribute, field_name, value), {'meta': {'foo': 'bar'}})
+
+    def test_django_schema_format_item_none(self):
+        class FooSchema(DjangoSchema):
+            class Meta:
+                type_ = 'foo'
+
+        schema = FooSchema()
+        self.assertEqual(schema.format_item(None), None)

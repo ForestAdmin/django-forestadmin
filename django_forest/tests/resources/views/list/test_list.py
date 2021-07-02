@@ -25,7 +25,7 @@ class ResourceListViewTests(TransactionTestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
-        Schema.handle_json_api_serializer()
+        Schema.handle_json_api_schema()
         self.url = reverse('resources:list', kwargs={'resource': 'Question'})
         self.reverse_url = reverse('resources:list', kwargs={'resource': 'Choice'})
         self.no_data_url = reverse('resources:list', kwargs={'resource': 'Waiter'})

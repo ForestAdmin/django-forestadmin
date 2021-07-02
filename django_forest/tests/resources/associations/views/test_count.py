@@ -13,7 +13,7 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
-        Schema.handle_json_api_serializer()
+        Schema.handle_json_api_schema()
 
     def tearDown(self):
         # reset _registry after each test

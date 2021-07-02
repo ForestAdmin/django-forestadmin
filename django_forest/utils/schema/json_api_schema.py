@@ -35,7 +35,8 @@ class JsonApiSchema(type):
         model_name = f'{model_name}Schema'
         if model_name in mcs._registry:
             return mcs._registry[model_name]
-        raise Exception(f'This {model_name} does not exist in the JsonApiSchema. Make sure you correctly set it.')
+        raise Exception(f'The {model_name} does not exist in the JsonApiSchema. Make sure you correctly set it.')
+
 
 # Notice: handle metaclass conflict
 class MarshmallowType(JsonApiSchema, SchemaMeta):

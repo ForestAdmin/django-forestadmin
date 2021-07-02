@@ -20,7 +20,7 @@ class ResourceDetailViewTests(TransactionTestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
-        Schema.handle_json_api_serializer()
+        Schema.handle_json_api_schema()
         self.url = reverse('resources:detail', kwargs={'resource': 'Question', 'pk': '1'})
         self.reverse_url = reverse('resources:detail', kwargs={'resource': 'Choice', 'pk': '1'})
         self.one_to_one_url = reverse('resources:detail', kwargs={'resource': 'Restaurant', 'pk': '1'})

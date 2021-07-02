@@ -18,7 +18,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
-        Schema.handle_json_api_serializer()
+        Schema.handle_json_api_schema()
         self.url = reverse('resources:associations:list',
                            kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
         self.reverse_url = reverse('resources:associations:list',

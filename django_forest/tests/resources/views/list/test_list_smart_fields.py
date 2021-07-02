@@ -34,7 +34,7 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
-        Schema.handle_json_api_serializer()
+        Schema.handle_json_api_schema()
         self.url = reverse('resources:list', kwargs={'resource': 'Question'})
 
     def tearDown(self):

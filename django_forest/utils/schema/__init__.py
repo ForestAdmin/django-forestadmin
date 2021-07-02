@@ -72,13 +72,6 @@ class Schema:
             return 'HasOne'
         return 'BelongsTo'
 
-    @staticmethod
-    def _get_relation_name(field):
-        if hasattr(field, 'get_accessor_name'):
-            return field.get_accessor_name()
-        else:
-            return field.name
-
     @classmethod
     def handle_relation(cls, field, f):
         if field.is_relation:
@@ -132,7 +125,7 @@ class Schema:
         autodiscover_modules(get_forest_setting('CONFIG_DIR', 'forest'))
 
     @classmethod
-    def handle_json_api_serializer(cls):
+    def handle_json_api_schema(cls):
         for collection in cls.schema['collections']:
             # Notice: create marshmallow-jsonapi resource for json api serializer
             create_json_api_schema(collection)

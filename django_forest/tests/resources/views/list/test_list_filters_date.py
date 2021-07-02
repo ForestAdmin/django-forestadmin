@@ -21,7 +21,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
-        Schema.handle_json_api_serializer()
+        Schema.handle_json_api_schema()
         self.url = reverse('resources:list', kwargs={'resource': 'Question'})
 
     def tearDown(self):
