@@ -89,7 +89,6 @@ def mocked_requests_get_bad_response(value, **args):
         return mocked_requests({'errors': [{'name': 'error'}]}, 500)
 
 
-
 class AuthenticationCallbackViewTests(TestCase):
 
     def setUp(self):

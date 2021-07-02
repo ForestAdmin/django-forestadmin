@@ -11,11 +11,12 @@ from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
-class ResourceLDetailViewTests(TransactionTestCase):
+class ResourceDetailViewTests(TransactionTestCase):
     fixtures = ['article.json', 'publication.json',
                 'session.json',
                 'question.json', 'choice.json',
-                'place.json', 'restaurant.json']
+                'place.json', 'restaurant.json',
+                ]
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
