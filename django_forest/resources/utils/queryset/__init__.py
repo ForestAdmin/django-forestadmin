@@ -6,15 +6,15 @@ from django_forest.resources.utils.decorators import DecoratorsMixin
 
 
 class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, DecoratorsMixin, LimitFieldsMixin):
+
     def filter_queryset(self, queryset, Model, params):
-        # filters
-        if 'filters' in params:
-            queryset = queryset.filter(self.get_filters(params, Model))
-
-        # search
-        if 'search' in params and params['search']:
-            queryset = queryset.filter(self.get_search(params, Model))
-
+        PARAMS = {
+            'filters': self.get_filters,
+            'search': self.get_search,
+        }
+        for name, method in PARAMS.items():
+            if name in params and params[name]:
+                queryset = queryset.filter(method(params, Model))
         return queryset
 
     def enhance_queryset(self, queryset, Model, params):

@@ -151,7 +151,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
             ]
         })
 
-    def test_is_realted_data(self):
+    def test_is_related_data(self):
         response = self.client.get(self.reverse_url, {
             'fields[Choice]': 'id,choice_text,question',
             'fields[question]': 'question_text',
