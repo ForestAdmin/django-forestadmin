@@ -103,6 +103,24 @@ class UtilsJsonApiSchemaTests(TestCase):
                     'links': {
                         'self': '/forest/Question/2'
                     }
+                },
+                {
+                    'type': 'question',
+                    'id': 3,
+                    'relationships': {
+                        'choice_set': {
+                            'links': {
+                                'related': '/forest/Question/3/relationships/choice_set'
+                            }
+                        }
+                    },
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
                 }
             ]
         })

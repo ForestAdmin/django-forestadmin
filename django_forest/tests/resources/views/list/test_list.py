@@ -76,6 +76,24 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 2, 'links': {
                         'self': '/forest/Question/2'
                     }
+                },
+                {
+                    'type': 'question',
+                    'relationships': {
+                        'choice_set': {
+                            'links': {
+                                'related': '/forest/Question/3/relationships/choice_set'
+                            }
+                        }
+                    },
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
                 }
             ]
         })
@@ -101,7 +119,7 @@ class ResourceListViewTests(TransactionTestCase):
                 }
             }
         }
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
         response = self.client.post(self.url,
                                     json.dumps(body),
                                     content_type='application/json')
@@ -113,7 +131,7 @@ class ResourceListViewTests(TransactionTestCase):
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/3/relationships/choice_set'
+                            'related': '/forest/Question/4/relationships/choice_set'
                         }
                     }
                 },
@@ -121,16 +139,16 @@ class ResourceListViewTests(TransactionTestCase):
                     'pub_date': '2021-06-21T09:46:39+00:00',
                     'question_text': 'What is your favorite color'
                 },
-                'id': 3,
+                'id': 4,
                 'links': {
-                    'self': '/forest/Question/3'
+                    'self': '/forest/Question/4'
                 }
             },
             'links': {
-                'self': '/forest/Question/3'
+                'self': '/forest/Question/4'
             }
         })
-        self.assertEqual(Question.objects.count(), 3)
+        self.assertEqual(Question.objects.count(), 4)
 
     def test_post_no_model(self):
         body = {
@@ -231,7 +249,7 @@ class ResourceListViewTests(TransactionTestCase):
                 }
             ]
         })
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Restaurant.objects.count(), 1)
 
     def test_post_error(self):
         url = reverse('resources:list', kwargs={'resource': 'Question'})
@@ -246,7 +264,7 @@ class ResourceListViewTests(TransactionTestCase):
                 }
             }
         }
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
         response = self.client.post(url,
                                     json.dumps(data),
                                     content_type='application/json')
@@ -259,7 +277,7 @@ class ResourceListViewTests(TransactionTestCase):
                 }
             ]
         })
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
 
     def test_delete(self):
         data = {
@@ -269,12 +287,12 @@ class ResourceListViewTests(TransactionTestCase):
                 }
             }
         }
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
         response = self.client.delete(self.url,
                                       json.dumps(data),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Question.objects.count(), 1)
+        self.assertEqual(Question.objects.count(), 2)
 
     def test_delete_all_records(self):
         data = {
@@ -305,12 +323,12 @@ class ResourceListViewTests(TransactionTestCase):
                 'type': 'action-requests'
             }
         }
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
         response = self.client.delete(self.url,
                                       json.dumps(data),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Question.objects.count(), 1)
+        self.assertEqual(Question.objects.count(), 2)
 
     def test_delete_no_model(self):
         data = {
@@ -320,10 +338,11 @@ class ResourceListViewTests(TransactionTestCase):
                 }
             }
         }
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
         response = self.client.delete(self.bad_url,
                                       json.dumps(data),
                                       content_type='application/json')
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(Question.objects.count(), 3)

@@ -208,7 +208,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                 }
             ]
         })
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Restaurant.objects.count(), 1)
 
     def test_put(self):
         body = {

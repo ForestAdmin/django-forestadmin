@@ -4,19 +4,18 @@ from uuid import UUID
 
 from django.db.models import Q
 
+from ..in_search_fields import in_search_fields
 from django_forest.utils.schema import Schema
 
 
 class SearchMixin:
-
-    # handle search_fields for excluding from collection
     def get_fields_to_search(self, collection):
         fields_to_search = []
         for x in collection['fields']:
             if x['type'] in ('String', 'Number', 'Enum') \
                     and not x['reference'] \
                     and not x['is_virtual'] \
-                    and (collection['search_fields'] is None or x['field'] in collection['search_fields']):
+                    and in_search_fields(x['field'], collection['search_fields']):
                 fields_to_search.append(x)
         return fields_to_search
 

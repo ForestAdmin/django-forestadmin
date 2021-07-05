@@ -2,9 +2,10 @@ from .filters import FiltersMixin
 from .limit_fields import LimitFieldsMixin
 from .pagination import PaginationMixin
 from .search import SearchMixin
+from django_forest.resources.utils.decorators import DecoratorsMixin
 
 
-class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, LimitFieldsMixin):
+class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, DecoratorsMixin, LimitFieldsMixin):
     def filter_queryset(self, queryset, Model, params):
         # filters
         if 'filters' in params:

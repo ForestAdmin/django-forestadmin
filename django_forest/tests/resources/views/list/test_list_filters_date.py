@@ -80,6 +80,17 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'links': {
                         'self': '/forest/Question/2'
                     }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
                 }
             ]
         })
@@ -175,6 +186,17 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'links': {
                         'self': '/forest/Question/2'
                     }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
                 }
             ]
         })
@@ -214,6 +236,17 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'links': {
                         'self': '/forest/Question/2'
                     }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
                 }
             ]
         })
@@ -252,6 +285,17 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
+                    }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
                     }
                 }
             ]

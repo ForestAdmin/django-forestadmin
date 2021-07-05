@@ -136,6 +136,17 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     'links': {
                         'self': '/forest/Question/2'
                     }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
                 }
             ]
         })
@@ -284,6 +295,17 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/2'
+                    }
+                },
+                {
+                    'type': 'question',
+                    'id': 3,
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'links': {
+                        'self': '/forest/Question/3'
                     }
                 }
             ]

@@ -223,7 +223,7 @@ class ResourceDetailViewTests(TransactionTestCase):
                 }
             ]
         })
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Restaurant.objects.count(), 1)
 
     def test_put_no_model(self):
         body = {
@@ -241,11 +241,11 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
 
     def test_delete(self):
-        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 3)
         self.assertTrue(Question.objects.get(pk=1))
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Question.objects.count(), 1)
+        self.assertEqual(Question.objects.count(), 2)
         with self.assertRaises(ObjectDoesNotExist):
             Question.objects.get(pk=1)
 

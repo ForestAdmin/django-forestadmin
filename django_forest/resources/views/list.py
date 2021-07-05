@@ -22,6 +22,9 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
 
             # json api serializer
             data = self.serialize(queryset, self.Model, params)
+
+            # search decorator
+            data = self.decorators(data, self.Model, params)
         except Exception as e:
             return self.error_response(e)
         else:

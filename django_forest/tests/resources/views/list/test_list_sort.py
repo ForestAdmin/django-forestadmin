@@ -58,6 +58,17 @@ class ResourceListViewTests(TransactionTestCase):
                 {
                     'type': 'question',
                     'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?'
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
@@ -76,7 +87,7 @@ class ResourceListViewTests(TransactionTestCase):
                     'links': {
                         'self': '/forest/Question/1'
                     }
-                }
+                },
             ]
         })
 

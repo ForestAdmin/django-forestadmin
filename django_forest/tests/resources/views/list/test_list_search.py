@@ -10,6 +10,15 @@ from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
+
+
+@pytest.mark.usefixtures('reset_config_dir_import')
 class ResourceListViewTests(TransactionTestCase):
     fixtures = ['article.json', 'publication.json',
                 'session.json',
@@ -24,6 +33,7 @@ class ResourceListViewTests(TransactionTestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
+        Schema.add_smart_features()
         Schema.handle_json_api_schema()
         self.url = reverse('resources:list', kwargs={'resource': 'Question'})
         self.reverse_url = reverse('resources:list', kwargs={'resource': 'Choice'})
@@ -91,7 +101,15 @@ class ResourceListViewTests(TransactionTestCase):
                         'self': '/forest/Question/1'
                     }
                 }
-            ]
+            ],
+            'meta': {
+                'decorators': [
+                    {
+                        'id': 1,
+                        'search': ['choice_text']
+                    }
+                ]
+            }
         })
 
     def test_get_search_pk_no_id(self):
@@ -206,6 +224,66 @@ class ResourceListViewTests(TransactionTestCase):
             'data': []
         })
 
+    def test_get_search_mutliple(self):
+        with self._django_assert_num_queries(1) as captured:
+            response = self.client.get(self.url, {
+                'fields[Question]': 'id,question_text,pub_date,foo,bar',
+                'page[number]': 1,
+                'page[size]': 15,
+                'search': 'favorite',
+                'searchExtended': 0
+            })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(captured.captured_queries[0]['sql'],
+                         ' '.join('''
+                         SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
+                          FROM "tests_question"
+                           WHERE "tests_question"."question_text"::text LIKE '%favorite%'
+                            LIMIT 15'''.replace('\n', ' ').split()))
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'question_text': 'what is your favorite color?',
+                        'foo': 'what is your favorite color?+foo',
+                        'bar': 'what is your favorite color?+bar',
+                    },
+                    'id': 1,
+                    'links': {
+                        'self': '/forest/Question/1'
+                    }
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?',
+                        'foo': 'who is your favorite singer?+foo',
+                        'bar': 'who is your favorite singer?+bar',
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    }
+                }
+            ],
+            'meta': {
+                'decorators': [
+                    {
+                        'id': 1,
+                        'search': ['question_text', 'foo', 'bar']
+                    },
+                    {
+                        'id': 3,
+                        'search': ['question_text', 'foo', 'bar']
+                    }
+                ]
+            }
+        })
+
     def test_get_search_enum(self):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.enum_url, {
@@ -234,7 +312,15 @@ class ResourceListViewTests(TransactionTestCase):
                         'self': '/forest/Student/1'
                     }
                 }
-            ]
+            ],
+            'meta': {
+                'decorators': [
+                    {
+                        'id': 1,
+                        'search': ['year_in_school']
+                    }
+                ]
+            }
         })
 
     def test_get_search_uuid(self):
@@ -265,7 +351,14 @@ class ResourceListViewTests(TransactionTestCase):
                         'self': '/forest/Serial/4759e256-a27a-45e1-b248-09fb1523c978'
                     }
                 }
-            ]
+            ],
+            'meta': {
+                'decorators': [
+                    {
+                        'id': '4759e256-a27a-45e1-b248-09fb1523c978',
+                        'search': ['uuid']
+                    }
+                ]}
         })
 
     def test_get_extended_search(self):

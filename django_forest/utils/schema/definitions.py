@@ -14,7 +14,7 @@ COLLECTION = {
 
 FIELD = {
     'field': '',
-    'type': '',
+    'type': 'String',
     'is_filterable': True,
     'is_sortable': True,
     'is_read_only': False,
