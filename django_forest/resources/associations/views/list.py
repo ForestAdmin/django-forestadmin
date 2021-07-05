@@ -1,24 +1,23 @@
 from distutils.util import strtobool
 
 from django.http import JsonResponse, HttpResponse
-from django.views import generic
 
-from django_forest.resources.associations.utils import AssociationMixin
-from django_forest.resources.utils import SmartFieldMixin, QuerysetMixin, JsonApiSerializerMixin
+from django_forest.resources.associations.utils import AssociationView
+from django_forest.resources.utils import SmartFieldMixin, JsonApiSerializerMixin
 
 
-class ListView(AssociationMixin, QuerysetMixin, SmartFieldMixin, JsonApiSerializerMixin, generic.View):
+class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
 
     def get(self, request, pk, association_resource):
         try:
-            association_field, association_field_name = self.get_association_field(self.Model, association_resource)
+            association_field = self.get_association_field(self.Model, association_resource)
         except Exception as e:
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model
 
             # default
-            queryset = getattr(self.Model.objects.get(pk=pk), association_field_name).all()
+            queryset = getattr(self.Model.objects.get(pk=pk), association_resource).all()
 
             params = request.GET.dict()
             # enhance queryset
@@ -34,7 +33,7 @@ class ListView(AssociationMixin, QuerysetMixin, SmartFieldMixin, JsonApiSerializ
 
     def post(self, request, pk, association_resource):
         try:
-            association_field, _ = self.get_association_field(self.Model, association_resource)
+            association_field = self.get_association_field(self.Model, association_resource)
         except Exception as e:
             return self.error_response(e)
         else:
@@ -60,13 +59,12 @@ class ListView(AssociationMixin, QuerysetMixin, SmartFieldMixin, JsonApiSerializ
 
     def delete(self, request, pk, association_resource):
         try:
-            association_field, _ = self.get_association_field(self.Model, association_resource)
+            association_field = self.get_association_field(self.Model, association_resource)
+            ids = self.get_ids_from_request(request)
         except Exception as e:
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model
-            body = self.get_body(request.body)
-            ids = [x['id'] for x in body['data']]
             params = request.GET.dict()
 
             # Notice: Delete

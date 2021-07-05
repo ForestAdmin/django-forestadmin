@@ -5,7 +5,7 @@ from .search import SearchMixin
 
 
 class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, LimitFieldsMixin):
-    def enhance_queryset(self, queryset, Model, params):
+    def filter_queryset(self, queryset, Model, params):
         # filters
         if 'filters' in params:
             queryset = queryset.filter(self.get_filters(params, Model))
@@ -13,6 +13,12 @@ class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, LimitFieldsMixin
         # search
         if 'search' in params and params['search']:
             queryset = queryset.filter(self.get_search(params, Model))
+
+        return queryset
+
+    def enhance_queryset(self, queryset, Model, params):
+        # filter + search
+        queryset = self.filter_queryset(queryset, Model, params)
 
         # sort
         if 'sort' in params:

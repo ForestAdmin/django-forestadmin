@@ -1,12 +1,12 @@
 from django.http import JsonResponse, HttpResponse
-from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, QuerysetMixin, \
-    JsonApiSerializerMixin, ResourceMixin
+from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, \
+    JsonApiSerializerMixin
+from django_forest.resources.utils.resource import ResourceView
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
-class ListView(ResourceMixin, FormatFieldMixin, QuerysetMixin, SmartFieldMixin, JsonApiSerializerMixin, generic.View):
+class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, ResourceView):
     def get(self, request):
         # default
         queryset = self.Model.objects.all()
@@ -42,10 +42,7 @@ class ListView(ResourceMixin, FormatFieldMixin, QuerysetMixin, SmartFieldMixin, 
             return JsonResponse(data, safe=False)
 
     def delete(self, request):
-        # TODO handle all_records, all_records_ids_excluded, all_records_subset_query
-        body = self.get_body(request.body)
-
-        ids = body['data']['attributes']['ids']
+        ids = self.get_ids_from_request(request)
         # Notice: this does not run pre/post_delete signals
         self.Model.objects.filter(pk__in=ids).delete()
         return HttpResponse(status=204)

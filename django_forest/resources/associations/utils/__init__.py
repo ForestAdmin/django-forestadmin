@@ -1,3 +1,3 @@
-from django_forest.resources.associations.utils.association import AssociationMixin
+from django_forest.resources.associations.utils.association import AssociationView
 
-__all__ = ['AssociationMixin']
+__all__ = ['AssociationView']

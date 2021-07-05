@@ -5,7 +5,6 @@ from pytz import timezone
 
 from django_forest.resources.utils.queryset.filters.date import DATE_OPERATORS, handle_date_operator
 from django_forest.utils.type_mapping import get_type
-from django_forest.utils.models import Models
 
 OPERATORS = {
     'not': '',
@@ -74,7 +73,7 @@ class FiltersMixin:
     def get_field_type(self, field, Model):
         if ':' in field:
             fields = field.split(':')
-            RelatedModel = Models.get(fields[0])
+            RelatedModel = self.get_association_field(Model, fields[0]).related_model
             field_type = get_type(RelatedModel._meta.get_field(fields[1]))
         else:
             field_type = get_type(Model._meta.get_field(field))
@@ -83,7 +82,10 @@ class FiltersMixin:
 
     def get_filters(self, params, Model):
         filters = json.loads(params['filters'])
-        tz = timezone(params['timezone'])
+
+        tz = None
+        if 'timezone' in params:
+            tz = timezone(params['timezone'])
 
         if 'aggregator' in filters:
             return self.handle_aggregator(filters, Model, tz)

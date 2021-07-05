@@ -5,7 +5,7 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
-from django_forest.tests.models import Question, Restaurant, Publication, Article
+from django_forest.tests.models import Question, Restaurant, Publication, Article, Choice
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
@@ -22,7 +22,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.url = reverse('resources:associations:list',
                            kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
         self.reverse_url = reverse('resources:associations:list',
-                           kwargs={'resource': 'Choice', 'pk': 1, 'association_resource': 'question'})
+                                   kwargs={'resource': 'Choice', 'pk': 1, 'association_resource': 'question'})
         self.bad_url = reverse('resources:associations:list',
                                kwargs={'resource': 'Foo', 'pk': 1, 'association_resource': 'choice_set'})
         self.bad_association_url = reverse('resources:associations:list',
@@ -239,6 +239,72 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                                       content_type='application/json')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Article.objects.count(), 1)
+
+    def test_delete_all_records(self):
+        data = {
+            'data': {
+                'attributes': {
+                    'ids': [
+                        {
+                            'id': '1',
+                            'type': 'choice'
+                        }
+                    ],
+                    'collection_name': 'Choice',
+                    'parent_collection_name': 'Question',
+                    'parent_collection_id': '1',
+                    'parent_association_name': 'choice_set',
+                    'all_records': True,
+                    'all_records_subset_query': {
+                        'page[number]': 1,
+                        'page[size]': 15,
+                        'fields[Choice]': 'id,question,choice_text,foo,bar'
+                    },
+                    'all_records_ids_excluded': ['2'],
+                    'smart_action_id': None
+                },
+                'type': 'action-requests'
+            }
+        }
+        self.assertEqual(Choice.objects.count(), 2)
+        response = self.client.delete(f'{self.url}?delete=true',
+                                      json.dumps(data),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Choice.objects.count(), 1)
+
+    def test_delete_all_records_no_association(self):
+        data = {
+            'data': {
+                'attributes': {
+                    'ids': [
+                        {
+                            'id': '1',
+                            'type': 'choice'
+                        }
+                    ],
+                    'collection_name': 'Choice',
+                    'parent_collection_name': 'Question',
+                    'parent_collection_id': '1',
+                    'parent_association_name': 'foo',
+                    'all_records': True,
+                    'all_records_subset_query': {
+                        'page[number]': 1,
+                        'page[size]': 15,
+                        'fields[Choice]': 'id,question,choice_text,foo,bar'
+                    },
+                    'all_records_ids_excluded': ['2'],
+                    'smart_action_id': None
+                },
+                'type': 'action-requests'
+            }
+        }
+        response = self.client.delete(f'{self.url}?delete=true',
+                                      json.dumps(data),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model Question'}]})
 
     def test_delete_no_model(self):
         data = {

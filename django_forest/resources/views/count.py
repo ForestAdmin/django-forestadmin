@@ -1,10 +1,9 @@
 from django.http import JsonResponse
-from django.views import generic
 
-from django_forest.resources.utils import ResourceMixin
+from django_forest.resources.utils import ResourceView
 
 
-class CountView(ResourceMixin, generic.View):
+class CountView(ResourceView):
     def get(self, request):
         queryset = self.Model.objects.count()
 

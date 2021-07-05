@@ -1,11 +1,11 @@
 from django.http import JsonResponse, HttpResponse
-from django.views import generic
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, ResourceMixin
+from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, \
+    ResourceView
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
-class DetailView(ResourceMixin, SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, generic.View):
+class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, ResourceView):
 
     def get(self, request, pk):
         queryset = self.Model.objects.get(pk=pk)

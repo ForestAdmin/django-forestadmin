@@ -276,6 +276,42 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Question.objects.count(), 1)
 
+    def test_delete_all_records(self):
+        data = {
+            'data': {
+                'attributes': {
+                    'ids': [
+                        '1'
+                    ],
+                    'collection_name': 'Question',
+                    'parent_collection_name': None,
+                    'parent_collection_id': None,
+                    'parent_association_name': None,
+                    'all_records': True,
+                    'all_records_subset_query': {
+                        'fields[Question]': 'id,question_text,pub_date',
+                        'fields[subject]': 'name',
+                        'fields[subject2]': 'name',
+                        'fields[topic]': 'name',
+                        'page[number]': 1,
+                        'page[size]': 15,
+                        'sort': '-id',
+                        'filters': '{\"field\":\"question_text\",\"operator\":\"equal\",\"value\":\"what is your favorite color?\"}',
+                        "searchExtended": 0
+                    },
+                    'all_records_ids_excluded': [],
+                    'smart_action_id': None
+                },
+                'type': 'action-requests'
+            }
+        }
+        self.assertEqual(Question.objects.count(), 2)
+        response = self.client.delete(self.url,
+                                      json.dumps(data),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Question.objects.count(), 1)
+
     def test_delete_no_model(self):
         data = {
             'data': {

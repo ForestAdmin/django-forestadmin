@@ -118,7 +118,7 @@ class SearchMixin:
 
         q_objects |= self.fill_conditions(search, Model.__name__)
 
-        if 'searchExtended' in params and strtobool(params['searchExtended']):
+        if 'searchExtended' in params and strtobool(str(params['searchExtended'])):
             q_objects |= self.handle_search_extended(search, Model)
 
         return q_objects

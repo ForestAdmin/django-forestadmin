@@ -1,17 +1,8 @@
-from django_forest.resources.utils import ResourceMixin
+from django_forest.resources.utils.resource import ResourceView
 from django_forest.utils import get_accessor_name
 
 
-class AssociationMixin(ResourceMixin):
-    def get_association_field(self, Model, association_resource):
-        accessors = [(x, get_accessor_name(x)) for x in Model._meta.get_fields() if x.is_relation]
-        for (field, accessor_name) in accessors:
-            if accessor_name == association_resource.lower():
-                return field, accessor_name
-        else:
-            message = f'cannot find association resource {association_resource} for Model {Model.__name__}'
-            raise Exception(message)
-
+class AssociationView(ResourceView):
     def get_association_utils(self, Model, RelatedModel, ids):
         objects = RelatedModel.objects.filter(pk__in=ids)
         fields_to_update = [x for x in RelatedModel._meta.get_fields() if
