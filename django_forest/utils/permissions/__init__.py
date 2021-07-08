@@ -5,6 +5,7 @@ import pytz
 from django_forest.utils.forest_setting import get_forest_setting
 from django_forest.utils.permissions.utils import date_difference_in_seconds, convert_to_new_format, \
     get_permissions_for_rendering, get_smart_action_permissions
+from django_forest.utils.scope_validator import ScopeValidator
 
 
 class Permission:
@@ -31,6 +32,16 @@ class Permission:
 
         cls.fetch_permissions(obj.rendering_id)
         return cls.is_allowed(obj)
+
+    @classmethod
+    def have_permissions_expired(cls, rendering_id):
+        permissions = cls.get_permissions(rendering_id)
+        last_fetch = permissions and 'last_fetch' in permissions and permissions['last_fetch']
+        if not last_fetch:
+            return True
+
+        elapsed_seconds = date_difference_in_seconds(datetime.now(pytz.UTC), last_fetch)
+        return elapsed_seconds >= cls.expiration_in_seconds
 
     @classmethod
     def resource_allowed(cls, obj, resource_permissions):
@@ -123,21 +134,11 @@ class Permission:
         return cls.is_user_allowed(obj.user_id, smart_action_permissions['triggerEnabled'])
 
     @classmethod
-    def have_permissions_expired(cls, rendering_id):
-        permissions = cls.get_permissions(rendering_id)
-        last_fetch = permissions and 'last_fetch' in permissions and permissions['last_fetch']
-        if not last_fetch:
-            return True
-
-        elapsed_seconds = date_difference_in_seconds(datetime.now(pytz.UTC), last_fetch)
-        return elapsed_seconds >= cls.expiration_in_seconds
-
-    @classmethod
     def get_permissions_content(cls, rendering_id):
         permissions = cls.get_permissions(rendering_id)
         return permissions and 'data' in permissions and permissions['data']['collections']
 
-    # When acl disabled permissions are stored and retrieved by rendering
+    # When acl is disabled, permissions are stored and retrieved by rendering
     @classmethod
     def get_permissions(cls, rendering_id):
         if cls.roles_acl_activated:
@@ -174,7 +175,9 @@ class Permission:
 
     @classmethod
     def scope_cache_expired(cls, rendering_id):
-        if not (cls.renderings_cached[rendering_id] and cls.renderings_cached[rendering_id]['last_fetch']):
+        if rendering_id not in cls.renderings_cached or\
+                'last_fetch' not in cls.renderings_cached[rendering_id] or\
+                not cls.renderings_cached[rendering_id]['last_fetch']:
             return True
 
         elapsed_seconds = date_difference_in_seconds(datetime.now(pytz.UTC),
@@ -194,11 +197,10 @@ class Permission:
             obj.collection_name in cls.renderings_cached[obj.rendering_id] and \
             cls.renderings_cached[obj.rendering_id][obj.collection_name]['scope']
 
-    # TODO
     @classmethod
     def are_scopes_valid(cls, obj, scope_permissions):
-        return False
-        # return ForestLiana::ScopeValidator.new(
-        #         scope_permissions['filter'],
-        #         scope_permissions['dynamicScopesValues']['users']
-        #       ).is_scope_in_request?(cls.collection_list_parameters)
+        users = None
+        if 'users' in scope_permissions['dynamicScopesValues']:
+            users = scope_permissions['dynamicScopesValues']['users']
+        scope_validator = ScopeValidator(scope_permissions['filter'], users)
+        return scope_validator.is_scope_in_request(obj.collection_list_parameters)

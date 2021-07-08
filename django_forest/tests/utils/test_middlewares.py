@@ -6,6 +6,6 @@ from django_forest.utils.middlewares import set_middlewares
 
 class UtilsMiddlewaresTests(TestCase):
 
-    def test_set_cors(self):
+    def test_set_middlewares(self):
         set_middlewares()
         self.assertTrue('django_forest.middleware.PermissionMiddleware' in settings.MIDDLEWARE)

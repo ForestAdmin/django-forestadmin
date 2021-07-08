@@ -44,11 +44,11 @@ class PermissionMiddleware:
         return response
 
     def get_token(self, request):
+        token = ''
         if 'Authorization' in request.headers:
             token = request.headers['Authorization'].split()[1]
         # NOTICE: Necessary for downloads authentication.
         elif 'cookie' in request.headers:
-            # TODO review
             REGEX_COOKIE_SESSION_TOKEN = r'forest_session_token=([^;]*)'
             m = re.search(REGEX_COOKIE_SESSION_TOKEN, request.headers['cookie'])
             token = m.group(1)
@@ -59,23 +59,30 @@ class PermissionMiddleware:
     def get_app_name(self, request):
         return request.resolver_match.app_name
 
+    def is_authorized(self, request, resource, token):
+        permission_name = self.mapping[request.resolver_match.url_name][request.method]
+        collection_list_parameters = None
+
+        # Notice: scope handling
+        if permission_name == 'browseEnabled':
+            collection_list_parameters = {
+                'user_id': token['id'],
+                'filters': request.GET.get('filters'),
+            }
+
+        permission = Permission(resource,
+                                permission_name,
+                                token['rendering_id'],
+                                token['id'],
+                                collection_list_parameters=collection_list_parameters)
+        if not Permission.is_authorized(permission):
+            return HttpResponse(status=403)
+
     def process_view(self, request, view_func, *args, **kwargs):
         if self.get_app_name(request).startswith('django_forest:resources'):
-            token = self.get_token(request)
-            resource = args[1]['resource']
-
-            permission_name = self.mapping[request.resolver_match.url_name][request.method]
-            collection_list_parameters = None
-            if permission_name == 'browseEnabled':
-                collection_list_parameters = {
-                    'user_id': token['id'],
-                    'filters': request.GET.get('filters'),
-                }
-
-            permission = Permission(resource,
-                                    permission_name,
-                                    token['rendering_id'],
-                                    token['id'],
-                                    collection_list_parameters=collection_list_parameters)
-            if not Permission.is_authorized(permission):
+            try:
+                token = self.get_token(request)
+            except Exception:
                 return HttpResponse(status=403)
+            else:
+                return self.is_authorized(request, args[1]['resource'], token)
