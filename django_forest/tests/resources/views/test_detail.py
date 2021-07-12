@@ -21,10 +21,10 @@ class ResourceDetailViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:detail', kwargs={'resource': 'Question', 'pk': '1'})
-        self.reverse_url = reverse('resources:detail', kwargs={'resource': 'Choice', 'pk': '1'})
-        self.one_to_one_url = reverse('resources:detail', kwargs={'resource': 'Restaurant', 'pk': '1'})
-        self.bad_url = reverse('resources:detail', kwargs={'resource': 'Foo', 'pk': '1'})
+        self.url = reverse('django_forest:resources:detail', kwargs={'resource': 'Question', 'pk': '1'})
+        self.reverse_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Choice', 'pk': '1'})
+        self.one_to_one_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Restaurant', 'pk': '1'})
+        self.bad_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Foo', 'pk': '1'})
 
     def tearDown(self):
         # reset _registry after each test

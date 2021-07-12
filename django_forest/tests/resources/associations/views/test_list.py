@@ -19,22 +19,22 @@ class ResourceAssociationListViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:associations:list',
+        self.url = reverse('django_forest:resources:associations:list',
                            kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
-        self.reverse_url = reverse('resources:associations:list',
+        self.reverse_url = reverse('django_forest:resources:associations:list',
                                    kwargs={'resource': 'Choice', 'pk': 1, 'association_resource': 'question'})
-        self.bad_url = reverse('resources:associations:list',
+        self.bad_url = reverse('django_forest:resources:associations:list',
                                kwargs={'resource': 'Foo', 'pk': 1, 'association_resource': 'choice_set'})
-        self.bad_association_url = reverse('resources:associations:list',
+        self.bad_association_url = reverse('django_forest:resources:associations:list',
                                            kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
 
-        self.many_url = reverse('resources:associations:list',
+        self.many_url = reverse('django_forest:resources:associations:list',
                                 kwargs={'resource': 'Publication', 'pk': 2, 'association_resource': 'article_set'})
-        self.many_reverse_url = reverse('resources:associations:list',
+        self.many_reverse_url = reverse('django_forest:resources:associations:list',
                                         kwargs={'resource': 'Article', 'pk': 1, 'association_resource': 'publications'})
-        self.many_bad_url = reverse('resources:associations:list',
+        self.many_bad_url = reverse('django_forest:resources:associations:list',
                                     kwargs={'resource': 'Foo', 'pk': 2, 'association_resource': 'article_set'})
-        self.many_bad_association_url = reverse('resources:associations:list',
+        self.many_bad_association_url = reverse('django_forest:resources:associations:list',
                                                 kwargs={'resource': 'Publication', 'pk': 2,
                                                         'association_resource': 'foo'})
 

@@ -26,11 +26,11 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:associations:csv',
+        self.url = reverse('django_forest:resources:associations:csv',
                            kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
-        self.reverse_url = reverse('resources:associations:csv',
+        self.reverse_url = reverse('django_forest:resources:associations:csv',
                                    kwargs={'resource': 'Choice', 'pk': 1, 'association_resource': 'question'})
-        self.bad_association_url = reverse('resources:associations:csv',
+        self.bad_association_url = reverse('django_forest:resources:associations:csv',
                                            kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
 
     def tearDown(self):

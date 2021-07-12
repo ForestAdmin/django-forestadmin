@@ -35,7 +35,7 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
 
     def tearDown(self):
         # reset _registry after each test

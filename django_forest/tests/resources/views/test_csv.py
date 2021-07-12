@@ -26,8 +26,8 @@ class ResourceCsvViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:csv', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('resources:csv', kwargs={'resource': 'Choice'})
+        self.url = reverse('django_forest:resources:csv', kwargs={'resource': 'Question'})
+        self.reverse_url = reverse('django_forest:resources:csv', kwargs={'resource': 'Choice'})
 
     def tearDown(self):
         # reset _registry after each test

@@ -24,13 +24,13 @@ class ResourceListViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:list', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('resources:list', kwargs={'resource': 'Choice'})
-        self.no_data_url = reverse('resources:list', kwargs={'resource': 'Waiter'})
-        self.enum_url = reverse('resources:list', kwargs={'resource': 'Student'})
-        self.uuid_url = reverse('resources:list', kwargs={'resource': 'Serial'})
-        self.one_to_one_url = reverse('resources:list', kwargs={'resource': 'Restaurant'})
-        self.bad_url = reverse('resources:list', kwargs={'resource': 'Foo'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
+        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'Waiter'})
+        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'Student'})
+        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'Serial'})
+        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'Restaurant'})
+        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'Foo'})
 
     def tearDown(self):
         # reset _registry after each test
