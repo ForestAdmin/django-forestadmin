@@ -80,7 +80,7 @@ class CallbackView(View):
         else:
             user = self._authenticate(rendering_id, {'forest_token': resp['access_token']})
 
-            auth_secret = get_forest_setting('AUTH_SECRET')
+            auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
             return jwt.encode({
                 'id': user['id'],
                 'email': user['email'],
@@ -98,7 +98,7 @@ class CallbackView(View):
             callback_url = get_callback_url()
             token = self._verify_code_and_generate_token(callback_url, request)
 
-            auth_secret = get_forest_setting('AUTH_SECRET')
+            auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
             result = {
                 'token': token,
                 'tokenData': jwt.decode(token, auth_secret, algorithms=['HS256'])

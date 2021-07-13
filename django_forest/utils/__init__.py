@@ -25,5 +25,5 @@ def get_token(request):
         m = re.search(REGEX_COOKIE_SESSION_TOKEN, request.headers['cookie'])
         token = m.group(1)
 
-    auth_secret = get_forest_setting('AUTH_SECRET')
+    auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
     return jwt.decode(token, auth_secret, algorithms=['HS256'])

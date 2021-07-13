@@ -128,7 +128,7 @@ FOREST = {
     'FOREST_URL': 'https://api.test.forestadmin.com',
     'APPLICATION_URL': 'http://localhost:8000',
     'FOREST_ENV_SECRET': 'foo',
-    'AUTH_SECRET': base64.urlsafe_b64encode(uuid.uuid4().bytes),
+    'FOREST_AUTH_SECRET': base64.urlsafe_b64encode(uuid.uuid4().bytes),
     # 'INCLUDED_MODELS': [],
     # 'EXCLUDED_MODELS': ['Permission', 'Group', 'User', 'ContentType'],
     # 'CONFIG_DIR': 'forest',
