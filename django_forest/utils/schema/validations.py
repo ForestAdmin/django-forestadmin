@@ -1,4 +1,5 @@
 from django.core.validators import RegexValidator
+from django.db.models.fields import NOT_PROVIDED
 
 VALIDATORS = {
     'max_length': {
@@ -55,7 +56,7 @@ def handle_validators(validators, f):
 
 
 def handle_is_present(field, f):
-    if not field.blank or not field.null:
+    if (not field.blank or not field.null) and not (hasattr(field, 'default') and field.default != NOT_PROVIDED):
         f = add_validation(f, 'is present', 'Ensure this value is not null or not empty')
 
     return f
