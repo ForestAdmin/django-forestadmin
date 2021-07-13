@@ -8,7 +8,7 @@ class DetailView(ResourceView):
         data = {}
         # TODO
 
-        #queryset = self.Model.objects.get(pk=pk)
+        # queryset = self.Model.objects.get(pk=pk)
 
         return JsonResponse(data, safe=False)
 
@@ -16,6 +16,6 @@ class DetailView(ResourceView):
         data = {}
         # TODO
 
-        #queryset = self.Model.objects.get(pk=pk)
+        # queryset = self.Model.objects.get(pk=pk)
 
         return JsonResponse(data, safe=False)
