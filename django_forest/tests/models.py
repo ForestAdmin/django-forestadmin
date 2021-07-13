@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinLengthValidator
@@ -6,6 +7,9 @@ from django.db import models
 
 
 # ForeignKey example
+from django.db.models import UUIDField
+
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200, validators=[MinLengthValidator(1)], default='how are you?')
     pub_date = models.DateTimeField('date published', default=datetime.datetime(2020, 5, 17))
@@ -15,7 +19,7 @@ class Question(models.Model):
 
 
 class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
 
@@ -112,3 +116,8 @@ class ChessBoard(models.Model):
         models.CharField(max_length=10, blank=True),
         size=8,
     )
+
+
+# UUID Field
+class Serial(models.Model):
+    uuid = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -14,7 +14,7 @@ COLLECTION = {
 
 FIELD = {
     'field': '',
-    'type': '',
+    'type': 'String',
     'is_filterable': True,
     'is_sortable': True,
     'is_read_only': False,
@@ -33,7 +33,7 @@ ACTION = {
     'type': 'bulk',
     'baseUrl': None,
     'endpoint': '',
-    'httpMethod': 'POST',
+    'http_method': 'POST',
     'redirect': None,
     'download': False,
     'fields': [],

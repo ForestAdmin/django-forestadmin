@@ -14,5 +14,13 @@
       "question_text": "do you like chocolate?",
       "pub_date": "2021-06-02T15:52:53.528Z"
     }
+  },
+  {
+    "model": "tests.question",
+    "pk": 3,
+    "fields": {
+      "question_text": "who is your favorite singer?",
+      "pub_date": "2021-06-03T13:52:53.528Z"
+    }
   }
 ]

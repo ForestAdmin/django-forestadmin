@@ -1,6 +1,6 @@
 from django.test import TestCase, override_settings
 
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 from test.support import EnvironmentVarGuard
 

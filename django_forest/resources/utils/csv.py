@@ -1,0 +1,34 @@
+from datetime import datetime
+
+from django.http import HttpResponse
+
+
+class CsvMixin:
+    def fill_csv_relationships(self, res, record, data, params):
+        for name, value in record['relationships'].items():
+            related_res = next((x for x in data['included']
+                                if x['type'] == value['data']['type'] and str(x['id']) == str(value['data']['id'])),
+                               None)
+            if related_res:
+                res[name] = related_res['attributes'][params[f'fields[{name}]']]
+        return res
+
+    def fill_csv(self, data, writer, params):
+        for record in data['data']:
+            res = record['attributes']
+            res['id'] = record['id']
+            if 'relationships' in record:
+                res = self.fill_csv_relationships(res, record, data, params)
+
+            writer.writerow(res)
+
+    def csv_response(self, csv_filename):
+        return HttpResponse(
+            content_type='text/csv; charset=utf-8',
+            headers={
+                'Content-Disposition': f'attachment; filename="{csv_filename}.csv"',
+                'Last-Modified': datetime.now(),
+                'X-Accel-Buffering': 'no',
+                'Cache-Control': 'no-cache'
+            },
+        )

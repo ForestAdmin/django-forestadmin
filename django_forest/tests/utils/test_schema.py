@@ -12,7 +12,7 @@ from django_forest.tests.fixtures.schema import test_schema, test_choice_schema,
     test_exclude_django_contrib_schema, test_serialized_schema, test_question_schema_data
 from django_forest.tests.utils.test_forest_api_requester import mocked_requests
 from django_forest.utils.collection import Collection
-from django_forest.utils.json_api_serializer import JsonApiSchema
+from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.models import Models
 from django_forest.utils.schema import Schema
 
@@ -74,6 +74,7 @@ class UtilsSchemaTests(TestCase):
     @mock.patch('importlib.metadata.version', return_value='0.0.0')
     def test_build_schema_excluded_models(self, mock_version, mock_orm_version):
         # reset schema
+        self.maxDiff = None
         Schema.schema = {
             'collections': [],
             'meta': {
@@ -105,9 +106,9 @@ class UtilsSchemaTests(TestCase):
         collection = Schema.get_collection('Foo')
         self.assertEqual(collection, None)
 
-    def test_handle_json_api_serializer(self):
-        Schema.handle_json_api_serializer()
-        self.assertEqual(len(JsonApiSchema._registry), 16)
+    def test_handle_json_api_schema(self):
+        Schema.handle_json_api_schema()
+        self.assertEqual(len(JsonApiSchema._registry), 17)
 
 
 # reset forest config dir auto import

@@ -4,8 +4,8 @@ from django_forest.utils.schema import Schema
 
 class Collection:
     name = None  # TODO warn if set to empty string?
-    is_searchable = None
-    is_read_only = None
+    is_searchable = False
+    is_read_only = False
     icon = None
     only_for_relationships = None
     pagination_type = None

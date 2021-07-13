@@ -10,7 +10,7 @@ from django_forest.authentication.oidc.client_manager import OidcClientManager
 from django_forest.authentication.utils import get_callback_url
 from django_forest.utils.error_handler import MESSAGES
 from django_forest.utils.forest_api_requester import ForestApiRequester
-from django_forest.utils.get_forest_setting import get_forest_setting
+from django_forest.utils.forest_setting import get_forest_setting
 
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ class CallbackView(View):
         else:
             user = self._authenticate(rendering_id, {'forest_token': resp['access_token']})
 
-            auth_secret = get_forest_setting('AUTH_SECRET')
+            auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
             return jwt.encode({
                 'id': user['id'],
                 'email': user['email'],
@@ -98,7 +98,7 @@ class CallbackView(View):
             callback_url = get_callback_url()
             token = self._verify_code_and_generate_token(callback_url, request)
 
-            auth_secret = get_forest_setting('AUTH_SECRET')
+            auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
             result = {
                 'token': token,
                 'tokenData': jwt.decode(token, auth_secret, algorithms=['HS256'])

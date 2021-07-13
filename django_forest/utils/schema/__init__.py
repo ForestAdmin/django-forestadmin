@@ -10,8 +10,8 @@ from django.utils.module_loading import autodiscover_modules
 
 from django_forest.utils.schema.apimap_errors import APIMAP_ERRORS
 from django_forest.utils.models import Models
-from django_forest.utils.get_type import get_type
-from django_forest.utils.json_api_serializer import create_json_api_schema
+from django_forest.utils.type_mapping import get_type
+from django_forest.utils.schema.json_api_schema import create_json_api_schema
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from .definitions import COLLECTION, FIELD
 from .validations import handle_validations
@@ -20,9 +20,10 @@ from .default import handle_default_value
 
 from .version import get_app_version
 
-# Get an instance of a logger
-from ..get_forest_setting import get_forest_setting
+from .. import get_accessor_name
+from ..forest_setting import get_forest_setting
 
+# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
@@ -75,24 +76,32 @@ class Schema:
     def handle_relation(cls, field, f):
         if field.is_relation:
             # Notice: do not add if not in included/excluded models
-            if field.target_field.model not in Models.list():
+            if field.related_model not in Models.list():
                 return None
 
             many = field.one_to_many or field.many_to_many
+            f['field'] = get_accessor_name(field)
             f['type'] = cls._get_relation_type(many)
             f['relationship'] = cls._get_relationship(field)
-            # Notice: forest-rails always put id on the end, do we support polymorphic support?
-            f['reference'] = f'{field.target_field.model.__name__}.{field.target_field.name}'
+            # Notice: forest-rails always put id on the end (it should not), do we handle polymorphic support?
+            f['reference'] = f'{field.related_model.__name__}.{field.target_field.column}'
             f['is_filterable'] = not many
-            f['inverse_of'] = None if not hasattr(field, 'related_name') else field.related_name
+            f['inverse_of'] = get_accessor_name(field.remote_field)
         return f
+
+    @staticmethod
+    def get_type(field):
+        type = get_type(field)
+        if type in ('Integer', 'Float'):
+            return 'Number'
+        return type
 
     @classmethod
     def add_fields(cls, model, collection):
         for field in model._meta.get_fields():
             f = cls.get_default({
                 'field': field.name,
-                'type': get_type(field)
+                'type': cls.get_type(field)
             }, FIELD)
             f = handle_default_value(field, f)
             f = handle_validations(field, f)
@@ -116,7 +125,7 @@ class Schema:
         autodiscover_modules(get_forest_setting('CONFIG_DIR', 'forest'))
 
     @classmethod
-    def handle_json_api_serializer(cls):
+    def handle_json_api_schema(cls):
         for collection in cls.schema['collections']:
             # Notice: create marshmallow-jsonapi resource for json api serializer
             create_json_api_schema(collection)

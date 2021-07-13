@@ -4,3 +4,4 @@ source=
 omit =
     django_forest/tests/*
     django_forest/apps.py
+    django_forest/management/*

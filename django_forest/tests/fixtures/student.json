@@ -1,0 +1,23 @@
+[
+  {
+    "model": "tests.student",
+    "pk": 1,
+    "fields": {
+      "year_in_school": "FR"
+    }
+  },
+  {
+    "model": "tests.student",
+    "pk": 2,
+    "fields": {
+      "year_in_school": "SO"
+    }
+  },
+  {
+    "model": "tests.student",
+    "pk": 3,
+    "fields": {
+      "year_in_school": "JR"
+    }
+  }
+]
