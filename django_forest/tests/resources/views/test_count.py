@@ -20,14 +20,14 @@ class ResourceCountViewTests(TransactionTestCase):
         JsonApiSchema._registry = {}
 
     def test_get(self):
-        url = reverse('resources:count', kwargs={'resource': 'Question'})
+        url = reverse('django_forest:resources:count', kwargs={'resource': 'Question'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {'count': 3})
 
     def test_get_no_model(self):
-        url = reverse('resources:count', kwargs={'resource': 'Foo'})
+        url = reverse('django_forest:resources:count', kwargs={'resource': 'Foo'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 400)

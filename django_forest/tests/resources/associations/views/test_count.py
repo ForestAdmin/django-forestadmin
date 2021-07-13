@@ -20,21 +20,21 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
         JsonApiSchema._registry = {}
 
     def test_get(self):
-        url = reverse('resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {'count': 2})
 
     def test_get_no_model(self):
-        url = reverse('resources:associations:count', kwargs={'resource': 'Foo', 'pk': 1, 'association_resource': 'choice_set'})
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'Foo', 'pk': 1, 'association_resource': 'choice_set'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
 
     def test_get_no_association(self):
-        url = reverse('resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 400)

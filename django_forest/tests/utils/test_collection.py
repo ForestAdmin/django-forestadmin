@@ -36,7 +36,7 @@ class QuestionForest(Collection):
             {
                 'name': 'Upload Legal Docs',
                 'endpoint': '/foo/upload_legal_docs',
-                'httpMethod': 'GET',
+                'http_method': 'GET',
                 'download': True,
                 'type': 'single',
                 'fields': [
@@ -177,7 +177,7 @@ class UtilsCollectionTests(TestCase):
             'type': 'bulk',
             'baseUrl': None,
             'endpoint': '/forest/actions/mark-as-live',
-            'httpMethod': 'POST',
+            'http_method': 'POST',
             'redirect': None,
             'download': False,
             'fields': [],
@@ -191,7 +191,7 @@ class UtilsCollectionTests(TestCase):
             'type': 'single',
             'baseUrl': None,
             'endpoint': '/foo/upload_legal_docs',
-            'httpMethod': 'GET',
+            'http_method': 'GET',
             'redirect': None,
             'download': True,
             'fields': [
@@ -253,7 +253,7 @@ class UtilsCollectionTests(TestCase):
             'type': 'single',
             'baseUrl': None,
             'endpoint': '/forest/actions/send-invoice',
-            'httpMethod': 'POST',
+            'http_method': 'POST',
             'redirect': None,
             'download': False,
             'fields': [

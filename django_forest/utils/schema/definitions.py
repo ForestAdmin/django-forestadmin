@@ -33,7 +33,7 @@ ACTION = {
     'type': 'bulk',
     'baseUrl': None,
     'endpoint': '',
-    'httpMethod': 'POST',
+    'http_method': 'POST',
     'redirect': None,
     'download': False,
     'fields': [],

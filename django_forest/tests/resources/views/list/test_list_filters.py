@@ -18,8 +18,8 @@ class ResourceListFilterViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:list', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('resources:list', kwargs={'resource': 'Choice'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
 
     def tearDown(self):
         # reset _registry after each test

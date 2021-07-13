@@ -24,13 +24,13 @@ class ResourceListViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('resources:list', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('resources:list', kwargs={'resource': 'Choice'})
-        self.no_data_url = reverse('resources:list', kwargs={'resource': 'Waiter'})
-        self.enum_url = reverse('resources:list', kwargs={'resource': 'Student'})
-        self.uuid_url = reverse('resources:list', kwargs={'resource': 'Serial'})
-        self.one_to_one_url = reverse('resources:list', kwargs={'resource': 'Restaurant'})
-        self.bad_url = reverse('resources:list', kwargs={'resource': 'Foo'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
+        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'Waiter'})
+        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'Student'})
+        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'Serial'})
+        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'Restaurant'})
+        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'Foo'})
 
     def tearDown(self):
         # reset _registry after each test
@@ -110,61 +110,3 @@ class ResourceListViewTests(TransactionTestCase):
                           ORDER BY "tests_question"."question_text"
                           ASC
                           LIMIT 15'''.replace('\n', ' ').split()))
-        self.assertEqual(data, {
-            'data': [
-                {
-                    'type': 'choice',
-                    'attributes': {
-                        'choice_text': 'yes'
-                    },
-                    'id': 1,
-                    'relationships': {
-                        'question': {
-                            'links': {
-                                'related': '/forest/Choice/1/relationships/question'
-                            },
-                            'data': {
-                                'type': 'question',
-                                'id': '1'
-                            }
-                        }
-                    },
-                    'links': {
-                        'self': '/forest/Choice/1'
-                    }
-                },
-                {
-                    'type': 'choice',
-                    'attributes': {
-                        'choice_text': 'no'
-                    },
-                    'id': 2,
-                    'relationships': {
-                        'question': {
-                            'links': {
-                                'related': '/forest/Choice/2/relationships/question'
-                            },
-                            'data': {
-                                'type': 'question',
-                                'id': '1'
-                            }
-                        }
-                    },
-                    'links': {
-                        'self': '/forest/Choice/2'
-                    }
-                }
-            ],
-            'included': [
-                {
-                    'type': 'question',
-                    'attributes': {
-                        'question_text': 'what is your favorite color?'
-                    },
-                    'id': 1,
-                    'links': {
-                        'self': '/forest/Question/1'
-                    }
-                }
-            ]
-        })

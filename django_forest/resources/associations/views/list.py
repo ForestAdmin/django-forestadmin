@@ -60,7 +60,7 @@ class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
     def delete(self, request, pk, association_resource):
         try:
             association_field = self.get_association_field(self.Model, association_resource)
-            ids = self.get_ids_from_request(request)
+            ids = self.get_ids_from_request(request, self.Model)
         except Exception as e:
             return self.error_response(e)
         else:

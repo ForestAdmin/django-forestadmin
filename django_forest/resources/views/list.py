@@ -45,7 +45,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             return JsonResponse(data, safe=False)
 
     def delete(self, request):
-        ids = self.get_ids_from_request(request)
+        ids = self.get_ids_from_request(request, self.Model)
         # Notice: this does not run pre/post_delete signals
         self.Model.objects.filter(pk__in=ids).delete()
         return HttpResponse(status=204)
