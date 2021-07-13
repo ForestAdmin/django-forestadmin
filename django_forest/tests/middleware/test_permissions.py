@@ -419,3 +419,13 @@ class MiddlewarePermissionsActionsTests(TestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.post(url, json.dumps(self.body), content_type='application/json')
         self.assertEqual(response.status_code, 403)
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_action, 200))
+    def test_actions_no_resource(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        body = copy.deepcopy(self.body)
+        body['data']['attributes']['collection_name'] = 'Foo'
+        response = self.client.post(self.url, json.dumps(body), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
