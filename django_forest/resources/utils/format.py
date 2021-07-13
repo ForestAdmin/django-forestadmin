@@ -40,9 +40,8 @@ class FormatFieldMixin:
     def populate_attribute(self, body):
         fields = {x.name: x for x in self.Model._meta.get_fields() if not x.many_to_many}
         attributes = {}
-        if 'attributes' in body['data']:
-            attributes.update(self.get_attributes(body['data']['attributes'], fields))
-        if 'relationships' in body['data']:
-            attributes.update(self.get_attributes(body['data']['relationships'], fields))
+        for key in ('attributes', 'relationships'):
+            if key in body['data']:
+                attributes.update(self.get_attributes(body['data'][key], fields))
 
         return attributes
