@@ -1,30 +1,61 @@
-import uuid
+from django.db import connection
 
-from django.http import JsonResponse
+from django_forest.stats.utils.stats import StatsMixin
+from django_forest.utils.views import BaseView
 
-from django_forest.stats.utils.stats import StatsView
 
+class IndexView(StatsMixin, BaseView):
 
-class IndexView(StatsView):
+    def get_row(self):
+        with connection.cursor() as cursor:
+            cursor.execute(self.body['query'])
+            name = cursor.description[0].name
+            if name != 'value':
+                raise Exception(f"The result columns must be named 'value' instead of '{name}'.")
+            row = cursor.fetchone()
 
-    def handle_live_query_chart(self, body, queryset):
-        # TODO
-        res = {
-            'data': {
-                'attributes': {},
-                'type': 'stats',
-                'id': uuid.uuid4()
-            }}
-        return res
+        return row
+
+    def get_rows(self):
+        with connection.cursor() as cursor:
+            cursor.execute(self.body['query'])
+            key = cursor.description[0].name
+            value = cursor.description[1].name
+            if key != 'key' or value != 'value':
+                raise Exception(f"The result columns must be named 'key', 'value' instead of '{key}', '{value}'.")
+            rows = cursor.fetchall()
+
+        return rows
+
+    def get_value(self):
+        key = 'countCurrent'
+        if self.body['type'] == 'Objective':
+            key = 'value'
+
+        return {
+            key: self.get_row()
+        }
+
+    def get_pie(self):
+        return [{
+            'key': self.serialize(x[0]),
+            'value': x[1]
+        } for x in self.get_rows()]
+
+    def get_line(self):
+        return [{
+            'label': row[0],
+            'values': {
+                'value': row[1]
+            }
+        } for row in self.get_rows()]
+
+    def get_leaderboard(self):
+        return [{
+            'key': self.serialize(row[0]),
+            'value': row[1]
+        } for row in self.get_rows() if row[1] is not None]
 
     def post(self, request, *args, **kwargs):
-        body = self.get_body(request.body)
-        manager = self.Model.objects.all()
-        queryset = self.enhance_queryset(manager, self.Model, body)
-
-        try:
-            res = self.handle_live_query_chart(body, queryset)
-        except Exception as e:
-            return self.error_response(e)
-        else:
-            return JsonResponse(res, safe=False)
+        self.body = self.get_body(request.body)
+        return self.chart()
