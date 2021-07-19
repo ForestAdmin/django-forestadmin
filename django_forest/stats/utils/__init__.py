@@ -1,16 +1,24 @@
 from django.db.models import Sum, Count
 
 
-def get_queryset_aggregate(body, queryset, pk_name):
+def get_annotated_queryset(body, queryset, pk_name, association_field_name=None):
     aggregate = body['aggregate']
-    # sum
-    if aggregate == 'Sum':
-        queryset = queryset.annotate(Sum(body['aggregate_field']))
-    # count
-    else:
-        queryset = queryset.annotate(Count(pk_name))
 
-    return queryset, aggregate.lower()
+    # determine value
+    value = pk_name  # count by default
+    if aggregate == 'sum':  # sum
+        value = body['aggregate_field']
+
+    # do we have an association field?
+    if association_field_name is not None:
+        value = f'{association_field_name}__{value}'
+
+    # select annotation
+    annotation = Count(value)  # count
+    if aggregate == 'Sum':
+        annotation = Sum(value)  # sum
+
+    return queryset.annotate(annotation), value
 
 
 def get_format_time_frame(body):
