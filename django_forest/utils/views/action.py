@@ -12,10 +12,10 @@ class ActionView(BaseView):
             'http_method': request.method
         }
 
-    def is_authorized(self, resource, token, smart_action_request_info):
-        permission_name = 'actions'
+    def is_authorized(self, request, token, resource):
+        smart_action_request_info = self.get_smart_action_request_info(request)
         permission = Permission(resource,
-                                permission_name,
+                                'actions',
                                 token['rendering_id'],
                                 token['id'],
                                 smart_action_request_info=smart_action_request_info)
@@ -34,8 +34,7 @@ class ActionView(BaseView):
             # check permissions
             try:
                 token = get_token(request)
-                smart_action_request_info = self.get_smart_action_request_info(request)
-                self.is_authorized(resource, token, smart_action_request_info)
+                self.is_authorized(request, token, resource)
             except Exception:
                 return HttpResponse(status=403)
             else:

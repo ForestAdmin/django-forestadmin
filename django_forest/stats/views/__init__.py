@@ -1,4 +1,4 @@
-from .detail import DetailView
-from .index import IndexView
+from .statWithParameters import StatWithParametersView
+from .liveQueries import LiveQueriesView
 
-__all__ = ['IndexView', 'DetailView']
+__all__ = ['LiveQueriesView', 'StatWithParametersView']

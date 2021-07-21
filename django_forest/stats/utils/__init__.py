@@ -4,21 +4,21 @@ from django.db.models import Sum, Count
 def get_annotated_queryset(body, queryset, pk_name, association_field_name=None):
     aggregate = body['aggregate']
 
-    # determine value
-    value = pk_name  # count by default
+    # determine name
+    name = pk_name  # count by default
     if aggregate == 'sum':  # sum
-        value = body['aggregate_field']
+        name = body['aggregate_field']
 
     # do we have an association field?
     if association_field_name is not None:
-        value = f'{association_field_name}__{value}'
+        name = f'{association_field_name}__{name}'
 
     # select annotation
-    annotation = Count(value)  # count
+    annotation = Count(name)  # count
     if aggregate == 'Sum':
-        annotation = Sum(value)  # sum
+        annotation = Sum(name)  # sum
 
-    return queryset.annotate(annotation), value
+    return queryset.annotate(annotation), name
 
 
 def get_format_time_frame(body):

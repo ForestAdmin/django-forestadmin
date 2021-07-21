@@ -1,3 +1,5 @@
+import json
+
 from django.http import HttpResponse
 
 from django_forest.utils import get_token
@@ -5,7 +7,6 @@ from django_forest.utils.permissions import Permission
 
 
 class PermissionMiddleware:
-    # TODO: smart action and stats
     mapping = {
         'list': {
             'GET': 'browseEnabled',
@@ -22,6 +23,12 @@ class PermissionMiddleware:
         },
         'csv': {
             'GET': 'exportEnabled'
+        },
+        'liveQueries': {
+            'POST': 'liveQueries'
+        },
+        'statWithParameters': {
+            'POST': 'statWithParameters'
         }
     }
 
@@ -40,19 +47,37 @@ class PermissionMiddleware:
 
         return response
 
-    def is_authorized(self, request, resource, token):
+    def is_authorized(self, request, token, resource):
         permission_name = self.mapping[request.resolver_match.url_name][request.method]
+
+        kwargs = {}
+        if permission_name in ('liveQueries', 'statWithParameters'):
+            body = json.loads(request.body.decode('utf-8'))
+            if permission_name in 'liveQueries':
+                kwargs['query_request_info'] = body['query']
+            elif permission_name in 'statWithParameters':
+                kwargs['query_request_info'] = body
+
         permission = Permission(resource,
                                 permission_name,
                                 token['rendering_id'],
-                                token['id'])
+                                token['id'],
+                                **kwargs)
         if not Permission.is_authorized(permission):
             raise Exception('not authorized')
 
+    def get_resource(self, args):
+        resource = None
+        if 'resource' in args[1]:
+            resource = args[1]['resource']
+        return resource
+
     def process_view(self, request, view_func, *args, **kwargs):
-        if request.resolver_match.app_name.startswith('django_forest:resources'):
+        if request.resolver_match.app_name.startswith('django_forest:resources') or \
+                request.resolver_match.app_name.startswith('django_forest:stats'):
             try:
                 token = get_token(request)
-                self.is_authorized(request, args[1]['resource'], token)
+                resource = self.get_resource(args)
+                self.is_authorized(request, token, resource)
             except Exception:
                 return HttpResponse(status=403)
