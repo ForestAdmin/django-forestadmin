@@ -10,6 +10,13 @@ class StatsMixin:
             return value.strftime('%d/%m/%Y')
         return value
 
+    def fill_data(self, data, key, value):
+        serialized_key = self.serialize(key)
+        if serialized_key in data:
+            data[serialized_key] += value
+        else:
+            data[serialized_key] = value
+
     def handle_values(self, params, queryset=None):
         values = None
         _type = params['type']

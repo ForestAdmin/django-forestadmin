@@ -12,11 +12,7 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         data = {}
         for x in queryset:
             if x[value] is not None:
-                serialized_key = self.serialize(x[key])
-                if serialized_key in data:
-                    data[serialized_key] += int(x[value])
-                else:
-                    data[serialized_key] = int(x[value])
+                self.fill_data(data, x[key], int(x[value]))
         return [{
             'key': k,
             'value': v

@@ -7,11 +7,7 @@ class LiveQueriesView(StatsMixin, BaseView):
     def compute_data(self, query):
         data = {}
         for key, value in execute_query(query, 'key', 'value'):
-            serialized_key = self.serialize(key)
-            if serialized_key in data:
-                data[serialized_key] += value
-            else:
-                data[serialized_key] = value
+            self.fill_data(data, key, value)
         return data
 
     def get_value(self, params, queryset=None):
