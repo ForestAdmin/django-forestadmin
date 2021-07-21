@@ -266,12 +266,12 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                 'type': 'action-requests'
             }
         }
-        self.assertEqual(Choice.objects.count(), 2)
+        self.assertEqual(Choice.objects.count(), 3)
         response = self.client.delete(f'{self.url}?delete=true',
                                       json.dumps(data),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Choice.objects.count(), 1)
+        self.assertEqual(Choice.objects.count(), 2)
 
     def test_delete_all_records_no_association(self):
         data = {

@@ -10,20 +10,21 @@ class StatsMixin:
             return value.strftime('%d/%m/%Y')
         return value
 
-    def handle_values(self, _type):
+    def handle_values(self, params, queryset=None):
         values = None
+        _type = params['type']
         if _type in ('Value', 'Objective'):
-            values = self.get_value()
+            values = self.get_value(params, queryset)
         elif _type == 'Pie':
-            values = self.get_pie()
+            values = self.get_pie(params, queryset)
         elif _type == 'Line':
-            values = self.get_line()
+            values = self.get_line(params, queryset)
         elif _type == 'Leaderboard':
-            values = self.get_leaderboard()
+            values = self.get_leaderboard(params, queryset)
 
         return values
 
-    def handle_chart(self):
+    def handle_chart(self, params, queryset=None):
         res = {
             'data': {
                 'attributes': {},
@@ -31,15 +32,15 @@ class StatsMixin:
                 'id': uuid.uuid4()
             }}
 
-        if 'type' in self.body:
+        if 'type' in params:
             res['data']['attributes'] = {
-                'value': self.handle_values(self.body['type'])
+                'value': self.handle_values(params, queryset)
             }
         return res
 
-    def chart(self):
+    def chart(self, params, queryset=None):
         try:
-            res = self.handle_chart()
+            res = self.handle_chart(params, queryset)
         except Exception as e:
             return self.error_response(e)
         else:

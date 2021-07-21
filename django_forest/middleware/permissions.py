@@ -27,8 +27,8 @@ class PermissionMiddleware:
         'liveQueries': {
             'POST': 'liveQueries'
         },
-        'statWithParameters': {
-            'POST': 'statWithParameters'
+        'statsWithParameters': {
+            'POST': 'statsWithParameters'
         }
     }
 
@@ -51,11 +51,11 @@ class PermissionMiddleware:
         permission_name = self.mapping[request.resolver_match.url_name][request.method]
 
         kwargs = {}
-        if permission_name in ('liveQueries', 'statWithParameters'):
+        if permission_name in ('liveQueries', 'statsWithParameters'):
             body = json.loads(request.body.decode('utf-8'))
             if permission_name in 'liveQueries':
                 kwargs['query_request_info'] = body['query']
-            elif permission_name in 'statWithParameters':
+            elif permission_name in 'statsWithParameters':
                 kwargs['query_request_info'] = body
 
         permission = Permission(resource,

@@ -1,4 +1,4 @@
-from .statWithParameters import StatWithParametersView
-from .liveQueries import LiveQueriesView
+from .stats_with_parameters import StatsWithParametersView
+from .live_queries import LiveQueriesView
 
-__all__ = ['LiveQueriesView', 'StatWithParametersView']
+__all__ = ['LiveQueriesView', 'StatsWithParametersView']

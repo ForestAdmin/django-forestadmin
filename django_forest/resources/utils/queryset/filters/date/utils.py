@@ -140,5 +140,11 @@ PREVIOUS_RANGE_DATE_OPERATORS = {
     },
 }
 
-DATE_OPERATORS = ['past', 'future', 'today', 'before_x_hours_ago', 'after_x_hours_ago']\
+DATE_OPERATORS = ['past', 'future', 'today', 'before_x_hours_ago', 'after_x_hours_ago'] \
     + list(RANGE_DATE_OPERATORS.keys())
+
+PREVIOUS_DATE_OPERATOR = ['today', 'yesterday',
+                          'previous_week', 'previous_month', 'previous_quarter', 'previous_year',
+                          'previous_week_to_date', 'previous_month_to_date', 'previous_quarter_to_date',
+                          'previous_year_to_date',
+                          'previous_x_days', 'previous_x_days_to_date']

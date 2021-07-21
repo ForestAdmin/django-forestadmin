@@ -35,6 +35,7 @@ class DatesMixin:
         range_date_operator = RANGE_DATE_OPERATORS[operator]
         if self.previous:
             range_date_operator = PREVIOUS_RANGE_DATE_OPERATORS[operator]
+
         if 'from' in range_date_operator:
             _from = range_date_operator['from'](start_of_today, value)
         if 'to' in range_date_operator:

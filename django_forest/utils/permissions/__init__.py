@@ -50,7 +50,7 @@ class Permission:
         # NOTICE: check liveQueries permissions
         if obj.permission_name == 'liveQueries':
             return cls.live_query_allowed(obj)
-        elif obj.permission_name == 'statWithParameters':
+        elif obj.permission_name == 'statsWithParameters':
             return cls.stat_with_parameters_allowed(obj)
 
         return cls.permission_allowed(obj)

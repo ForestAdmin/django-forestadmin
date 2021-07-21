@@ -58,7 +58,7 @@ class ResourceCsvViewTests(TransactionTestCase):
             'timezone': 'Europe/Paris'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode('utf-8'), 'id,choice text,\r\n1,what is your favorite color?,yes\r\n2,what is your favorite color?,no\r\n')
+        self.assertEqual(response.content.decode('utf-8'), 'id,choice text,\r\n1,what is your favorite color?,yes\r\n2,what is your favorite color?,no\r\n3,do you like chocolate?,good\r\n')
 
     def test_wrong_operator(self):
         response = self.client.get(self.url, {
