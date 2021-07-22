@@ -7,7 +7,7 @@ class LiveQueriesView(StatsMixin, BaseView):
     def compute_data(self, query):
         data = {}
         for key, value in execute_query(query, 'key', 'value'):
-            self.fill_data(data, key, value)
+            self.fill_data(data, key, int(value))
         return data
 
     def get_value(self, params, queryset=None):
