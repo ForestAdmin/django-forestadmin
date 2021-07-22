@@ -56,7 +56,8 @@ class PermissionMiddleware:
             if permission_name in 'liveQueries':
                 kwargs['query_request_info'] = body['query']
             elif permission_name in 'statsWithParameters':
-                del body['timezone']
+                if 'timezone' in body:
+                    del body['timezone']
                 kwargs['query_request_info'] = body
 
         permission = Permission(resource,

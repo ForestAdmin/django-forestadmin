@@ -524,14 +524,13 @@ class MiddlewarePermissionsStatsTests(TestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         stats_with_parameters_body = {
             'type': 'Value',
-            'aggregator': 'Sum',
-            'aggregateFieldName': 'id',
-            'sourceCollectionId': 'Question'
+            'aggregator': 'Count',
+            'sourceCollectionId': 'Question',
+            'timezone': 'Europe/Paris'
         }
         response = self.client.post(self.stats_with_parameters_url, json.dumps(stats_with_parameters_body),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 403)
-
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
