@@ -47,18 +47,21 @@ class PermissionMiddleware:
 
         return response
 
+    def populate_query_request_info(self, permission_name, body, kwargs):
+        if permission_name in 'liveQueries':
+            kwargs['query_request_info'] = body['query']
+        elif permission_name in 'statsWithParameters':
+            if 'timezone' in body:
+                del body['timezone']
+            kwargs['query_request_info'] = body
+
     def is_authorized(self, request, token, resource):
         permission_name = self.mapping[request.resolver_match.url_name][request.method]
 
         kwargs = {}
         if permission_name in ('liveQueries', 'statsWithParameters'):
             body = json.loads(request.body.decode('utf-8'))
-            if permission_name in 'liveQueries':
-                kwargs['query_request_info'] = body['query']
-            elif permission_name in 'statsWithParameters':
-                if 'timezone' in body:
-                    del body['timezone']
-                kwargs['query_request_info'] = body
+            self.populate_query_request_info(permission_name, body, kwargs)
 
         permission = Permission(resource,
                                 permission_name,
