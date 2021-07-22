@@ -1,4 +1,4 @@
-from django_forest.stats.utils import get_row, execute_query
+from .utils import get_row, execute_query
 from django_forest.stats.utils.stats import StatsMixin
 from django_forest.utils.views import BaseView
 

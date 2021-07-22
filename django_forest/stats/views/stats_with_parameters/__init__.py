@@ -1,10 +1,10 @@
 import json
 
 from django_forest.resources.utils import ResourceView
+from django_forest.stats.utils.stats import StatsMixin
 
-from ..utils.stats import StatsMixin
-from ..utils import get_annotated_queryset, get_format_time_frame, compute_value, compute_line_values, get_periods
-from ...resources.utils.queryset.filters.date.utils import PREVIOUS_DATE_OPERATOR
+from .utils import get_annotated_queryset, get_format_time_frame, compute_value, compute_line_values, get_periods, \
+    contains_previous_date_operator
 
 
 class StatsWithParametersView(StatsMixin, ResourceView):
@@ -23,18 +23,10 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         queryset = self.enhance_queryset(self.Model.objects.all(), self.Model, params)
         return compute_value(params, queryset)
 
-    def contains_previous_date_operator(self, filters):
-        if 'aggregator' in filters:
-            previous_date_operator = next(
-                (x for x in filters['conditions'] if x['operator'] in PREVIOUS_DATE_OPERATOR), None)
-            return previous_date_operator is not None
-        else:
-            return filters['operator'] in PREVIOUS_DATE_OPERATOR
-
     def handle_count_previous(self, params, res):
         if params['type'] == 'Value' and 'filters' in params:
             filters = json.loads(params['filters'])
-            if self.contains_previous_date_operator(filters):
+            if contains_previous_date_operator(filters):
                 res['countPrevious'] = self.get_previous_count(params)
 
     def get_value(self, params, queryset):
