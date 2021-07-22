@@ -108,6 +108,29 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         self.assertEqual(data['data']['type'], 'stats')
 
     @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
+    def test_get_value_count_previous_yesterday_aggregator(self, mocked_datetime):
+        mocked_datetime.now.return_value = datetime(2021, 6, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        body = {
+            'aggregate': 'Count',
+            'collection': 'Question',
+            'filters': "{\"aggregator\":\"and\",\"conditions\":[{\"field\":\"pub_date\",\"operator\":\"yesterday\",\"value\":null},{\"field\":\"pub_date\",\"operator\":\"present\",\"value\":null}]}",
+            'query': None,
+            'time_range': None,
+            'type': 'Value'
+        }
+
+        response = self.client.post(self.url, json.dumps(body), content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['data']['attributes'], {
+            'value': {
+                'countCurrent': 1,
+                'countPrevious': 2
+            }
+        })
+        self.assertEqual(data['data']['type'], 'stats')
+
+    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
     def test_get_value_count_previous_month(self, mocked_datetime):
         mocked_datetime.now.return_value = datetime(2021, 7, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {

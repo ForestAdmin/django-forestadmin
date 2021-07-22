@@ -23,6 +23,20 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         queryset = self.enhance_queryset(self.Model.objects.all(), self.Model, params)
         return compute_value(params, queryset)
 
+    def contains_previous_date_operator(self, filters):
+        if 'aggregator' in filters:
+            previous_date_operator = next(
+                (x for x in filters['conditions'] if x['operator'] in PREVIOUS_DATE_OPERATOR), None)
+            return previous_date_operator is not None
+        else:
+            return filters['operator'] in PREVIOUS_DATE_OPERATOR
+
+    def handle_count_previous(self, params, res):
+        if params['type'] == 'Value' and 'filters' in params:
+            filters = json.loads(params['filters'])
+            if self.contains_previous_date_operator(filters):
+                res['countPrevious'] = self.get_previous_count(params)
+
     def get_value(self, params, queryset):
         value = compute_value(params, queryset)
         key = 'countCurrent'
@@ -34,11 +48,7 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         }
 
         # Notice: handle countPrevious
-        if params['type'] == 'Value' and 'filters' in params:
-            filters = json.loads(params['filters'])
-            # TODO handle aggregate
-            if filters['operator'] in PREVIOUS_DATE_OPERATOR:
-                res['countPrevious'] = self.get_previous_count(params)
+        self.handle_count_previous(params, res)
 
         return res
 
