@@ -48,7 +48,7 @@ def get_format_time_frame(params):
         format = '%d/%m/%Y'
         time_frame = 'days'
     elif time_range == 'Week':
-        format = 'W%V-%Y'  # TODO review format, different from node (week + 1)...
+        format = 'W%V-%Y'
         time_frame = 'weeks'
     elif time_range == 'Month':
         format = '%b %y'
