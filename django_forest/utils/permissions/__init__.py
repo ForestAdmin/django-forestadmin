@@ -2,9 +2,10 @@ from datetime import datetime
 
 import pytz
 
+from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.forest_setting import get_forest_setting
-from django_forest.utils.permissions.utils import date_difference_in_seconds, \
-    get_permissions_for_rendering, is_stat_allowed, is_user_allowed, is_smart_action_allowed
+from django_forest.utils.permissions.utils import date_difference_in_seconds, is_stat_allowed, is_user_allowed,\
+    is_smart_action_allowed
 
 
 class Permission:
@@ -41,7 +42,7 @@ class Permission:
 
     @classmethod
     def fetch_permissions(cls, rendering_id):
-        permissions = get_permissions_for_rendering(rendering_id)
+        permissions = ForestApiRequester.get_from_rendering_id('/liana/v3/permissions', rendering_id)
         permissions['last_fetch'] = datetime.now(pytz.UTC)
         cls.permissions_cached = permissions
 

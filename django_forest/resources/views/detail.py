@@ -1,31 +1,49 @@
 from django.http import JsonResponse, HttpResponse
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, \
-    ResourceView
+from django_forest.resources.utils.format import FormatFieldMixin
+from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
+from django_forest.resources.utils.resource import ResourceView
+from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
 class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, ResourceView):
 
+    def get_instance(self, request, pk):
+        # Notice: filter by scopes first
+        queryset = self.Model.objects.all()
+        scope_filters = self.get_scope(request, self.Model)
+        if scope_filters is not None:
+            queryset = queryset.filter(scope_filters)
+        queryset = queryset.filter(pk=pk)
+
+        if not len(queryset):
+            raise Exception('Record does not exist or you don\'t have the right to query it')
+
+        return queryset[0]
+
     def get(self, request, pk):
-        queryset = self.Model.objects.get(pk=pk)
+        try:
+            instance = self.get_instance(request, pk)
+        except Exception as e:
+            return self.error_response(e)
+        else:
+            # handle smart fields
+            self.handle_smart_fields(instance, self.Model)
 
-        # handle smart fields
-        self.handle_smart_fields(queryset, self.Model)
+            # json api serializer
+            include_data = self.get_include_data(self.Model)
+            Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
+            data = Schema(include_data=include_data).dump(instance)
 
-        # json api serializer
-        include_data = self.get_include_data(self.Model)
-        Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
-        data = Schema(include_data=include_data).dump(queryset)
-
-        return JsonResponse(data, safe=False)
+            return JsonResponse(data, safe=False)
 
     def put(self, request, pk):
         body = self.get_body(request.body)
 
         try:
             attributes = self.populate_attribute(body)
-            instance = self.Model.objects.get(pk=pk)
+            instance = self.get_instance(request, pk)
             for k, v in attributes.items():
                 setattr(instance, k, v)
             instance.save()
@@ -43,6 +61,10 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             return JsonResponse(data, safe=False)
 
     def delete(self, request, pk):
-        instance = self.Model.objects.get(pk=pk)
-        instance.delete()
-        return HttpResponse(status=204)
+        try:
+            instance = self.get_instance(request, pk)
+        except Exception as e:
+            return self.error_response(e)
+        else:
+            instance.delete()
+            return HttpResponse(status=204)

@@ -17,11 +17,11 @@ class StatsMixin:
         else:
             data[serialized_key] = value
 
-    def handle_values(self, params, queryset=None):
+    def handle_values(self, params, request, queryset=None):
         values = None
         _type = params['type']
         if _type in ('Value', 'Objective'):
-            values = self.get_value(params, queryset)
+            values = self.get_value(params, queryset, request)
         elif _type == 'Pie':
             values = self.get_pie(params, queryset)
         elif _type == 'Line':
@@ -31,7 +31,7 @@ class StatsMixin:
 
         return values
 
-    def handle_chart(self, params, queryset=None):
+    def handle_chart(self, params, request, queryset=None):
         res = {
             'data': {
                 'attributes': {},
@@ -41,13 +41,13 @@ class StatsMixin:
 
         if 'type' in params:
             res['data']['attributes'] = {
-                'value': self.handle_values(params, queryset)
+                'value': self.handle_values(params, request, queryset)
             }
         return res
 
-    def chart(self, params, queryset=None):
+    def chart(self, params, request, queryset=None):
         try:
-            res = self.handle_chart(params, queryset)
+            res = self.handle_chart(params, request, queryset)
         except Exception as e:
             return self.error_response(e)
         else:

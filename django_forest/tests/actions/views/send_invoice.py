@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from django_forest.utils.views import ActionView
+from django_forest.utils.views.action import ActionView
 
 
 class SendInvoiceActionView(ActionView):

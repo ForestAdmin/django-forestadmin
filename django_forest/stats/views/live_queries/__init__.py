@@ -1,6 +1,8 @@
+from django_forest.utils.views.base import BaseView
 from .utils import get_row, execute_query
 from django_forest.stats.utils.stats import StatsMixin
-from django_forest.utils.views import BaseView
+
+# TODO: support scopes once specification is achieved
 
 
 class LiveQueriesView(StatsMixin, BaseView):
@@ -10,7 +12,7 @@ class LiveQueriesView(StatsMixin, BaseView):
             self.fill_data(data, key, int(value))
         return data
 
-    def get_value(self, params, queryset=None):
+    def get_value(self, params, request, queryset=None):
         res = {}
         if params['type'] == 'Objective':
             value, objective = execute_query(params['query'], 'value', 'objective', one=True)
@@ -46,4 +48,4 @@ class LiveQueriesView(StatsMixin, BaseView):
 
     def post(self, request, *args, **kwargs):
         params = self.get_body(request.body)
-        return self.chart(params)
+        return self.chart(params, request)

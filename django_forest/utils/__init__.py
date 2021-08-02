@@ -27,3 +27,13 @@ def get_token(request):
 
     auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
     return jwt.decode(token, auth_secret, algorithms=['HS256'])
+
+
+def get_association_field(Model, association_resource):
+    association_field = next((x for x in Model._meta.get_fields()
+                              if x.is_relation and get_accessor_name(x) == association_resource), None)
+    if association_field is None:
+        message = f'cannot find association resource {association_resource} for Model {Model.__name__}'
+        raise Exception(message)
+
+    return association_field

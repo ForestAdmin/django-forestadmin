@@ -1,23 +1,8 @@
-import requests
-
-from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.schema import Schema
 
 
 def date_difference_in_seconds(date1, date2):
     return (date1 - date2).total_seconds()
-
-
-def get_permissions_for_rendering(rendering_id):
-    query = {
-        'renderingId': rendering_id
-    }
-
-    response = ForestApiRequester.get('/liana/v3/permissions', query=query)
-    if response.status_code == requests.codes.ok:
-        return response.json()
-    else:
-        raise Exception(f'Forest API returned an #{response.content}')
 
 
 def is_stat_permission_not_allowed(array_permission_infos, pool_permission):

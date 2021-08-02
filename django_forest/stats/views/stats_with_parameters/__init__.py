@@ -1,7 +1,8 @@
 import json
 
-from django_forest.resources.utils import ResourceView
+from django_forest.resources.utils.resource import ResourceView
 from django_forest.stats.utils.stats import StatsMixin
+from django_forest.utils import get_association_field
 
 from .utils import get_annotated_queryset, get_format_time_frame, compute_value, compute_line_values, get_periods, \
     contains_previous_date_operator
@@ -18,18 +19,18 @@ class StatsWithParametersView(StatsMixin, ResourceView):
             'value': v
         } for k, v, in data.items()]
 
-    def get_previous_count(self, params):
+    def get_previous_count(self, params, request):
         self.previous = True
-        queryset = self.enhance_queryset(self.Model.objects.all(), self.Model, params)
+        queryset = self.enhance_queryset(self.Model.objects.all(), self.Model, params, request)
         return compute_value(params, queryset)
 
-    def handle_count_previous(self, params, res):
+    def handle_count_previous(self, params, res, request):
         if params['type'] == 'Value' and 'filters' in params:
             filters = json.loads(params['filters'])
             if contains_previous_date_operator(filters):
-                res['countPrevious'] = self.get_previous_count(params)
+                res['countPrevious'] = self.get_previous_count(params, request)
 
-    def get_value(self, params, queryset):
+    def get_value(self, params, queryset, request):
         value = compute_value(params, queryset)
         key = 'countCurrent'
         if params['type'] == 'Objective':
@@ -40,7 +41,7 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         }
 
         # Notice: handle countPrevious
-        self.handle_count_previous(params, res)
+        self.handle_count_previous(params, res, request)
 
         return res
 
@@ -81,7 +82,7 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         relationship_field = params['relationship_field']
 
         queryset = queryset.values(label_field)
-        association_field = self.get_association_field(self.Model, relationship_field)
+        association_field = get_association_field(self.Model, relationship_field)
         pk_name = association_field.related_model._meta.pk.name
 
         aggregate = params['aggregate'].lower()
@@ -97,5 +98,5 @@ class StatsWithParametersView(StatsMixin, ResourceView):
         params = self.get_body(request.body)
         params.update(request.GET.dict())
         queryset = self.Model.objects.all()
-        queryset = self.enhance_queryset(queryset, self.Model, params)
-        return self.chart(params, queryset)
+        queryset = self.enhance_queryset(queryset, self.Model, params, request)
+        return self.chart(params, request, queryset)
