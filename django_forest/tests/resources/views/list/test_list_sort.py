@@ -92,7 +92,7 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     def test_get_sort_related_data(self):
-        with self._django_assert_num_queries(3) as captured:
+        with self._django_assert_num_queries(4) as captured:
             response = self.client.get(self.reverse_url, {
                 'fields[Choice]': 'id,question,choice_text',
                 'fields[question]': 'question_text',
@@ -101,7 +101,6 @@ class ResourceListViewTests(TransactionTestCase):
                 'sort': 'question.question_text',
                 'searchExtended': 0
             })
-        data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
                          ' '.join('''SELECT "tests_choice"."id", "tests_choice"."question_id", "tests_choice"."choice_text"

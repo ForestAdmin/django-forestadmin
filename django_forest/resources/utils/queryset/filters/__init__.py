@@ -3,8 +3,10 @@ import json
 from django.db.models import Q
 from pytz import timezone
 
-from django_forest.resources.utils.queryset.filters.date import DATE_OPERATORS, handle_date_operator
 from django_forest.utils.type_mapping import get_type
+
+from .date import DatesMixin
+from .date.utils import DATE_OPERATORS
 
 OPERATORS = {
     'not': '',
@@ -24,7 +26,8 @@ OPERATORS = {
 
 
 # TODO handle smart fields
-class FiltersMixin:
+class FiltersMixin(DatesMixin):
+    previous = False
 
     def get_basic_expression(self, field, operator, value):
         try:
@@ -53,7 +56,7 @@ class FiltersMixin:
 
         # special case date, blank and present
         if operator in DATE_OPERATORS:
-            return handle_date_operator(operator, field, value, tz)
+            return self.handle_date_operator(operator, field, value, tz)
         if operator == 'blank':
             return self.handle_blank(field_type, field)
         elif operator == 'present':

@@ -16,5 +16,14 @@
         "choice_text": "no",
         "votes": 1
     }
+},
+{
+    "model": "tests.choice",
+    "pk": 3,
+    "fields": {
+        "question": 2,
+        "choice_text": "good",
+        "votes": 1
+    }
 }
 ]

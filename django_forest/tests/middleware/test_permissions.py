@@ -100,6 +100,20 @@ mocked_config_action['data']['collections']['Question']['actions'] = {
     }
 }
 
+mocked_config_stats = copy.deepcopy(mocked_config)
+mocked_config_stats['stats'] = {
+    'queries': ['SELECT COUNT(*) AS value, 5 as objective FROM tests_question', 'SELECT SUM(tests_question.id) AS value FROM tests_question'],
+    'leaderboards': [{'type': 'Leaderboard', 'limit': 5, 'aggregator': 'Count', 'labelFieldName': 'question_text', 'aggregateFieldName': None, 'sourceCollectionId': 'Question', 'relationshipFieldName': 'choice_set'}],
+    'lines': [{'type': 'Line', 'filter': '{"field":"id","operator":"equal","value":0}', 'timeRange': 'Day', 'aggregator': 'Count', 'groupByFieldName': 'pub_date', 'aggregateFieldName': None, 'sourceCollectionId': 'Question'}],
+    'objectives': [],
+    'percentages': [{'type': 'Percentage', 'numeratorChartId': 'ffd97b70-e3b9-11eb-aaf7-0ffaf80df470', 'denominatorChartId': '49dd5600-e587-11eb-aaf6-e990d6816f15'}],
+    'pies': [{'type': 'Pie', 'filter': None, 'aggregator': 'Sum', 'groupByFieldName': 'pub_date', 'aggregateFieldName': 'id', 'sourceCollectionId': 'Question'}],
+    'values': [{'type': 'Value', 'filter': '{"field":"pub_date","operator":"previous_month","value":null}', 'aggregator': 'Sum', 'aggregateFieldName': 'id', 'sourceCollectionId': 'Question'}]
+}
+
+mocked_config_missing_stats = copy.deepcopy(mocked_config)
+mocked_config_missing_stats['stats'] = {}
+
 
 class MiddlewarePermissionsNoTokenTests(TestCase):
 
@@ -429,3 +443,100 @@ class MiddlewarePermissionsActionsTests(TestCase):
         body['data']['attributes']['collection_name'] = 'Foo'
         response = self.client.post(self.url, json.dumps(body), content_type='application/json')
         self.assertEqual(response.status_code, 400)
+
+
+class MiddlewarePermissionsStatsTests(TestCase):
+
+    def setUp(self):
+        set_middlewares()
+        Schema.schema = copy.deepcopy(test_schema)
+        Schema.handle_json_api_schema()
+        self.live_queries_url = f"{reverse('django_forest:stats:liveQueries')}?timezone=Europe%2FParis"
+        self.stats_with_parameters_url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'Question'})}?timezone=Europe%2FParis"
+        self.client = self.client_class(
+            HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
+        self.live_queries_body = {
+            'type': 'Objective',
+            'timezone': 'Europe/Paris',
+            'query': 'SELECT COUNT(*) AS value, 5 as objective FROM tests_question'
+        }
+        self.stats_with_parameters_body = {
+            'type': 'Leaderboard',
+            'collection': 'Question',
+            'timezone': 'Europe/Paris',
+            'label_field': 'question_text',
+            'relationship_field': 'choice_set',
+            'limit': 5,
+            'aggregate': 'Count'
+        }
+
+    def tearDown(self):
+        # reset _registry after each test
+        JsonApiSchema._registry = {}
+        Permission.permissions_cached = {}
+        Permission.renderings_cached = {}
+        settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_stats, 200))
+    def test_live_queries(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        response = self.client.post(self.live_queries_url, json.dumps(self.live_queries_body), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_stats, 200))
+    def test_live_queries_forbidden(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        live_queries_body = {
+            'type': 'Objective',
+            'timezone': 'Europe/Paris',
+            'query': 'SELECT COUNT(*) AS value, 0 as objective FROM tests_question'
+        }
+
+        response = self.client.post(self.live_queries_url, json.dumps(live_queries_body),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_missing_stats, 200))
+    def test_live_queries_missing_stats(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        response = self.client.post(self.live_queries_url, json.dumps(self.live_queries_body),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_stats, 200))
+    def test_stats_with_parameters(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        response = self.client.post(self.stats_with_parameters_url, json.dumps(self.stats_with_parameters_body), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_stats, 200))
+    def test_stats_with_parameters_forbidden(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        stats_with_parameters_body = {
+            'type': 'Value',
+            'aggregator': 'Count',
+            'sourceCollectionId': 'Question',
+            'timezone': 'Europe/Paris'
+        }
+        response = self.client.post(self.stats_with_parameters_url, json.dumps(stats_with_parameters_body),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.permissions.datetime')
+    @mock.patch('requests.get', return_value=mocked_requests(mocked_config_missing_stats, 200))
+    def test_stats_with_parameters_missing_stats(self, mocked_requests, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+        response = self.client.post(self.stats_with_parameters_url, json.dumps(self.stats_with_parameters_body),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 403)

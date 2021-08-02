@@ -6,7 +6,7 @@ from django.utils.functional import Promise
 # TODO handle other special type?
 def serialize_value(value):
     if isinstance(value, datetime) or isinstance(value, Promise):
-        return str(value)
+        return str(value)  # TODO use strftime for date?
     return value
 
 

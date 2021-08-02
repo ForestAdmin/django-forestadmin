@@ -20,20 +20,48 @@ def get_permissions_for_rendering(rendering_id):
         raise Exception(f'Forest API returned an #{response.content}')
 
 
-def find_action_from_endpoint(collection_name, endpoint, http_method):
-    collection = Schema.get_collection(collection_name)
+def is_stat_permission_not_allowed(array_permission_infos, pool_permission):
+    for info in array_permission_infos:
+        if info not in pool_permission:
+            return True
+    else:
+        return False
+
+
+def is_stat_allowed(pool_permissions, array_permission_infos):
+    # NOTICE: Is there any pool_permissions containing the array_permission_infos
+    for pool_permission in pool_permissions:
+        pool_permission = [x for x in pool_permission.values() if x is not None]
+        if is_stat_permission_not_allowed(array_permission_infos, pool_permission):
+            return False
+    else:
+        return True
+
+
+def is_user_allowed(user_id, permission_value):
+    if permission_value is None:
+        return False
+    elif permission_value in (True, False):
+        return permission_value
+    else:
+        return user_id in permission_value
+
+
+def find_action_from_endpoint(obj):
+    endpoint = obj.smart_action_request_info['endpoint']
+    http_method = obj.smart_action_request_info['http_method']
+    collection = Schema.get_collection(obj.collection_name)
     return next((x for x in collection['actions']
                  if x['endpoint'] == endpoint and x['http_method'] == http_method),
                 None)
 
 
-def get_smart_action_permissions(obj, smart_actions_permissions):
-    endpoint = obj.smart_action_request_info['endpoint']
-    http_method = obj.smart_action_request_info['http_method']
-    schema_smart_action = find_action_from_endpoint(obj.collection_name, endpoint, http_method)
+def is_smart_action_allowed(obj, smart_actions_permissions):
+    schema_smart_action = find_action_from_endpoint(obj)
 
-    if schema_smart_action and \
-            'name' in schema_smart_action and \
-            smart_actions_permissions and \
-            schema_smart_action['name'] in smart_actions_permissions.keys():
-        return smart_actions_permissions[schema_smart_action['name']]
+    try:
+        permission = smart_actions_permissions[schema_smart_action['name']]
+    except Exception:
+        return False
+    else:
+        return is_user_allowed(obj.user_id, permission['triggerEnabled'])
