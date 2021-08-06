@@ -10,9 +10,13 @@ from django.db import models
 from django.db.models import UUIDField
 
 
+class Topic(models.Model):
+    name = models.CharField(max_length=200)
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200, validators=[MinLengthValidator(1)], default='how are you?')
     pub_date = models.DateTimeField('date published', default=datetime.datetime(2020, 5, 17))
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.question_text

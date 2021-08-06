@@ -5,7 +5,6 @@ from pytz import timezone
 from .utils import ConditionsMixin
 
 
-# TODO handle smart fields
 class FiltersMixin(ConditionsMixin):
     def get_filters(self, params, Model):
         filters = json.loads(params['filters'])

@@ -17,6 +17,13 @@ from django_forest.utils.models import Models
 from django_forest.utils.schema import Schema
 from django_forest.utils.scope import ScopeManager
 
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
+
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsSchemaTests(TestCase):
@@ -98,7 +105,7 @@ class UtilsSchemaTests(TestCase):
         Schema.add_smart_features()
         from django_forest.tests.forest import QuestionForest
         from django_forest.tests.models import Question
-        collection_mock.register.assert_called_once_with(QuestionForest, Question)
+        collection_mock.register.assert_called_with(QuestionForest, Question)
 
     def test_get_collection(self):
         collection = Schema.get_collection('Question')
@@ -110,15 +117,7 @@ class UtilsSchemaTests(TestCase):
 
     def test_handle_json_api_schema(self):
         Schema.handle_json_api_schema()
-        self.assertEqual(len(JsonApiSchema._registry), 17)
-
-
-# reset forest config dir auto import
-@pytest.fixture()
-def reset_config_dir_import():
-    for key in list(sys.modules.keys()):
-        if key.startswith('django_forest.tests.forest'):
-            del sys.modules[key]
+        self.assertEqual(len(JsonApiSchema._registry), 18)
 
 
 file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
@@ -188,7 +187,7 @@ class UtilsSchemaFileTests(TestCase):
             data = f.read()
             data = json.loads(data)
             question = [c for c in data['collections'] if c['name'] == 'Question'][0]
-            self.assertEqual(len(question['fields']), 6)
+            self.assertEqual(len(question['fields']), 7)
             foo_field = [f for f in question['fields'] if f['field'] == 'foo'][0]
             self.assertFalse('get' in foo_field)
             self.assertIsNotNone(Schema.schema_data)

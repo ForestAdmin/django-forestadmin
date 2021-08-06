@@ -24,7 +24,7 @@ class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView
             queryset = self.enhance_queryset(queryset, RelatedModel, params, request)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, RelatedModel, many=True)
+            self.handle_smart_fields(queryset, RelatedModel.__name__, many=True)
 
             # json api serializer
             data = self.serialize(queryset, RelatedModel, params)

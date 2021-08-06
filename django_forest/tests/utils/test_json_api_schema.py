@@ -26,7 +26,7 @@ class UtilsJsonApiSchemaTests(TestCase):
 
     def test_handle_json_api_schema(self):
         Schema.handle_json_api_schema()
-        self.assertEqual(len(JsonApiSchema._registry), 17)
+        self.assertEqual(len(JsonApiSchema._registry), 18)
 
     def test_json_api_schema_bad_name(self):
         Schema.handle_json_api_schema()
@@ -48,7 +48,8 @@ class UtilsJsonApiSchemaTests(TestCase):
                         'links': {
                             'related': '/forest/Question/1/relationships/choice_set'
                         }
-                    }
+                    },
+                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
                 },
                 'attributes': {
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
@@ -78,7 +79,8 @@ class UtilsJsonApiSchemaTests(TestCase):
                             'links': {
                                 'related': '/forest/Question/1/relationships/choice_set'
                             }
-                        }
+                        },
+                        'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
@@ -96,7 +98,8 @@ class UtilsJsonApiSchemaTests(TestCase):
                             'links': {
                                 'related': '/forest/Question/2/relationships/choice_set'
                             }
-                        }
+                        },
+                        'topic': {'links': {'related': '/forest/Question/2/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
@@ -114,7 +117,8 @@ class UtilsJsonApiSchemaTests(TestCase):
                             'links': {
                                 'related': '/forest/Question/3/relationships/choice_set'
                             }
-                        }
+                        },
+                        'topic': {'links': {'related': '/forest/Question/3/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
@@ -167,7 +171,8 @@ class UtilsJsonApiSchemaTests(TestCase):
                             'links': {
                                 'related': '/forest/Question/1/relationships/choice_set'
                             }
-                        }
+                        },
+                        'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',

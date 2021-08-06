@@ -46,9 +46,9 @@ ACTION = {
 ACTION_FIELD = {
     'field': '',
     'type': '',
-    'is_read_only': False,
-    'is_required': False,
-    'default_value': None,
+    'isReadOnly': False,
+    'isRequired': False,
+    'defaultValue': None,
     'integration': None,
     'reference': None,
     'description': None,

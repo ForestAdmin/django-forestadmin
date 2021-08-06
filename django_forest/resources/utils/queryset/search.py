@@ -4,6 +4,7 @@ from uuid import UUID
 
 from django.db.models import Q
 
+from django_forest.utils.collection import Collection
 from ..in_search_fields import in_search_fields
 from django_forest.utils.schema import Schema
 
@@ -101,6 +102,24 @@ class SearchMixin:
 
         return q_objects
 
+    def add_smart_field(self, smart_field, resource, search):
+        q_object = Q()
+        method = smart_field['search']
+        if isinstance(method, str):
+            q_object = getattr(Collection._registry[resource], method)(search)
+        elif callable(method):
+            q_object = method(search)
+        return q_object
+
+    def add_smart_fields(self, collection, resource, search):
+        q_objects = Q()
+        smart_fields = [x for x in collection['fields'] if x['is_virtual']]
+        for smart_field in smart_fields:
+            if 'search' in smart_field:
+                q_objects |= self.add_smart_field(smart_field, resource, search)
+
+        return q_objects
+
     def fill_conditions(self, search, resource, related_field_name=None):
         q_objects = Q()
 
@@ -108,6 +127,9 @@ class SearchMixin:
         fields_to_search = self.get_fields_to_search(collection)
         for field in fields_to_search:
             q_objects |= self.handle_field(search, field, related_field_name)
+
+        # Notice handle smart fields
+        q_objects |= self.add_smart_fields(collection, resource, search)
 
         return q_objects
 

@@ -100,7 +100,8 @@ class ResourceListScopeViewTests(TransactionTestCase):
             }
         }
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
             'page[size]': '15'
@@ -118,7 +119,9 @@ class ResourceListScopeViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {'topic': {'data': None,
+                                                'links': {'related': '/forest/Question/1/relationships/topic'}}},
                 }
             ]
         })
@@ -132,7 +135,8 @@ class ResourceListScopeViewTests(TransactionTestCase):
     }))
     def test_scope_simple(self, mocked_requests, mocked_decode):
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
             'page[size]': '15'
@@ -150,7 +154,9 @@ class ResourceListScopeViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {'topic': {'data': None,
+                                                'links': {'related': '/forest/Question/1/relationships/topic'}}},
                 }
             ]
         })
@@ -164,7 +170,8 @@ class ResourceListScopeViewTests(TransactionTestCase):
     }))
     def test_scope_aggregator_dynamic_values(self, mocked_requests, mocked_decode):
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
             'page[size]': '15'
@@ -182,7 +189,9 @@ class ResourceListScopeViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {'topic': {'data': None,
+                                                'links': {'related': '/forest/Question/1/relationships/topic'}}},
                 },
                 {
                     'type': 'question',
@@ -193,7 +202,9 @@ class ResourceListScopeViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {'topic': {'data': None,
+                                                'links': {'related': '/forest/Question/3/relationships/topic'}}},
                 },
             ]
         })

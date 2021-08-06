@@ -1,6 +1,6 @@
-import copy
 from datetime import datetime
 from unittest import mock
+import sys
 
 import pytest
 import pytz
@@ -8,11 +8,21 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
+from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
 
 
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
+
+
+@pytest.mark.usefixtures('reset_config_dir_import')
 class ResourceListViewTests(TransactionTestCase):
     fixtures = ['article.json', 'publication.json',
                 'session.json',
@@ -26,7 +36,8 @@ class ResourceListViewTests(TransactionTestCase):
         self._django_assert_num_queries = django_assert_num_queries
 
     def setUp(self):
-        Schema.schema = copy.deepcopy(test_schema)
+        Schema.build_schema()
+        Schema.add_smart_features()
         Schema.handle_json_api_schema()
         self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
         self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
@@ -48,6 +59,7 @@ class ResourceListViewTests(TransactionTestCase):
         # reset _registry after each test
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
+        Collection._registry = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.datetime')
@@ -55,7 +67,8 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,question_text,pub_date',
+                'fields[Question]': 'id,topic,question_text,pub_date',
+                'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
                 'sort': '-id',
@@ -64,7 +77,7 @@ class ResourceListViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
+                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
                           FROM "tests_question"
                            ORDER BY "tests_question"."id"
                            DESC
@@ -80,7 +93,15 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -91,7 +112,15 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -102,7 +131,15 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 1,
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
             ]
         })
@@ -111,9 +148,10 @@ class ResourceListViewTests(TransactionTestCase):
     @mock.patch('django_forest.utils.scope.datetime')
     def test_get_sort_related_data(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        with self._django_assert_num_queries(4) as captured:
+        with self._django_assert_num_queries(7) as captured:
             response = self.client.get(self.reverse_url, {
-                'fields[Choice]': 'id,question,choice_text',
+                'fields[Choice]': 'id,topic,question,choice_text',
+                'fields[topic]': 'name',
                 'fields[question]': 'question_text',
                 'page[number]': 1,
                 'page[size]': 15,

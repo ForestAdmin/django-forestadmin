@@ -19,7 +19,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             queryset = self.enhance_queryset(queryset, self.Model, params, request)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, self.Model, many=True)
+            self.handle_smart_fields(queryset, self.Model.__name__, many=True)
 
             # json api serializer
             data = self.serialize(queryset, self.Model, params)

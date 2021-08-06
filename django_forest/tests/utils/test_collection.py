@@ -45,22 +45,22 @@ class QuestionForest(Collection):
                         'field': 'Certificate of Incorporation',
                         'description': 'The legal document relating to the formation of a company or corporation.',
                         'type': 'File',
-                        'is_required': True
+                        'isRequired': True
                     }, {
                         'field': 'Proof of address',
                         'description': '(Electricity, Gas, Water, Internet, Landline & Mobile Phone Invoice / Payment Schedule) no older than 3 months of the legal representative of your company',
                         'type': 'File',
-                        'is_required': True
+                        'isRequired': True
                     }, {
                         'field': 'Company bank statement',
                         'description': 'PDF including company name as well as IBAN',
                         'type': 'File',
-                        'is_required': True
+                        'isRequired': True
                     }, {
                         'field': 'Valid proof of ID',
                         'description': 'ID card or passport if the document has been issued in the EU, EFTA, or EEA / ID card or passport + resident permit or driving licence if the document has been issued outside the EU, EFTA, or EEA of the legal representative of your company',
                         'type': 'File',
-                        'is_required': True
+                        'isRequired': True
                     }
                 ]
             },
@@ -75,18 +75,20 @@ class QuestionForest(Collection):
                     },
                     {
                         'field': 'city',
-                        'type': 'String'
+                        'type': 'String',
+                        'hook': 'cityChange'
                     },
                     {
                         'field': 'zip code',
-                        'type': 'String'
+                        'type': 'String',
+                        'hook': 'zipCodeChange'
                     },
                 ],
                 'hooks': {
                     'load': self.invoice_load,
                     'change': {
-                        'city': self.invoice_change_city,
-                        'zip code': self.invoice_change_zip_code,
+                        'cityChange': self.invoice_change_city,
+                        'zipCodeChange': self.invoice_change_zip_code,
                     },
                 },
             }
@@ -108,14 +110,18 @@ class QuestionForest(Collection):
             LIMIT 5;''')
         return {'id__in': [question.id for question in questions]}
 
-    def invoice_load(self, fields, records, *args, **kwargs):
-        pass
+    def invoice_load(self, fields, request, *args, **kwargs):
+        country = next((x for x in fields if x['field'] == 'country'), None)
+        country['value'] = 'FR'
+        return fields
 
-    def invoice_change_city(self, fields, record, *args, **kwargs):
-        pass
+    def invoice_change_city(self, fields, request, changed_field, *args, **kwargs):
+        zip_code = next((x for x in fields if x['field'] == 'zip code'), None)
+        zip_code['value'] = '83'
+        return fields
 
-    def invoice_change_zip_code(self, fields, record, *args, **kwargs):
-        pass
+    def invoice_change_zip_code(self, fields, request, changed_field, *args, **kwargs):
+        return fields
 
 
 class CustomNameForest(Collection):
@@ -126,6 +132,7 @@ class UtilsCollectionTests(TestCase):
 
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
+        Collection._registry = {}
 
     def tearDown(self):
         # reset _registry after each test
@@ -152,7 +159,7 @@ class UtilsCollectionTests(TestCase):
     def test_register_smart_field(self):
         Collection.register(QuestionForest, Question)
         collection = Schema.get_collection('Question')
-        self.assertEqual(len(collection['fields']), 5)
+        self.assertEqual(len(collection['fields']), 6)
         foo_smart_field = [f for f in collection['fields'] if f['field'] == 'foo'][0]
         self.assertTrue(foo_smart_field['is_virtual'])
 
@@ -201,9 +208,9 @@ class UtilsCollectionTests(TestCase):
                     'field': 'Certificate of Incorporation',
                     'description': 'The legal document relating to the formation of a company or corporation.',
                     'type': 'File',
-                    'is_required': True,
-                    'is_read_only': False,
-                    'default_value': None,
+                    'isRequired': True,
+                    'isReadOnly': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -213,9 +220,9 @@ class UtilsCollectionTests(TestCase):
                     'field': 'Proof of address',
                     'description': '(Electricity, Gas, Water, Internet, Landline & Mobile Phone Invoice / Payment Schedule) no older than 3 months of the legal representative of your company',
                     'type': 'File',
-                    'is_required': True,
-                    'is_read_only': False,
-                    'default_value': None,
+                    'isRequired': True,
+                    'isReadOnly': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -225,9 +232,9 @@ class UtilsCollectionTests(TestCase):
                     'field': 'Company bank statement',
                     'description': 'PDF including company name as well as IBAN',
                     'type': 'File',
-                    'is_required': True,
-                    'is_read_only': False,
-                    'default_value': None,
+                    'isRequired': True,
+                    'isReadOnly': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -237,9 +244,9 @@ class UtilsCollectionTests(TestCase):
                     'field': 'Valid proof of ID',
                     'description': 'ID card or passport if the document has been issued in the EU, EFTA, or EEA / ID card or passport + resident permit or driving licence if the document has been issued outside the EU, EFTA, or EEA of the legal representative of your company',
                     'type': 'File',
-                    'is_required': True,
-                    'is_read_only': False,
-                    'default_value': None,
+                    'isRequired': True,
+                    'isReadOnly': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'widget': None,
@@ -263,9 +270,9 @@ class UtilsCollectionTests(TestCase):
                     'field': 'country',
                     'type': 'Enum',
                     'enums': ['FR', 'US'],
-                    'is_read_only': False,
-                    'is_required': False,
-                    'default_value': None,
+                    'isReadOnly': False,
+                    'isRequired': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'description': None,
@@ -275,28 +282,30 @@ class UtilsCollectionTests(TestCase):
                 {
                     'field': 'city',
                     'type': 'String',
-                    'is_read_only': False,
-                    'is_required': False,
-                    'default_value': None,
+                    'isReadOnly': False,
+                    'isRequired': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'description': None,
                     'widget': None,
-                    'position': 1
+                    'position': 1,
+                    'hook': 'cityChange'
                 }, {
                     'field': 'zip code',
                     'type': 'String',
-                    'is_read_only': False,
-                    'is_required': False,
-                    'default_value': None,
+                    'isReadOnly': False,
+                    'isRequired': False,
+                    'defaultValue': None,
                     'integration': None,
                     'reference': None,
                     'description': None,
                     'widget': None,
-                    'position': 2
+                    'position': 2,
+                    'hook': 'zipCodeChange'
                 }],
             'hooks': {
                 'load': True,
-                'change': ['city', 'zip code']
+                'change': ['cityChange', 'zipCodeChange']
             }
         })

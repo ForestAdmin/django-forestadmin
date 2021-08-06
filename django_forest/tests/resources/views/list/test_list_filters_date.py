@@ -46,7 +46,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"past","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -65,7 +66,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -77,7 +86,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"future","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -96,7 +106,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -107,7 +125,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -119,7 +145,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
             'filters': '{"field":"pub_date","operator":"today","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -138,7 +164,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -149,7 +183,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -161,7 +203,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"before_x_hours_ago","value":1}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -180,7 +223,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -192,7 +243,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"after_x_hours_ago","value":1}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -211,7 +263,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -222,7 +282,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -234,7 +302,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 7, 1, 0, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"previous_quarter","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -253,7 +322,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -264,7 +341,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -275,7 +360,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -287,7 +380,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 30, 23, 59, 59, 999999, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"previous_quarter_to_date","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -306,7 +400,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -317,7 +419,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -328,7 +438,15 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })

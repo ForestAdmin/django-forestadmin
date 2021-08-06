@@ -1,3 +1,5 @@
+import copy
+
 from django_forest.utils.schema.definitions import COLLECTION, ACTION, ACTION_FIELD, FIELD
 from django_forest.utils.schema import Schema
 
@@ -34,6 +36,12 @@ class Collection:
             if hasattr(self, key) and getattr(self, key) is not None:
                 collection[key] = getattr(self, key)
 
+    def add_smart_field(self, collection, field):
+        field['is_virtual'] = True
+        field['is_filterable'] = False if 'is_filterable' not in field else field['is_filterable']
+        field['is_sortable'] = False if 'is_sortable' not in field else field['is_sortable']
+        collection['fields'].append(Schema.get_default(field, FIELD))
+
     def handle_smart_fields(self, collection):
         existing_fields = [f['field'] for f in collection['fields']]
         for field in self.fields:
@@ -43,8 +51,7 @@ class Collection:
                 fi.update({'is_virtual': True})
             # add
             else:
-                field.update({'is_virtual': True})
-                collection['fields'].append(Schema.get_default(field, FIELD))
+                self.add_smart_field(collection, field)
 
     def handle_action_endpoint(self, action):
         if 'endpoint' not in action:
@@ -78,9 +85,10 @@ class Collection:
             action.update({
                 'endpoint': self.handle_action_endpoint(action),
                 'fields': self.handle_action_fields(action),
-                'hooks': self.handle_action_hooks(action)
             })
-            collection['actions'].append(Schema.get_default(action, ACTION))
+            action_hooks = copy.deepcopy(action)
+            action_hooks['hooks'] = self.handle_action_hooks(action_hooks)
+            collection['actions'].append(Schema.get_default(action_hooks, ACTION))
 
     def handle_smart_segments(self, collection):
         for segment in self.segments:

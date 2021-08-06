@@ -1,14 +1,15 @@
-import copy
 import json
 from datetime import datetime
 from unittest import mock
 
 import pytz
+import sys
+
+import pytest
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TransactionTestCase
 from django.urls import reverse
 
-from django_forest.tests.fixtures.schema import test_schema
 from django_forest.tests.models import Question, Restaurant, Place
 from django_forest.tests.resources.views.list.test_list_scope import mocked_scope
 from django_forest.utils.schema import Schema
@@ -16,6 +17,15 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
 
 
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
+
+
+@pytest.mark.usefixtures('reset_config_dir_import')
 class ResourceDetailViewTests(TransactionTestCase):
     fixtures = ['article.json', 'publication.json',
                 'session.json',
@@ -24,7 +34,8 @@ class ResourceDetailViewTests(TransactionTestCase):
                 ]
 
     def setUp(self):
-        Schema.schema = copy.deepcopy(test_schema)
+        Schema.build_schema()
+        Schema.add_smart_features()
         Schema.handle_json_api_schema()
         self.url = reverse('django_forest:resources:detail', kwargs={'resource': 'Question', 'pk': '1'})
         self.reverse_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Choice', 'pk': '1'})
@@ -55,6 +66,8 @@ class ResourceDetailViewTests(TransactionTestCase):
             'data': {
                 'type': 'question',
                 'attributes': {
+                    'bar': 'what is your favorite color?+bar',
+                    'foo': 'what is your favorite color?+foo',
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
                     'question_text': 'what is your favorite color?'
                 },
@@ -63,6 +76,10 @@ class ResourceDetailViewTests(TransactionTestCase):
                         'links': {
                             'related': '/forest/Question/1/relationships/choice_set'
                         }
+                    },
+                    'topic': {
+                        'data': None,
+                        'links': {'related': '/forest/Question/1/relationships/topic'}
                     }
                 },
                 'id': 1,
@@ -109,6 +126,8 @@ class ResourceDetailViewTests(TransactionTestCase):
             'data': {
                 'type': 'question',
                 'attributes': {
+                    'bar': 'what is your favorite color?+bar',
+                    'foo': 'what is your favorite color?+foo',
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
                     'question_text': 'what is your favorite color?'
                 },
@@ -117,7 +136,9 @@ class ResourceDetailViewTests(TransactionTestCase):
                         'links': {
                             'related': '/forest/Question/1/relationships/choice_set'
                         }
-                    }
+                    },
+                    'topic': {'data': None,
+                              'links': {'related': '/forest/Question/1/relationships/topic'}}
                 },
                 'id': 1,
                 'links': {
@@ -183,14 +204,17 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'type': 'question',
                 'attributes': {
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
-                    'question_text': 'What is your favorite animal?'
+                    'question_text': 'What is your favorite animal?',
+                    'bar': 'what is your favorite color?+bar',
+                    'foo': 'what is your favorite color?+foo',
                 },
                 'relationships': {
                     'choice_set': {
                         'links': {
                             'related': '/forest/Question/1/relationships/choice_set'
                         }
-                    }
+                    },
+                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
                 },
                 'id': 1,
                 'links': {
@@ -309,7 +333,13 @@ class ResourceDetailViewTests(TransactionTestCase):
                         'links': {
                             'related': '/forest/Choice/1/relationships/question'
                         }
-                    }},
+                    },
+                    'topic': {
+                        'links': {
+                            'related': '/forest/Choice/1/relationships/topic'
+                        }
+                    }
+                },
                 'links': {
                     'self': '/forest/Choice/1'
                 }
@@ -364,6 +394,51 @@ class ResourceDetailViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.scope.datetime')
+    def test_put_smart_field(self, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+        body = {
+            'data': {
+                'attributes': {
+                    'foo': 'What is your favorite animal?',
+                    'bar': 'What is your favorite animal?',
+                }
+            }
+        }
+        response = self.client.put(self.url,
+                                   json.dumps(body),
+                                   content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': {
+                'type': 'question',
+                'attributes': {
+                    'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                    'question_text': 'bar+What is your favorite animal?',
+                    'bar': 'what is your favorite color?+bar',
+                    'foo': 'what is your favorite color?+foo',
+                },
+                'relationships': {
+                    'choice_set': {
+                        'links': {
+                            'related': '/forest/Question/1/relationships/choice_set'
+                        }
+                    },
+                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                },
+                'id': 1,
+                'links': {
+                    'self': '/forest/Question/1'
+                }
+            },
+            'links': {
+                'self': '/forest/Question/1'
+            }
+        })
+
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.datetime')

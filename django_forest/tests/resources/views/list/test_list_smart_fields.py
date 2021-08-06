@@ -9,6 +9,7 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
+from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
@@ -55,13 +56,15 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         # reset _registry after each test
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
+        Collection._registry = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.datetime')
     def test_get(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date,foo,bar',
+            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[topic]': 'name',
             'page[number]': '1',
             'page[size]': '15'
         })
@@ -80,7 +83,15 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                     'id': 1,
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -93,7 +104,15 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -106,7 +125,133 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
+                }
+            ]
+        })
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.scope.datetime')
+    def test_get_filter_callable(self, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+        response = self.client.get(self.url, {
+            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[topic]': 'name',
+            'filters': '{"field":"foo","operator":"contains","value":"favorite"}',
+            'page[number]': '1',
+            'page[size]': '15'
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'question_text': 'what is your favorite color?',
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'foo': 'what is your favorite color?+foo',
+                        'bar': 'what is your favorite color?+bar'
+                    },
+                    'id': 1,
+                    'links': {
+                        'self': '/forest/Question/1'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'question_text': 'who is your favorite singer?',
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'foo': 'who is your favorite singer?+foo',
+                        'bar': 'who is your favorite singer?+bar'},
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
+                }
+            ]
+        })
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.scope.datetime')
+    def test_get_filter_string(self, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+        response = self.client.get(self.url, {
+            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[topic]': 'name',
+            'filters': '{"field":"bar","operator":"contains","value":"favorite"}',
+            'page[number]': '1',
+            'page[size]': '15'
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'question_text': 'what is your favorite color?',
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'foo': 'what is your favorite color?+foo',
+                        'bar': 'what is your favorite color?+bar'
+                    },
+                    'id': 1,
+                    'links': {
+                        'self': '/forest/Question/1'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
+                },
+                {
+                    'type': 'question',
+                    'attributes': {
+                        'question_text': 'who is your favorite singer?',
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'foo': 'who is your favorite singer?+foo',
+                        'bar': 'who is your favorite singer?+bar'},
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/Question/3'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })

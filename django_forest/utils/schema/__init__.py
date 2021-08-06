@@ -113,6 +113,7 @@ class Schema:
 
     @classmethod
     def build_schema(cls):
+        cls.schema['collections'] = []
         for model in Models.list():
             collection = cls.get_default({'name': model.__name__}, COLLECTION)
             cls.add_fields(model, collection)
