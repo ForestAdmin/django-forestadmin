@@ -32,8 +32,8 @@ class ResourceCsvViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:csv', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('django_forest:resources:csv', kwargs={'resource': 'Choice'})
+        self.url = reverse('django_forest:resources:csv', kwargs={'resource': 'tests_question'})
+        self.reverse_url = reverse('django_forest:resources:csv', kwargs={'resource': 'tests_choice'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -53,7 +53,7 @@ class ResourceCsvViewTests(TransactionTestCase):
     def test_get(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',
             'search': '',
             'filters': '',
@@ -71,7 +71,7 @@ class ResourceCsvViewTests(TransactionTestCase):
     def test_get_related_data(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.reverse_url, {
-            'fields[Choice]': 'id,question,topic,choice_text',
+            'fields[tests_choice]': 'id,question,topic,choice_text',
             'fields[question]': 'question_text',
             'fields[topic]': 'name',
             'search': '',
@@ -90,7 +90,7 @@ class ResourceCsvViewTests(TransactionTestCase):
     def test_wrong_operator(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date,foo,bar',
+            'fields[tests_question]': 'id,question_text,pub_date,foo,bar',
             'search': '',
             'filters': '{"field":"question_text","operator":"foo","value":"what is your favorite color?"}',
             'searchExtended': 0,

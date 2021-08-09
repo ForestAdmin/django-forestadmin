@@ -23,7 +23,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
 
         instance = queryset[0]
         # handle smart fields
-        self.handle_smart_fields(instance, self.Model.__name__)
+        self.handle_smart_fields(instance, self.Model._meta.db_table)
 
         return instance
 
@@ -34,11 +34,11 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             return self.error_response(e)
         else:
             # handle smart fields
-            self.handle_smart_fields(instance, self.Model.__name__)
+            self.handle_smart_fields(instance, self.Model._meta.db_table)
 
             # json api serializer
             include_data = self.get_include_data(self.Model)
-            Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
+            Schema = JsonApiSchema._registry[f'{self.Model._meta.db_table}Schema']
             data = Schema(include_data=include_data).dump(instance)
 
             return JsonResponse(data, safe=False)
@@ -51,7 +51,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             instance = self.get_instance(request, pk)
             for k, v in attributes.items():
                 setattr(instance, k, v)
-            instance = self.update_smart_fields(instance, body, self.Model.__name__)
+            instance = self.update_smart_fields(instance, body, self.Model._meta.db_table)
             instance.save()
         except Exception as e:
             return self.error_response(e)
@@ -62,7 +62,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
                 self.Model.objects.filter(pk=pk).delete()
 
             # json api serializer
-            Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
+            Schema = JsonApiSchema._registry[f'{self.Model._meta.db_table}Schema']
             data = Schema().dump(instance)
             return JsonResponse(data, safe=False)
 

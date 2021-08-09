@@ -24,7 +24,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -46,7 +46,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"past","value":null}',
             'timezone': 'Europe/Paris',
@@ -58,20 +58,20 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
@@ -86,7 +86,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"future","value":null}',
             'timezone': 'Europe/Paris',
@@ -98,39 +98,39 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'id': 2,
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/2/relationships/topic'
+                                'related': '/forest/tests_question/2/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/3/relationships/topic'
+                                'related': '/forest/tests_question/3/relationships/topic'
                             }
                         }
                     },
@@ -145,7 +145,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'filters': '{"field":"pub_date","operator":"today","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -156,39 +156,39 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'id': 2,
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/2/relationships/topic'
+                                'related': '/forest/tests_question/2/relationships/topic'
                             }
                         }
                     },
@@ -203,7 +203,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"before_x_hours_ago","value":1}',
             'timezone': 'Europe/Paris',
@@ -215,20 +215,20 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
@@ -243,7 +243,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"after_x_hours_ago","value":1}',
             'timezone': 'Europe/Paris',
@@ -255,39 +255,39 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'id': 2,
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/2/relationships/topic'
+                                'related': '/forest/tests_question/2/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/3/relationships/topic'
+                                'related': '/forest/tests_question/3/relationships/topic'
                             }
                         }
                     },
@@ -302,7 +302,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 7, 1, 0, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"previous_quarter","value":null}',
             'timezone': 'Europe/Paris',
@@ -314,58 +314,58 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'id': 2,
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/2/relationships/topic'
+                                'related': '/forest/tests_question/2/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/3/relationships/topic'
+                                'related': '/forest/tests_question/3/relationships/topic'
                             }
                         }
                     },
@@ -380,7 +380,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         mocked_now.now.return_value = datetime(2021, 6, 30, 23, 59, 59, 999999, tzinfo=timezone('Europe/Paris'))
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"previous_quarter_to_date","value":null}',
             'timezone': 'Europe/Paris',
@@ -392,58 +392,58 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'id': 2,
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/2/relationships/topic'
+                                'related': '/forest/tests_question/2/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/3/relationships/topic'
+                                'related': '/forest/tests_question/3/relationships/topic'
                             }
                         }
                     },

@@ -14,7 +14,7 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
 
 mocked_scope = {
-    'Question': {
+    'tests_question': {
         'scope': {
             'filter': {
                 'aggregator': 'and',
@@ -32,7 +32,7 @@ mocked_scope = {
 }
 
 mocked_scope_dynamic_value = {
-    'Question': {
+    'tests_question': {
         'scope': {
             'filter': {
                 'aggregator': 'or',
@@ -79,8 +79,8 @@ class ResourceListScopeViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_choice'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
 
@@ -100,7 +100,7 @@ class ResourceListScopeViewTests(TransactionTestCase):
             }
         }
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -111,17 +111,17 @@ class ResourceListScopeViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {'topic': {'data': None,
-                                                'links': {'related': '/forest/Question/1/relationships/topic'}}},
+                                                'links': {'related': '/forest/tests_question/1/relationships/topic'}}},
                 }
             ]
         })
@@ -135,7 +135,7 @@ class ResourceListScopeViewTests(TransactionTestCase):
     }))
     def test_scope_simple(self, mocked_requests, mocked_decode):
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -146,17 +146,17 @@ class ResourceListScopeViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {'topic': {'data': None,
-                                                'links': {'related': '/forest/Question/1/relationships/topic'}}},
+                                                'links': {'related': '/forest/tests_question/1/relationships/topic'}}},
                 }
             ]
         })
@@ -170,7 +170,7 @@ class ResourceListScopeViewTests(TransactionTestCase):
     }))
     def test_scope_aggregator_dynamic_values(self, mocked_requests, mocked_decode):
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -181,30 +181,30 @@ class ResourceListScopeViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {'topic': {'data': None,
-                                                'links': {'related': '/forest/Question/1/relationships/topic'}}},
+                                                'links': {'related': '/forest/tests_question/1/relationships/topic'}}},
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 3,
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {'topic': {'data': None,
-                                                'links': {'related': '/forest/Question/3/relationships/topic'}}},
+                                                'links': {'related': '/forest/tests_question/3/relationships/topic'}}},
                 },
             ]
         })
@@ -218,7 +218,7 @@ class ResourceListScopeViewTests(TransactionTestCase):
     }))
     def test_scope_no_response(self, mocked_requests, mocked_decode):
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[tests_question]': 'id,question_text,pub_date',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
             'page[size]': '15'
@@ -236,7 +236,7 @@ class ResourceListScopeViewTests(TransactionTestCase):
     @mock.patch('jose.jwt.decode', return_value={'id': 1})
     def test_scope_bad_token(self, mocked_decode):
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[tests_question]': 'id,question_text,pub_date',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
             'page[size]': '15'

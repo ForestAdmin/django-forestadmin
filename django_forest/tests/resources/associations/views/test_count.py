@@ -36,7 +36,7 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
     @mock.patch('django_forest.utils.scope.datetime')
     def test_get(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
@@ -46,7 +46,7 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
     @mock.patch('django_forest.utils.scope.datetime')
     def test_get_invalid_token(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
@@ -60,8 +60,8 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
 
     def test_get_no_association(self):
-        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'foo'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model Question'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_question'}]})

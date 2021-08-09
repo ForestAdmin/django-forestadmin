@@ -19,7 +19,7 @@ class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixi
             queryset = self.enhance_queryset(queryset, self.Model, params, request)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, self.Model.__name__, many=True)
+            self.handle_smart_fields(queryset, self.Model._meta.db_table, many=True)
 
             # json api serializer
             data = self.serialize(queryset, self.Model, params)
@@ -28,7 +28,7 @@ class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixi
         else:
             response = self.csv_response(params['filename'])
 
-            field_names_requested = [x for x in params[f'fields[{self.Model.__name__}]'].split(',')]
+            field_names_requested = [x for x in params[f'fields[{self.Model._meta.db_table}]'].split(',')]
             csv_header = params['header'].split(',')
 
             writer = csv.DictWriter(response, fieldnames=field_names_requested)

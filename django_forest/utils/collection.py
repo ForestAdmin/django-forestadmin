@@ -23,7 +23,7 @@ class Collection:
         instance = model_forest(model)
         key = instance.__class__.__name__
         if model is not None:
-            key = model.__name__
+            key = model._meta.db_table
         elif instance.name is not None:
             key = instance.name
         cls._registry[key] = instance
@@ -99,7 +99,7 @@ class Collection:
 
         # find resource in Schema
         if model is not None:
-            collection = Schema.get_collection(model.__name__)
+            collection = Schema.get_collection(model._meta.db_table)
         # create smart collection
         else:
             collection = Schema.get_default({

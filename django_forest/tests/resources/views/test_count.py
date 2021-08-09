@@ -36,7 +36,7 @@ class ResourceCountViewTests(TransactionTestCase):
     @mock.patch('django_forest.utils.scope.datetime')
     def test_get(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        url = reverse('django_forest:resources:count', kwargs={'resource': 'Question'})
+        url = reverse('django_forest:resources:count', kwargs={'resource': 'tests_question'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
@@ -46,7 +46,7 @@ class ResourceCountViewTests(TransactionTestCase):
     @mock.patch('django_forest.utils.scope.datetime')
     def test_get_invalid_token(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        url = reverse('django_forest:resources:count', kwargs={'resource': 'Question'})
+        url = reverse('django_forest:resources:count', kwargs={'resource': 'tests_question'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 400)

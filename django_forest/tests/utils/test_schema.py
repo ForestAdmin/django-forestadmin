@@ -108,8 +108,8 @@ class UtilsSchemaTests(TestCase):
         collection_mock.register.assert_called_with(QuestionForest, Question)
 
     def test_get_collection(self):
-        collection = Schema.get_collection('Question')
-        self.assertEqual(collection, [x for x in test_schema['collections'] if x['name'] == 'Question'][0])
+        collection = Schema.get_collection('tests_question')
+        self.assertEqual(collection, [x for x in test_schema['collections'] if x['name'] == 'tests_question'][0])
 
     def test_get_collection_inexist(self):
         collection = Schema.get_collection('Foo')
@@ -117,7 +117,15 @@ class UtilsSchemaTests(TestCase):
 
     def test_handle_json_api_schema(self):
         Schema.handle_json_api_schema()
-        self.assertEqual(len(JsonApiSchema._registry), 18)
+        self.assertEqual(len(JsonApiSchema._registry), 22)
+
+
+# reset forest config dir auto import
+@pytest.fixture()
+def reset_config_dir_import():
+    for key in list(sys.modules.keys()):
+        if key.startswith('django_forest.tests.forest'):
+            del sys.modules[key]
 
 
 file_path = os.path.join(os.getcwd(), '.forestadmin-schema.json')
@@ -186,7 +194,7 @@ class UtilsSchemaFileTests(TestCase):
         with open(file_path, 'r') as f:
             data = f.read()
             data = json.loads(data)
-            question = [c for c in data['collections'] if c['name'] == 'Question'][0]
+            question = [c for c in data['collections'] if c['name'] == 'tests_question'][0]
             self.assertEqual(len(question['fields']), 7)
             foo_field = [f for f in question['fields'] if f['field'] == 'foo'][0]
             self.assertFalse('get' in foo_field)

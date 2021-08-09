@@ -31,13 +31,13 @@ class ResourceListViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = f"{reverse('django_forest:resources:list', kwargs={'resource': 'Question'})}?timezone=Europe%2FParis"
-        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
-        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'Waiter'})
-        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'Student'})
-        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'Serial'})
-        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'Restaurant'})
-        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'Foo'})
+        self.url = f"{reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})}?timezone=Europe%2FParis"
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_choice'})
+        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_waiter'})
+        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_student'})
+        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_serial'})
+        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_restaurant'})
+        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_foo'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -62,49 +62,49 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/1/relationships/choice_set'
+                                'related': '/forest/tests_question/1/relationships/choice_set'
                             }
                         },
-                        'topic': {'data': None, 'links': {'related': '/forest/Question/1/relationships/topic'}}
+                        'topic': {'data': None, 'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                     },
                     'attributes': {
                         'question_text': 'what is your favorite color?',
                         'pub_date': '2021-06-02T13:52:53.528000+00:00'},
                     'id': 1,
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     }
                 }, {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/2/relationships/choice_set'
+                                'related': '/forest/tests_question/2/relationships/choice_set'
                             }
                         },
-                        'topic': {'data': None, 'links': {'related': '/forest/Question/2/relationships/topic'}}
+                        'topic': {'data': None, 'links': {'related': '/forest/tests_question/2/relationships/topic'}}
                     },
                     'attributes': {
                         'question_text': 'do you like chocolate?',
                         'pub_date': '2021-06-02T15:52:53.528000+00:00'
                     },
                     'id': 2, 'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     }
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/3/relationships/choice_set'
+                                'related': '/forest/tests_question/3/relationships/choice_set'
                             }
                         },
-                        'topic': {'data': None, 'links': {'related': '/forest/Question/3/relationships/topic'}}
+                        'topic': {'data': None, 'links': {'related': '/forest/tests_question/3/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
@@ -112,7 +112,7 @@ class ResourceListViewTests(TransactionTestCase):
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     }
                 }
             ]
@@ -131,7 +131,7 @@ class ResourceListViewTests(TransactionTestCase):
         response = self.client.get(self.bad_url, {'page[number]': '1', 'page[size]': '15'})
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
 
     def test_post(self):
         body = {
@@ -150,14 +150,14 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'question',
+                'type': 'tests_question',
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/4/relationships/choice_set'
+                            'related': '/forest/tests_question/4/relationships/choice_set'
                         }
                     },
-                    'topic': {'links': {'related': '/forest/Question/4/relationships/topic'}}
+                    'topic': {'links': {'related': '/forest/tests_question/4/relationships/topic'}}
                 },
                 'attributes': {
                     'pub_date': '2021-06-21T09:46:39+00:00',
@@ -165,11 +165,11 @@ class ResourceListViewTests(TransactionTestCase):
                 },
                 'id': 4,
                 'links': {
-                    'self': '/forest/Question/4'
+                    'self': '/forest/tests_question/4'
                 }
             },
             'links': {
-                'self': '/forest/Question/4'
+                'self': '/forest/tests_question/4'
             }
         })
         self.assertEqual(Question.objects.count(), 4)
@@ -188,7 +188,7 @@ class ResourceListViewTests(TransactionTestCase):
                                     content_type='application/json')
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
 
     def test_post_related_data(self):
         body = {
@@ -200,7 +200,7 @@ class ResourceListViewTests(TransactionTestCase):
                 'relationships': {
                     'place': {
                         'data': {
-                            'type': 'Places',
+                            'type': 'tests_places',
                             'id': 2,
                         }
                     },
@@ -215,16 +215,16 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'restaurant',
+                'type': 'tests_restaurant',
                 'relationships': {
                     'waiter_set': {
                         'links': {
-                            'related': '/forest/Restaurant/2/relationships/waiter_set'
+                            'related': '/forest/tests_restaurant/2/relationships/waiter_set'
                         }
                     },
                     'place': {
                         'links': {
-                            'related': '/forest/Restaurant/2/relationships/place'
+                            'related': '/forest/tests_restaurant/2/relationships/place'
                         }
                     }
                 },
@@ -234,11 +234,11 @@ class ResourceListViewTests(TransactionTestCase):
                 },
                 'id': 2,
                 'links': {
-                    'self': '/forest/Restaurant/2'
+                    'self': '/forest/tests_restaurant/2'
                 }
             },
             'links': {
-                'self': '/forest/Restaurant/2'
+                'self': '/forest/tests_restaurant/2'
             }
         })
         self.assertEqual(Restaurant.objects.count(), 2)
@@ -253,7 +253,7 @@ class ResourceListViewTests(TransactionTestCase):
                 'relationships': {
                     'place': {
                         'data': {
-                            'type': 'Places',
+                            'type': 'tests_places',
                             'id': 3,
                         }
                     },
@@ -269,14 +269,14 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'errors': [
                 {
-                    'detail': 'Instance Place with pk 3 does not exists'
+                    'detail': 'Instance tests_place with pk 3 does not exists'
                 }
             ]
         })
         self.assertEqual(Restaurant.objects.count(), 1)
 
     def test_post_error(self):
-        url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
         data = {
             'data': {
                 'attributes': {
@@ -355,13 +355,13 @@ class ResourceListViewTests(TransactionTestCase):
                     'ids': [
                         '1'
                     ],
-                    'collection_name': 'Question',
+                    'collection_name': 'tests_question',
                     'parent_collection_name': None,
                     'parent_collection_id': None,
                     'parent_association_name': None,
                     'all_records': True,
                     'all_records_subset_query': {
-                        'fields[Question]': 'id,question_text,pub_date',
+                        'fields[tests_question]': 'id,question_text,pub_date',
                         'fields[subject]': 'name',
                         'fields[subject2]': 'name',
                         'fields[topic]': 'name',
@@ -398,5 +398,5 @@ class ResourceListViewTests(TransactionTestCase):
                                       content_type='application/json')
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
         self.assertEqual(Question.objects.count(), 3)

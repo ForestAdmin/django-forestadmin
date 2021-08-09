@@ -37,10 +37,10 @@ class ResourceDetailViewTests(TransactionTestCase):
         Schema.build_schema()
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:detail', kwargs={'resource': 'Question', 'pk': '1'})
-        self.reverse_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Choice', 'pk': '1'})
-        self.one_to_one_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Restaurant', 'pk': '1'})
-        self.bad_url = reverse('django_forest:resources:detail', kwargs={'resource': 'Foo', 'pk': '1'})
+        self.url = reverse('django_forest:resources:detail', kwargs={'resource': 'tests_question', 'pk': '1'})
+        self.reverse_url = reverse('django_forest:resources:detail', kwargs={'resource': 'tests_choice', 'pk': '1'})
+        self.one_to_one_url = reverse('django_forest:resources:detail', kwargs={'resource': 'tests_restaurant', 'pk': '1'})
+        self.bad_url = reverse('django_forest:resources:detail', kwargs={'resource': 'tests_foo', 'pk': '1'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -64,7 +64,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'question',
+                'type': 'tests_question',
                 'attributes': {
                     'bar': 'what is your favorite color?+bar',
                     'foo': 'what is your favorite color?+foo',
@@ -74,21 +74,21 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/choice_set'
+                            'related': '/forest/tests_question/1/relationships/choice_set'
                         }
                     },
                     'topic': {
                         'data': None,
-                        'links': {'related': '/forest/Question/1/relationships/topic'}
+                        'links': {'related': '/forest/tests_question/1/relationships/topic'}
                     }
                 },
                 'id': 1,
                 'links': {
-                    'self': '/forest/Question/1'
+                    'self': '/forest/tests_question/1'
                 }
             },
             'links': {
-                'self': '/forest/Question/1'
+                'self': '/forest/tests_question/1'
             }
         })
 
@@ -105,7 +105,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         response = self.client.get(self.bad_url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.datetime')
@@ -124,7 +124,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'question',
+                'type': 'tests_question',
                 'attributes': {
                     'bar': 'what is your favorite color?+bar',
                     'foo': 'what is your favorite color?+foo',
@@ -134,19 +134,19 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/choice_set'
+                            'related': '/forest/tests_question/1/relationships/choice_set'
                         }
                     },
                     'topic': {'data': None,
-                              'links': {'related': '/forest/Question/1/relationships/topic'}}
+                              'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                 },
                 'id': 1,
                 'links': {
-                    'self': '/forest/Question/1'
+                    'self': '/forest/tests_question/1'
                 }
             },
             'links': {
-                'self': '/forest/Question/1'
+                'self': '/forest/tests_question/1'
             }
         })
 
@@ -156,7 +156,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         ScopeManager.cache = {
             '1': {
                 'scopes': {
-                    'Question': {
+                    'tests_question': {
                         'scope': {
                             'filter': {
                                 'aggregator': 'and',
@@ -201,7 +201,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'question',
+                'type': 'tests_question',
                 'attributes': {
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
                     'question_text': 'What is your favorite animal?',
@@ -211,18 +211,18 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/choice_set'
+                            'related': '/forest/tests_question/1/relationships/choice_set'
                         }
                     },
-                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                    'topic': {'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                 },
                 'id': 1,
                 'links': {
-                    'self': '/forest/Question/1'
+                    'self': '/forest/tests_question/1'
                 }
             },
             'links': {
-                'self': '/forest/Question/1'
+                'self': '/forest/tests_question/1'
             }
         })
 
@@ -256,7 +256,7 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'place': {
                         'data': {
-                            'type': 'Places',
+                            'type': 'tests_places',
                             'id': 2,
                         }
                     },
@@ -272,7 +272,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'restaurant',
+                'type': 'tests_restaurant',
                 'attributes': {
                     'serves_pizza': False,
                     'serves_hot_dogs': True
@@ -280,22 +280,22 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'place': {
                         'links': {
-                            'related': '/forest/Restaurant/2/relationships/place'
+                            'related': '/forest/tests_restaurant/2/relationships/place'
                         }
                     },
                     'waiter_set': {
                         'links': {
-                            'related': '/forest/Restaurant/2/relationships/waiter_set'
+                            'related': '/forest/tests_restaurant/2/relationships/waiter_set'
                         }
                     }
                 },
                 'id': 2,
                 'links': {
-                    'self': '/forest/Restaurant/2'
+                    'self': '/forest/tests_restaurant/2'
                 }
             },
             'links': {
-                'self': '/forest/Restaurant/2'
+                'self': '/forest/tests_restaurant/2'
             }
         })
         self.assertEqual(Restaurant.objects.count(), 1)
@@ -322,7 +322,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'choice',
+                'type': 'tests_choice',
                 'id': 1,
                 'attributes': {
                     'choice_text': 'yes',
@@ -331,21 +331,21 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'question': {
                         'links': {
-                            'related': '/forest/Choice/1/relationships/question'
+                            'related': '/forest/tests_choice/1/relationships/question'
                         }
                     },
                     'topic': {
                         'links': {
-                            'related': '/forest/Choice/1/relationships/topic'
+                            'related': '/forest/tests_choice/1/relationships/topic'
                         }
                     }
                 },
                 'links': {
-                    'self': '/forest/Choice/1'
+                    'self': '/forest/tests_choice/1'
                 }
             },
             'links': {
-                'self': '/forest/Choice/1'
+                'self': '/forest/tests_choice/1'
             }
         })
 
@@ -358,7 +358,7 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'place': {
                         'data': {
-                            'type': 'Places',
+                            'type': 'tests_places',
                             'id': 3,
                         }
                     },
@@ -374,7 +374,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'errors': [
                 {
-                    'detail': 'Instance Place with pk 3 does not exists'
+                    'detail': 'Instance tests_place with pk 3 does not exists'
                 }
             ]
         })
@@ -393,7 +393,7 @@ class ResourceDetailViewTests(TransactionTestCase):
                                    content_type='application/json')
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.datetime')
@@ -414,7 +414,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
             'data': {
-                'type': 'question',
+                'type': 'tests_question',
                 'attributes': {
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
                     'question_text': 'bar+What is your favorite animal?',
@@ -424,18 +424,18 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/choice_set'
+                            'related': '/forest/tests_question/1/relationships/choice_set'
                         }
                     },
-                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                    'topic': {'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                 },
                 'id': 1,
                 'links': {
-                    'self': '/forest/Question/1'
+                    'self': '/forest/tests_question/1'
                 }
             },
             'links': {
-                'self': '/forest/Question/1'
+                'self': '/forest/tests_question/1'
             }
         })
 
@@ -465,4 +465,4 @@ class ResourceDetailViewTests(TransactionTestCase):
         response = self.client.delete(self.bad_url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})

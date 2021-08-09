@@ -33,7 +33,7 @@ def get_association_field(Model, association_resource):
     association_field = next((x for x in Model._meta.get_fields()
                               if x.is_relation and get_accessor_name(x) == association_resource), None)
     if association_field is None:
-        message = f'cannot find association resource {association_resource} for Model {Model.__name__}'
+        message = f'cannot find association resource {association_resource} for Model {Model._meta.db_table}'
         raise Exception(message)
 
     return association_field

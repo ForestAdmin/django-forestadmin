@@ -9,7 +9,7 @@ class JsonApiSerializerMixin:
         return 'id'
 
     def compute_only(self, only, field_name, params, Model):
-        collection = Schema.get_collection(Model.__name__)
+        collection = Schema.get_collection(Model._meta.db_table)
         field = next((x for x in collection['fields'] if x['field'] == field_name), None)
         if field is not None:
             if field['is_virtual']:
@@ -24,7 +24,7 @@ class JsonApiSerializerMixin:
         return only
 
     def get_deep_only(self, params, Model):
-        only = params[f'fields[{Model.__name__}]'].split(',')
+        only = params[f'fields[{Model._meta.db_table}]'].split(',')
         sub_only = [x for x in only if f'fields[{x}]' in params]
         for field_name in sub_only:
             only = self.compute_only(only, field_name, params, Model)
@@ -37,13 +37,13 @@ class JsonApiSerializerMixin:
 
     def get_only(self, params, Model):
         only = []
-        lookup = f'fields[{Model.__name__}]'
+        lookup = f'fields[{Model._meta.db_table}]'
         if lookup in params:
             only = self.get_deep_only(params, Model)
         if 'context[field]' in params:
             fields_and_relationships = [x.name for x in Model._meta.get_fields()
                                         if not x.is_relation or (x.many_to_one or x.one_to_one)]
-            smart_relationships = self.get_smart_relationships(Model.__name__)
+            smart_relationships = self.get_smart_relationships(Model._meta.db_table)
             only = fields_and_relationships + smart_relationships
 
         if 'id' not in only:
@@ -54,16 +54,17 @@ class JsonApiSerializerMixin:
 
     def get_include_data(self, Model):
         relationships = [x.name for x in Model._meta.get_fields() if x.is_relation and (x.many_to_one or x.one_to_one)]
-        smart_relationships = self.get_smart_relationships(Model.__name__)
+        smart_relationships = self.get_smart_relationships(Model._meta.db_table)
         return relationships + smart_relationships
 
     def serialize(self, queryset, Model, params):
-        Schema = JsonApiSchema._registry[f'{Model.__name__}Schema']
+        Schema = JsonApiSchema._registry[f'{Model._meta.db_table}Schema']
 
         kwargs = {
             'include_data': self.get_include_data(Model)
         }
-        if f'fields[{Model.__name__}]' in params or 'context[field]' in params:
+
+        if f'fields[{Model._meta.db_table}]' in params or 'context[field]' in params:
             kwargs['only'] = self.get_only(params, Model)
 
         if not queryset:

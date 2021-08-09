@@ -35,7 +35,7 @@ class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, ScopeMixin, Deco
 
         # segment
         if 'segment' in params:
-            collection = Collection._registry[Model.__name__]
+            collection = Collection._registry[Model._meta.db_table]
             segment = next((x for x in collection.segments if x['name'] == params['segment']), None)
             if segment is not None and 'where' in segment:
                 queryset = queryset.filter(segment['where']())
