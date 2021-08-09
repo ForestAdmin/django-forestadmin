@@ -1,8 +1,9 @@
 from django.http import JsonResponse, HttpResponse
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, \
-    JsonApiSerializerMixin
+from django_forest.resources.utils.format import FormatFieldMixin
+from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
 from django_forest.resources.utils.resource import ResourceView
+from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
@@ -15,7 +16,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
 
         try:
             # enhance queryset
-            queryset = self.enhance_queryset(queryset, self.Model, params)
+            queryset = self.enhance_queryset(queryset, self.Model, params, request)
 
             # handle smart fields
             self.handle_smart_fields(queryset, self.Model, many=True)
@@ -45,7 +46,12 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             return JsonResponse(data, safe=False)
 
     def delete(self, request):
+        queryset = self.Model.objects.all()
+        scope_filters = self.get_scope(request, self.Model)
+        if scope_filters is not None:
+            queryset = queryset.filter(scope_filters)
+
         ids = self.get_ids_from_request(request, self.Model)
         # Notice: this does not run pre/post_delete signals
-        self.Model.objects.filter(pk__in=ids).delete()
+        queryset.filter(pk__in=ids).delete()
         return HttpResponse(status=204)

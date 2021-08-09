@@ -9,6 +9,7 @@ from django_forest.tests.models import Article, Session, Question, Choice
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema.json_api_schema import JsonApiSchema, DjangoSchema
 from django_forest.utils.schema import Schema
+from django_forest.utils.scope import ScopeManager
 
 
 class UtilsJsonApiSchemaTests(TestCase):
@@ -21,6 +22,7 @@ class UtilsJsonApiSchemaTests(TestCase):
         # reset _registry after each test
         Collection._registry = {}
         JsonApiSchema._registry = {}
+        ScopeManager.cache = {}
 
     def test_handle_json_api_schema(self):
         Schema.handle_json_api_schema()

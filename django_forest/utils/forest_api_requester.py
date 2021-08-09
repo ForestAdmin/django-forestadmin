@@ -59,6 +59,18 @@ class ForestApiRequester:
             return r
 
     @classmethod
+    def get_from_rendering_id(cls, route, rendering_id):
+        query = {
+            'renderingId': rendering_id
+        }
+
+        response = ForestApiRequester.get(route, query=query)
+        if response.status_code == requests.codes.ok:
+            return response.json()
+        else:
+            raise Exception(f'Forest API returned an #{response.content}')
+
+    @classmethod
     def get(cls, route, query=None, headers=None):
         body, query, headers = cls.get_params(query=query, headers=headers)
         url = cls._get_url(route)

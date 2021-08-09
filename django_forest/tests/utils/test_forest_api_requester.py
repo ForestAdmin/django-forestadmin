@@ -1,6 +1,7 @@
 import json
 from unittest import mock
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.test import TestCase, override_settings
 
 from django_forest.utils.forest_api_requester import ForestApiRequester
@@ -11,7 +12,7 @@ class MockResponse:
         self.json_data = json_data
         self.status_code = status_code
         self.headers = {'content-type': 'application/json'}
-        self.text = json.dumps(json_data)
+        self.text = json.dumps(json_data, cls=DjangoJSONEncoder)
 
     def json(self):
         return self.json_data

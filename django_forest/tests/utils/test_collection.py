@@ -6,6 +6,7 @@ from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.collection import Collection
 from django_forest.tests.models import Question
 from django_forest.utils.schema import Schema
+from django_forest.utils.scope import ScopeManager
 
 
 class QuestionForest(Collection):
@@ -129,6 +130,7 @@ class UtilsCollectionTests(TestCase):
     def tearDown(self):
         # reset _registry after each test
         Collection._registry = {}
+        ScopeManager.cache = {}
 
     def test_register(self):
         Collection.register(QuestionForest, Question)

@@ -1,9 +1,10 @@
 import csv
 
-from django_forest.resources.utils import SmartFieldMixin, FormatFieldMixin, \
-    JsonApiSerializerMixin
 from django_forest.resources.utils.csv import CsvMixin
+from django_forest.resources.utils.format import FormatFieldMixin
+from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
 from django_forest.resources.utils.resource import ResourceView
+from django_forest.resources.utils.smart_field import SmartFieldMixin
 
 
 class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, ResourceView):
@@ -15,7 +16,7 @@ class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixi
 
         try:
             # enhance queryset
-            queryset = self.enhance_queryset(queryset, self.Model, params)
+            queryset = self.enhance_queryset(queryset, self.Model, params, request)
 
             # handle smart fields
             self.handle_smart_fields(queryset, self.Model, many=True)

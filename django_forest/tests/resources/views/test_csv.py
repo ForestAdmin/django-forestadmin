@@ -1,7 +1,10 @@
 import copy
 import sys
+from datetime import datetime
+from unittest import mock
 
 import pytest
+import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
 
@@ -11,6 +14,9 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
 # reset forest config dir auto import
+from django_forest.utils.scope import ScopeManager
+
+
 @pytest.fixture()
 def reset_config_dir_import():
     for key in list(sys.modules.keys()):
@@ -28,12 +34,24 @@ class ResourceCsvViewTests(TransactionTestCase):
         Schema.handle_json_api_schema()
         self.url = reverse('django_forest:resources:csv', kwargs={'resource': 'Question'})
         self.reverse_url = reverse('django_forest:resources:csv', kwargs={'resource': 'Choice'})
+        self.client = self.client_class(
+            HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
+        ScopeManager.cache = {
+            '1': {
+                'scopes': {},
+                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+            }
+        }
 
     def tearDown(self):
         # reset _registry after each test
         JsonApiSchema._registry = {}
+        ScopeManager.cache = {}
 
-    def test_get(self):
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.scope.datetime')
+    def test_get(self, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
             'fields[Question]': 'id,question_text,pub_date,foo,bar',
             'search': '',
@@ -46,7 +64,10 @@ class ResourceCsvViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), 'id,question text,pub date,foo,bar\r\n1,what is your favorite color?,2021-06-02T13:52:53.528000+00:00,what is your favorite color?+foo,what is your favorite color?+bar\r\n2,do you like chocolate?,2021-06-02T15:52:53.528000+00:00,do you like chocolate?+foo,do you like chocolate?+bar\r\n3,who is your favorite singer?,2021-06-03T13:52:53.528000+00:00,who is your favorite singer?+foo,who is your favorite singer?+bar\r\n')
 
-    def test_get_related_data(self):
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.scope.datetime')
+    def test_get_related_data(self, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.reverse_url, {
             'fields[Choice]': 'id,question,choice_text',
             'fields[question]': 'question_text',
@@ -60,7 +81,10 @@ class ResourceCsvViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), 'id,choice text,\r\n1,what is your favorite color?,yes\r\n2,what is your favorite color?,no\r\n3,do you like chocolate?,good\r\n')
 
-    def test_wrong_operator(self):
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('django_forest.utils.scope.datetime')
+    def test_wrong_operator(self, mocked_datetime, mocked_decode):
+        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
             'fields[Question]': 'id,question_text,pub_date,foo,bar',
             'search': '',

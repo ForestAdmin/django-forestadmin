@@ -7,6 +7,7 @@ from django.urls import reverse
 from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
+from django_forest.utils.scope import ScopeManager
 
 
 class StatsLiveQueriesViewTests(TransactionTestCase):
@@ -20,6 +21,7 @@ class StatsLiveQueriesViewTests(TransactionTestCase):
     def tearDown(self):
         # reset _registry after each test
         JsonApiSchema._registry = {}
+        ScopeManager.cache = {}
 
     def test_get_value(self):
         body = {

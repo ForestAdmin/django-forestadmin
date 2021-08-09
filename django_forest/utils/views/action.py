@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django_forest.utils import get_token
 from django_forest.utils.permissions import Permission
-from .base import BaseView
+from django_forest.utils.views.base import BaseView
 
 
 class ActionView(BaseView):

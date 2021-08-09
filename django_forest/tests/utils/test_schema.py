@@ -15,6 +15,7 @@ from django_forest.utils.collection import Collection
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.models import Models
 from django_forest.utils.schema import Schema
+from django_forest.utils.scope import ScopeManager
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
@@ -27,6 +28,7 @@ class UtilsSchemaTests(TestCase):
         # reset _registry after each test
         Collection._registry = {}
         JsonApiSchema._registry = {}
+        ScopeManager.cache = {}
         Schema.schema_data = None
         Models.models = None
 
@@ -145,6 +147,7 @@ class UtilsSchemaFileTests(TestCase):
         # reset _registry after each test
         Collection._registry = {}
         JsonApiSchema._registry = {}
+        ScopeManager.cache = {}
         Schema.schema_data = None
         Models.models = None
         if os.path.exists(file_path):
