@@ -9,6 +9,7 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
+from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
@@ -61,6 +62,7 @@ class ResourceListViewTests(TransactionTestCase):
         # reset _registry after each test
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
+        Collection._registry = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.datetime')
@@ -94,7 +96,13 @@ class ResourceListViewTests(TransactionTestCase):
                                 'type': 'question',
                                 'id': '1'
                             }
-                        }
+                        },
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Choice/1/relationships/topic'
+                                }
+                            }
                     },
                     'links': {
                         'self': '/forest/Choice/1'
@@ -113,7 +121,8 @@ class ResourceListViewTests(TransactionTestCase):
                         'links': {
                             'related': '/forest/Question/1/relationships/choice_set'
                         }
-                    }
+                    },
+                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
                 },
                     'links': {
                         'self': '/forest/Question/1'
@@ -197,7 +206,8 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,question_text,pub_date',
+                'fields[Question]': 'id,topic,question_text,pub_date',
+                'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
                 'search': 1,
@@ -206,10 +216,12 @@ class ResourceListViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
+                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
                                   FROM "tests_question"
                                    WHERE ("tests_question"."id" = 1
-                                    OR "tests_question"."question_text"::text LIKE \'%1%\')
+                                    OR "tests_question"."question_text"::text LIKE \'%1%\'
+                                    OR "tests_question"."question_text" = '1'
+                                    OR "tests_question"."question_text" = '1')
                                   LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
@@ -222,7 +234,15 @@ class ResourceListViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -245,7 +265,9 @@ class ResourceListViewTests(TransactionTestCase):
                          ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
                           FROM "tests_question"
                            WHERE ("tests_question"."id"::text LIKE '%9223372036854775808%'
-                            OR "tests_question"."question_text"::text LIKE '%9223372036854775808%')
+                            OR "tests_question"."question_text"::text LIKE '%9223372036854775808%'
+                            OR "tests_question"."question_text" = '9223372036854775808'
+                            OR "tests_question"."question_text" = '9223372036854775808')
                           LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': []
@@ -257,7 +279,8 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,question_text,pub_date,foo,bar',
+                'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+                'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
                 'search': 'favorite',
@@ -267,9 +290,11 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
                          ' '.join('''
-                         SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
+                         SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
                           FROM "tests_question"
-                           WHERE "tests_question"."question_text"::text LIKE '%favorite%'
+                           WHERE ("tests_question"."question_text"::text LIKE '%favorite%'
+                           OR "tests_question"."question_text" = 'favorite'
+                           OR "tests_question"."question_text" = 'favorite')
                             LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
@@ -284,7 +309,15 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 1,
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -297,7 +330,15 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ],
             'meta': {
@@ -403,7 +444,8 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,question_text,pub_date',
+                'fields[Question]': 'id,topic,question_text,pub_date',
+                'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
                 'search': 'yes',
@@ -412,11 +454,15 @@ class ResourceListViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
+                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
                           FROM "tests_question"
                            LEFT OUTER JOIN "tests_choice" ON ("tests_question"."id" = "tests_choice"."question_id")
+                           LEFT OUTER JOIN "tests_topic" ON ("tests_question"."topic_id" = "tests_topic"."id")
                             WHERE ("tests_question"."question_text"::text LIKE '%yes%' 
-                            OR "tests_choice"."choice_text"::text LIKE '%yes%')
+                            OR "tests_question"."question_text" = 'yes'
+                            OR "tests_question"."question_text" = 'yes'
+                            OR "tests_choice"."choice_text"::text LIKE '%yes%'
+                            OR "tests_topic"."name"::text LIKE '%yes%')
                           LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
@@ -428,7 +474,15 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 1,
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })

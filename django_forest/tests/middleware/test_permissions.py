@@ -528,7 +528,7 @@ class MiddlewarePermissionsActionsTests(TestCase):
         response = self.client.post(self.url, json.dumps(self.body), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data, {'message': 'success'})
+        self.assertEqual(data, {'success': 'now live'})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')

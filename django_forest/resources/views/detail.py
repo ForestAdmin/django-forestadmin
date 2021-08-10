@@ -4,6 +4,7 @@ from django_forest.resources.utils.format import FormatFieldMixin
 from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
 from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
+
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 
@@ -20,7 +21,11 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
         if not len(queryset):
             raise Exception('Record does not exist or you don\'t have the right to query it')
 
-        return queryset[0]
+        instance = queryset[0]
+        # handle smart fields
+        self.handle_smart_fields(instance, self.Model.__name__)
+
+        return instance
 
     def get(self, request, pk):
         try:
@@ -29,7 +34,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             return self.error_response(e)
         else:
             # handle smart fields
-            self.handle_smart_fields(instance, self.Model)
+            self.handle_smart_fields(instance, self.Model.__name__)
 
             # json api serializer
             include_data = self.get_include_data(self.Model)
@@ -46,6 +51,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             instance = self.get_instance(request, pk)
             for k, v in attributes.items():
                 setattr(instance, k, v)
+            instance = self.update_smart_fields(instance, body, self.Model.__name__)
             instance.save()
         except Exception as e:
             return self.error_response(e)

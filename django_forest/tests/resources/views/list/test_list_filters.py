@@ -44,7 +44,8 @@ class ResourceListFilterViewTests(TransactionTestCase):
     def test_is(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"question_text","operator":"equal","value":"what is your favorite color?"}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -63,7 +64,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -73,7 +82,8 @@ class ResourceListFilterViewTests(TransactionTestCase):
     def test_aggregator(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"aggregator":"and","conditions":[{"field":"question_text","operator":"equal","value":"what is your favorite color?"},{"field":"id","operator":"equal","value":1}]}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -92,7 +102,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -102,7 +120,8 @@ class ResourceListFilterViewTests(TransactionTestCase):
     def test_aggregator_or(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"aggregator":"or","conditions":[{"field":"id","operator":"equal","value":1},{"field":"id","operator":"equal","value":2}]}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -121,7 +140,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     'id': 1,
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -132,7 +159,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -142,7 +177,8 @@ class ResourceListFilterViewTests(TransactionTestCase):
     def test_is_not(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"question_text","operator":"not","value":"what is your favorite color?"}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -161,7 +197,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     'id': 2,
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -172,7 +216,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     'id': 3,
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })
@@ -306,7 +358,8 @@ class ResourceListFilterViewTests(TransactionTestCase):
     def test_is_present(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,question_text,pub_date',
+            'fields[Question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
             'filters': '{"field":"pub_date","operator":"present","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
@@ -325,7 +378,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/1'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/1/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -336,7 +397,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/2'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/2/relationships/topic'
+                            }
+                        }
+                    },
                 },
                 {
                     'type': 'question',
@@ -347,7 +416,15 @@ class ResourceListFilterViewTests(TransactionTestCase):
                     },
                     'links': {
                         'self': '/forest/Question/3'
-                    }
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/Question/3/relationships/topic'
+                            }
+                        }
+                    },
                 }
             ]
         })

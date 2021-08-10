@@ -4,6 +4,8 @@ from django_forest.resources.utils.queryset.filters.date import DatesMixin
 from django_forest.resources.utils.queryset.filters.date.utils import DATE_OPERATORS
 from django_forest.utils import get_association_field
 from django_forest.utils.type_mapping import get_type
+from django_forest.utils.collection import Collection
+from django_forest.utils.schema import Schema
 
 
 OPERATORS = {
@@ -14,8 +16,8 @@ OPERATORS = {
     'less_than': '__lt',
     'after': '__gt',
     'greater_than': '__gt',
-    'starts_with': 'startswith',
-    'ends_with': 'endswith',
+    'starts_with': '__startswith',
+    'ends_with': '__endswith',
     'not_equal': '',
     'equal': '',
     'includes_all': '__contains',
@@ -43,10 +45,24 @@ class ConditionsMixin(DatesMixin):
             return Q(Q(**{f'{field}__isnull': True}) | Q(**{f'{field}__exact': ''}))
         return Q(**{f'{field}__isnull': True})
 
-    def get_expression(self, condition, Model, tz):
+    def get_expression_smart_field(self, smart_fields, condition, resource):
         operator = condition['operator']
         field = condition['field'].replace(':', '__')
         value = condition['value']
+
+        smart_field = smart_fields[field]
+        if 'filter' in smart_field:
+            method = smart_field['filter']
+            if isinstance(method, str):
+                return getattr(Collection._registry[resource], method)(operator, value)
+            elif callable(method):
+                return method(operator, value)
+
+    def get_expression_field(self, condition, Model, tz):
+        operator = condition['operator']
+        field = condition['field'].replace(':', '__')
+        value = condition['value']
+
         field_type = self.get_field_type(condition['field'], Model)
 
         # special case date, blank and present
@@ -58,6 +74,17 @@ class ConditionsMixin(DatesMixin):
             return Q(**{f'{field}__isnull': False})
         else:
             return self.get_basic_expression(field, operator, value)
+
+    def get_expression(self, condition, Model, tz):
+        field = condition['field'].replace(':', '__')
+
+        resource = Model.__name__
+        collection = Schema.get_collection(resource)
+        smart_fields = {x['field']: x for x in collection['fields'] if x['is_virtual']}
+        if field in smart_fields.keys():
+            return self.get_expression_smart_field(smart_fields, condition, resource)
+        else:
+            return self.get_expression_field(condition, Model, tz)
 
     def handle_aggregator(self, filters, Model, tz):
         q_objects = Q()

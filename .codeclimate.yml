@@ -65,4 +65,5 @@ exclude_patterns:
 - "**/*_test.go"
 - "**/*.d.ts"
 - "**/.pytest_cache/"
+- "**/urls.py"
 - "**/django_forest.egg-info/"

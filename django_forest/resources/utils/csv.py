@@ -4,11 +4,17 @@ from django.http import HttpResponse
 
 
 class CsvMixin:
-    def fill_csv_relationships(self, res, record, data, params):
-        for name, value in record['relationships'].items():
+    def get_related_res(self, data, value):
+        related_res = None
+        if value['data'] is not None:
             related_res = next((x for x in data['included']
                                 if x['type'] == value['data']['type'] and str(x['id']) == str(value['data']['id'])),
                                None)
+        return related_res
+
+    def fill_csv_relationships(self, res, record, data, params):
+        for name, value in record['relationships'].items():
+            related_res = self.get_related_res(data, value)
             if related_res:
                 res[name] = related_res['attributes'][params[f'fields[{name}]']]
         return res
@@ -17,7 +23,7 @@ class CsvMixin:
         for record in data['data']:
             res = record['attributes']
             res['id'] = record['id']
-            if 'relationships' in record:
+            if 'relationships' in record and 'included' in data:
                 res = self.fill_csv_relationships(res, record, data, params)
 
             writer.writerow(res)
