@@ -37,7 +37,7 @@ class ResourceListSmartRelationshipViewTests(TransactionTestCase):
         Schema.build_schema()
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_choice'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
 
@@ -62,7 +62,7 @@ class ResourceListSmartRelationshipViewTests(TransactionTestCase):
             }
         }
         response = self.client.get(self.url, {
-            'fields[Choice]': 'id,question,topic,choice_text,votes',
+            'fields[tests_choice]': 'id,question,topic,choice_text,votes',
             'fields[question]': 'question_text',
             'fields[topic]': 'name',
             'page[number]': '1',
@@ -71,21 +71,21 @@ class ResourceListSmartRelationshipViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {
-            'data': [{'type': 'choice', 'attributes': {'choice_text': 'yes', 'votes': 0}, 'relationships': {
-                'topic': {'links': {'related': '/forest/Choice/1/relationships/topic'}, 'data': None},
-                'question': {'links': {'related': '/forest/Choice/1/relationships/question'},
-                             'data': {'type': 'question', 'id': '1'}}}, 'id': 1, 'links': {'self': '/forest/Choice/1'}},
-                     {'type': 'choice', 'attributes': {'choice_text': 'no', 'votes': 1}, 'relationships': {
-                         'topic': {'links': {'related': '/forest/Choice/2/relationships/topic'}, 'data': None},
-                         'question': {'links': {'related': '/forest/Choice/2/relationships/question'},
-                                      'data': {'type': 'question', 'id': '1'}}}, 'id': 2,
-                      'links': {'self': '/forest/Choice/2'}},
-                     {'type': 'choice', 'attributes': {'choice_text': 'good', 'votes': 1}, 'relationships': {
-                         'topic': {'links': {'related': '/forest/Choice/3/relationships/topic'}, 'data': None},
-                         'question': {'links': {'related': '/forest/Choice/3/relationships/question'},
-                                      'data': {'type': 'question', 'id': '2'}}}, 'id': 3,
-                      'links': {'self': '/forest/Choice/3'}}], 'included': [
-                {'type': 'question', 'attributes': {'question_text': 'what is your favorite color?'}, 'id': 1,
-                 'links': {'self': '/forest/Question/1'}},
-                {'type': 'question', 'attributes': {'question_text': 'do you like chocolate?'}, 'id': 2,
-                 'links': {'self': '/forest/Question/2'}}]})
+            'data': [{'type': 'tests_choice', 'attributes': {'choice_text': 'yes', 'votes': 0}, 'relationships': {
+                'topic': {'links': {'related': '/forest/tests_choice/1/relationships/topic'}, 'data': None},
+                'question': {'links': {'related': '/forest/tests_choice/1/relationships/question'},
+                             'data': {'type': 'tests_question', 'id': '1'}}}, 'id': 1, 'links': {'self': '/forest/tests_choice/1'}},
+                     {'type': 'tests_choice', 'attributes': {'choice_text': 'no', 'votes': 1}, 'relationships': {
+                         'topic': {'links': {'related': '/forest/tests_choice/2/relationships/topic'}, 'data': None},
+                         'question': {'links': {'related': '/forest/tests_choice/2/relationships/question'},
+                                      'data': {'type': 'tests_question', 'id': '1'}}}, 'id': 2,
+                      'links': {'self': '/forest/tests_choice/2'}},
+                     {'type': 'tests_choice', 'attributes': {'choice_text': 'good', 'votes': 1}, 'relationships': {
+                         'topic': {'links': {'related': '/forest/tests_choice/3/relationships/topic'}, 'data': None},
+                         'question': {'links': {'related': '/forest/tests_choice/3/relationships/question'},
+                                      'data': {'type': 'tests_question', 'id': '2'}}}, 'id': 3,
+                      'links': {'self': '/forest/tests_choice/3'}}], 'included': [
+                {'type': 'tests_question', 'attributes': {'question_text': 'what is your favorite color?'}, 'id': 1,
+                 'links': {'self': '/forest/tests_question/1'}},
+                {'type': 'tests_question', 'attributes': {'question_text': 'do you like chocolate?'}, 'id': 2,
+                 'links': {'self': '/forest/tests_question/2'}}]})

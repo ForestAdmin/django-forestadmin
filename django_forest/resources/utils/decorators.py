@@ -24,7 +24,7 @@ class DecoratorsMixin:
                 decorator_instance['search'].append(field['field'])
 
     def handle_search_decorator(self, data, Model, search):
-        collection = Schema.get_collection(Model.__name__)
+        collection = Schema.get_collection(Model._meta.db_table)
         fields_to_search = self.get_fields_for_decorator_search(collection)
 
         for record in data['data']:

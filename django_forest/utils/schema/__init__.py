@@ -84,7 +84,7 @@ class Schema:
             f['type'] = cls._get_relation_type(many)
             f['relationship'] = cls._get_relationship(field)
             # Notice: forest-rails always put id on the end (it should not), do we handle polymorphic support?
-            f['reference'] = f'{field.related_model.__name__}.{field.target_field.column}'
+            f['reference'] = f'{field.related_model._meta.db_table}.{field.target_field.column}'
             f['is_filterable'] = not many
             f['inverse_of'] = get_accessor_name(field.remote_field)
         return f
@@ -115,7 +115,7 @@ class Schema:
     def build_schema(cls):
         cls.schema['collections'] = []
         for model in Models.list():
-            collection = cls.get_default({'name': model.__name__}, COLLECTION)
+            collection = cls.get_default({'name': model._meta.db_table}, COLLECTION)
             cls.add_fields(model, collection)
             cls.schema['collections'].append(collection)
         return cls.schema

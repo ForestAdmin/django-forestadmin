@@ -33,11 +33,11 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
         self.url = reverse('django_forest:resources:associations:csv',
-                           kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
+                           kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
         self.reverse_url = reverse('django_forest:resources:associations:csv',
-                                   kwargs={'resource': 'Choice', 'pk': 1, 'association_resource': 'question'})
+                                   kwargs={'resource': 'tests_choice', 'pk': 1, 'association_resource': 'question'})
         self.bad_association_url = reverse('django_forest:resources:associations:csv',
-                                           kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
+                                           kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'foo'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -57,7 +57,7 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
     def test_get(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Choice]': 'id,question,topic,choice_text',
+            'fields[tests_choice]': 'id,question,topic,choice_text',
             'fields[question]': 'question_text',
             'fields[topic]': 'name',
             'search': '',
@@ -71,7 +71,7 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
 
     def test_get_no_association(self):
         response = self.client.get(self.bad_association_url, {
-            'fields[Choice]': 'id,question,choice_text',
+            'fields[tests_choice]': 'id,question,choice_text',
             'fields[question]': 'question_text',
             'search': '',
             'searchExtended': '',
@@ -81,4 +81,4 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
         })
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model Question'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_question'}]})

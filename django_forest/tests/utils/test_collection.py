@@ -142,7 +142,7 @@ class UtilsCollectionTests(TestCase):
     def test_register(self):
         Collection.register(QuestionForest, Question)
         self.assertEqual(len(Collection._registry), 1)
-        self.assertIsInstance(Collection._registry['Question'], Collection)
+        self.assertIsInstance(Collection._registry['tests_question'], Collection)
 
     def test_register_smart_collection(self):
         Collection.register(QuestionForest)
@@ -158,7 +158,7 @@ class UtilsCollectionTests(TestCase):
 
     def test_register_smart_field(self):
         Collection.register(QuestionForest, Question)
-        collection = Schema.get_collection('Question')
+        collection = Schema.get_collection('tests_question')
         self.assertEqual(len(collection['fields']), 6)
         foo_smart_field = [f for f in collection['fields'] if f['field'] == 'foo'][0]
         self.assertTrue(foo_smart_field['is_virtual'])
@@ -166,20 +166,20 @@ class UtilsCollectionTests(TestCase):
     def test_register_smart_field_override(self):
         Collection.register(QuestionForest, Question)
         self.assertEqual(len(Collection._registry), 1)
-        self.assertIsInstance(Collection._registry['Question'], Collection)
-        collection = Schema.get_collection('Question')
+        self.assertIsInstance(Collection._registry['tests_question'], Collection)
+        collection = Schema.get_collection('tests_question')
         question_text_field = [f for f in collection['fields'] if f['field'] == 'question_text'][0]
         self.assertTrue(question_text_field['is_virtual'])
 
     def test_register_smart_segment(self):
         Collection.register(QuestionForest, Question)
-        collection = Schema.get_collection('Question')
+        collection = Schema.get_collection('tests_question')
         self.assertEqual(len(collection['segments']), 1)
         self.assertEqual(collection['segments'][0], {'name': 'Best questions'})
 
     def test_register_smart_action(self):
         Collection.register(QuestionForest, Question)
-        collection = Schema.get_collection('Question')
+        collection = Schema.get_collection('tests_question')
         self.assertEqual(len(collection['actions']), 3)
         self.assertEqual(collection['actions'][0], {
             'name': 'Mark as Live',

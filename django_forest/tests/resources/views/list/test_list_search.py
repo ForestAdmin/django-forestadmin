@@ -42,13 +42,13 @@ class ResourceListViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
-        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'Waiter'})
-        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'Student'})
-        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'Serial'})
-        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'Restaurant'})
-        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'Foo'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_choice'})
+        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_waiter'})
+        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_student'})
+        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_serial'})
+        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_restaurant'})
+        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_foo'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -71,7 +71,7 @@ class ResourceListViewTests(TransactionTestCase):
         response = self.client.get(self.reverse_url, {
             'context[relationship]': 'HasMany',
             'context[field]': 'choice_set',
-            'context[collection]': 'Question',
+            'context[collection]': 'tests_question',
             'context[recordId]': '1',
             'search': 'yes',
             'searchToEdit': 'true'
@@ -81,7 +81,7 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'choice',
+                    'type': 'tests_choice',
                     'id': 1,
                     'attributes': {
                         'choice_text': 'yes',
@@ -90,28 +90,28 @@ class ResourceListViewTests(TransactionTestCase):
                     'relationships': {
                         'question': {
                             'links': {
-                                'related': '/forest/Choice/1/relationships/question'
+                                'related': '/forest/tests_choice/1/relationships/question'
                             },
                             'data': {
-                                'type': 'question',
+                                'type': 'tests_question',
                                 'id': '1'
                             }
                         },
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Choice/1/relationships/topic'
+                                'related': '/forest/tests_choice/1/relationships/topic'
                                 }
                             }
                     },
                     'links': {
-                        'self': '/forest/Choice/1'
+                        'self': '/forest/tests_choice/1'
                     }
                 },
             ],
             'included': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'question_text': 'what is your favorite color?',
                         'pub_date': '2021-06-02T13:52:53.528000+00:00'
@@ -119,13 +119,13 @@ class ResourceListViewTests(TransactionTestCase):
                     'id': 1, 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/choice_set'
+                            'related': '/forest/tests_question/1/relationships/choice_set'
                         }
                     },
-                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                    'topic': {'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                 },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     }
                 }
             ],
@@ -146,9 +146,9 @@ class ResourceListViewTests(TransactionTestCase):
         response = self.client.get(self.one_to_one_url, {
             'context[relationship]': 'BelongsTo',
             'context[field]': 'restaurant',
-            'context[collection]': 'Place',
+            'context[collection]': 'tests_place',
             'context[recordId]': '1',
-            'fields[Restaurant]': 'id',
+            'fields[tests_restaurant]': 'id',
             'search': '1',
             'searchToEdit': 'true'
         })
@@ -157,7 +157,7 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'restaurant',
+                    'type': 'tests_restaurant',
                     'id': 1,
                     'attributes': {
                         'serves_hot_dogs': True,
@@ -166,26 +166,26 @@ class ResourceListViewTests(TransactionTestCase):
                     'relationships': {
                         'place': {
                             'links': {
-                                'related': '/forest/Restaurant/1/relationships/place'
+                                'related': '/forest/tests_restaurant/1/relationships/place'
                             },
                             'data': {
-                                'type': 'place',
+                                'type': 'tests_place',
                                 'id': '1'
                             }
                         }
                     },
                     'links': {
-                        'self': '/forest/Restaurant/1'
+                        'self': '/forest/tests_restaurant/1'
                     }
                 }
             ],
             'included': [
                 {
-                    'type': 'place',
+                    'type': 'tests_place',
                     'relationships': {
                         'restaurant': {
                             'links': {
-                                'related': '/forest/Place/1/relationships/restaurant'
+                                'related': '/forest/tests_place/1/relationships/restaurant'
                             }
                         }
                     },
@@ -194,7 +194,7 @@ class ResourceListViewTests(TransactionTestCase):
                         'name': 'San Marco'},
                     'id': 1,
                     'links': {
-                        'self': '/forest/Place/1'
+                        'self': '/forest/tests_place/1'
                     }
                 }
             ]
@@ -206,7 +206,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,topic,question_text,pub_date',
+                'fields[tests_question]': 'id,topic,question_text,pub_date',
                 'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
@@ -226,20 +226,20 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
@@ -253,7 +253,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,question_text,pub_date',
+                'fields[tests_question]': 'id,question_text,pub_date',
                 'page[number]': 1,
                 'page[size]': 15,
                 'search': sys.maxsize + 1,
@@ -279,7 +279,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+                'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
                 'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
@@ -299,7 +299,7 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?',
@@ -308,19 +308,19 @@ class ResourceListViewTests(TransactionTestCase):
                     },
                     'id': 1,
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?',
@@ -329,13 +329,13 @@ class ResourceListViewTests(TransactionTestCase):
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/3/relationships/topic'
+                                'related': '/forest/tests_question/3/relationships/topic'
                             }
                         }
                     },
@@ -361,7 +361,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.enum_url, {
-                'fields[Student]': 'id,year_in_school',
+                'fields[tests_student]': 'id,year_in_school',
                 'page[number]': 1,
                 'page[size]': 15,
                 'search': 'FR',
@@ -377,13 +377,13 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'student',
+                    'type': 'tests_student',
                     'attributes': {
                         'year_in_school': 'FR'
                     },
                     'id': 1,
                     'links': {
-                        'self': '/forest/Student/1'
+                        'self': '/forest/tests_student/1'
                     }
                 }
             ],
@@ -403,7 +403,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.uuid_url, {
-                'fields[Serial]': 'uuid',
+                'fields[tests_serial]': 'uuid',
                 'page[number]': 1,
                 'page[size]': 15,
                 'search': '4759e256-a27a-45e1-b248-09fb1523c978',
@@ -419,13 +419,13 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'serial',
+                    'type': 'tests_serial',
                     'attributes': {
                         'uuid': '4759e256-a27a-45e1-b248-09fb1523c978'
                     },
                     'id': '4759e256-a27a-45e1-b248-09fb1523c978',
                     'links': {
-                        'self': '/forest/Serial/4759e256-a27a-45e1-b248-09fb1523c978'
+                        'self': '/forest/tests_serial/4759e256-a27a-45e1-b248-09fb1523c978'
                     }
                 }
             ],
@@ -444,7 +444,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,topic,question_text,pub_date',
+                'fields[tests_question]': 'id,topic,question_text,pub_date',
                 'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
@@ -467,19 +467,19 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'question_text': 'what is your favorite color?',
                         'pub_date': '2021-06-02T13:52:53.528000+00:00'},
                     'id': 1,
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },

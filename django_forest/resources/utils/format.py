@@ -11,7 +11,7 @@ class FormatFieldMixin:
         try:
             instance = association.related_model.objects.get(pk=pk)
         except ObjectDoesNotExist:
-            raise Exception(f'Instance {association.related_model.__name__} with pk {pk} does not exists')
+            raise Exception(f'Instance {association.related_model._meta.db_table} with pk {pk} does not exists')
         else:
             return instance
 

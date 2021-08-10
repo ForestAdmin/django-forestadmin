@@ -39,13 +39,13 @@ class ResourceListViewTests(TransactionTestCase):
         Schema.build_schema()
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
-        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'Choice'})
-        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'Waiter'})
-        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'Student'})
-        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'Serial'})
-        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'Restaurant'})
-        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'Foo'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
+        self.reverse_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_choice'})
+        self.no_data_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_waiter'})
+        self.enum_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_student'})
+        self.uuid_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_serial'})
+        self.one_to_one_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_restaurant'})
+        self.bad_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_foo'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -67,7 +67,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
-                'fields[Question]': 'id,topic,question_text,pub_date',
+                'fields[tests_question]': 'id,topic,question_text,pub_date',
                 'fields[topic]': 'name',
                 'page[number]': 1,
                 'page[size]': 15,
@@ -85,58 +85,58 @@ class ResourceListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'id': 3,
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/3/relationships/topic'
+                                'related': '/forest/tests_question/3/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'id': 2,
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/2/relationships/topic'
+                                'related': '/forest/tests_question/2/relationships/topic'
                             }
                         }
                     },
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'id': 1,
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },
@@ -150,7 +150,7 @@ class ResourceListViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(7) as captured:
             response = self.client.get(self.reverse_url, {
-                'fields[Choice]': 'id,topic,question,choice_text',
+                'fields[tests_choice]': 'id,topic,question,choice_text',
                 'fields[topic]': 'name',
                 'fields[question]': 'question_text',
                 'page[number]': 1,

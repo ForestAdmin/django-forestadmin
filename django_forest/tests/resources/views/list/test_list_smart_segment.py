@@ -42,7 +42,7 @@ class ResourceListSmartSegmentViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
 
@@ -64,7 +64,7 @@ class ResourceListSmartSegmentViewTests(TransactionTestCase):
             }
         }
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',
             'segment': 'Best questions',
             'page[number]': '1',
@@ -76,7 +76,7 @@ class ResourceListSmartSegmentViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?',
@@ -85,13 +85,13 @@ class ResourceListSmartSegmentViewTests(TransactionTestCase):
                     },
                     'id': 1,
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     },
                     'relationships': {
                         'topic': {
                             'data': None,
                             'links': {
-                                'related': '/forest/Question/1/relationships/topic'
+                                'related': '/forest/tests_question/1/relationships/topic'
                             }
                         }
                     },

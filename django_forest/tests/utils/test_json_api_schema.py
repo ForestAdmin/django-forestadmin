@@ -26,7 +26,7 @@ class UtilsJsonApiSchemaTests(TestCase):
 
     def test_handle_json_api_schema(self):
         Schema.handle_json_api_schema()
-        self.assertEqual(len(JsonApiSchema._registry), 18)
+        self.assertEqual(len(JsonApiSchema._registry), 22)
 
     def test_json_api_schema_bad_name(self):
         Schema.handle_json_api_schema()
@@ -36,96 +36,96 @@ class UtilsJsonApiSchemaTests(TestCase):
 
     def test_json_api_schema(self):
         Schema.handle_json_api_schema()
-        schema = JsonApiSchema.get('Question')
+        schema = JsonApiSchema.get('tests_question')
         question = Question.objects.get(pk=1)
         data = schema().dump(question)
         self.assertEqual(data, {
             'data': {
-                'type': 'question',
+                'type': 'tests_question',
                 'id': 1,
                 'relationships': {
                     'choice_set': {
                         'links': {
-                            'related': '/forest/Question/1/relationships/choice_set'
+                            'related': '/forest/tests_question/1/relationships/choice_set'
                         }
                     },
-                    'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                    'topic': {'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                 },
                 'attributes': {
                     'pub_date': '2021-06-02T13:52:53.528000+00:00',
                     'question_text': 'what is your favorite color?'
                 },
                 'links': {
-                    'self': '/forest/Question/1'
+                    'self': '/forest/tests_question/1'
                 }
             },
             'links': {
-                'self': '/forest/Question/1'
+                'self': '/forest/tests_question/1'
             }
         })
 
     def test_json_api_schema_many(self):
         Schema.handle_json_api_schema()
-        schema = JsonApiSchema.get('Question')
+        schema = JsonApiSchema.get('tests_question')
         queryset = Question.objects.all()
         data = schema().dump(queryset, many=True)
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/1/relationships/choice_set'
+                                'related': '/forest/tests_question/1/relationships/choice_set'
                             }
                         },
-                        'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                        'topic': {'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     }
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 2,
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/2/relationships/choice_set'
+                                'related': '/forest/tests_question/2/relationships/choice_set'
                             }
                         },
-                        'topic': {'links': {'related': '/forest/Question/2/relationships/topic'}}
+                        'topic': {'links': {'related': '/forest/tests_question/2/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-02T15:52:53.528000+00:00',
                         'question_text': 'do you like chocolate?'
                     },
                     'links': {
-                        'self': '/forest/Question/2'
+                        'self': '/forest/tests_question/2'
                     }
                 },
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 3,
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/3/relationships/choice_set'
+                                'related': '/forest/tests_question/3/relationships/choice_set'
                             }
                         },
-                        'topic': {'links': {'related': '/forest/Question/3/relationships/topic'}}
+                        'topic': {'links': {'related': '/forest/tests_question/3/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-03T13:52:53.528000+00:00',
                         'question_text': 'who is your favorite singer?'
                     },
                     'links': {
-                        'self': '/forest/Question/3'
+                        'self': '/forest/tests_question/3'
                     }
                 }
             ]
@@ -133,12 +133,12 @@ class UtilsJsonApiSchemaTests(TestCase):
 
     def test_json_api_schema_foreign_key(self):
         Schema.handle_json_api_schema()
-        schema = JsonApiSchema.get('Choice')
+        schema = JsonApiSchema.get('tests_choice')
         choice = Choice.objects.get(pk=1)
         data = schema(include_data=['question']).dump(choice)
         self.assertEqual(data, {
             'data': {
-                'type': 'choice',
+                'type': 'tests_choice',
                 'attributes': {
                     'choice_text': 'yes',
                     'votes': 0
@@ -147,39 +147,39 @@ class UtilsJsonApiSchemaTests(TestCase):
                 'relationships': {
                     'question': {
                         'links': {
-                            'related': '/forest/Choice/1/relationships/question'
+                            'related': '/forest/tests_choice/1/relationships/question'
                         },
                         'data': {
-                            'type': 'question',
+                            'type': 'tests_question',
                             'id': '1'
                         }
                     }
                 },
                 'links': {
-                    'self': '/forest/Choice/1'
+                    'self': '/forest/tests_choice/1'
                 }
             },
             'links': {
-                'self': '/forest/Choice/1'
+                'self': '/forest/tests_choice/1'
             },
             'included': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'relationships': {
                         'choice_set': {
                             'links': {
-                                'related': '/forest/Question/1/relationships/choice_set'
+                                'related': '/forest/tests_question/1/relationships/choice_set'
                             }
                         },
-                        'topic': {'links': {'related': '/forest/Question/1/relationships/topic'}}
+                        'topic': {'links': {'related': '/forest/tests_question/1/relationships/topic'}}
                     },
                     'attributes': {
                         'pub_date': '2021-06-02T13:52:53.528000+00:00',
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     }
                 }
             ]
@@ -187,12 +187,12 @@ class UtilsJsonApiSchemaTests(TestCase):
 
     def test_json_api_schema_pk_is_not_id(self):
         Schema.handle_json_api_schema()
-        schema = JsonApiSchema.get('Session')
+        schema = JsonApiSchema.get('tests_session')
         session = Session.objects.get(pk='foobar1234')
         data = schema().dump(session)
         self.assertEqual(data, {
             'data': {
-                'type': 'session',
+                'type': 'tests_session',
                 'attributes': {
                     'session_key': 'foobar1234',
                     'expire_date': '2021-06-02T13:48:36.039000+00:00',
@@ -200,30 +200,30 @@ class UtilsJsonApiSchemaTests(TestCase):
                 },
                 'id': 'foobar1234',
                 'links': {
-                    'self': '/forest/Session/foobar1234'
+                    'self': '/forest/tests_session/foobar1234'
                 },
             },
             'links': {
-                'self': '/forest/Session/foobar1234'
+                'self': '/forest/tests_session/foobar1234'
             },
         })
 
     def test_json_api_schema_many_to_many(self):
         Schema.handle_json_api_schema()
-        schema = JsonApiSchema.get('Article')
+        schema = JsonApiSchema.get('tests_article')
         article = Article.objects.get(pk=1)
         data = schema(include_data=['publications']).dump(article)
         self.assertEqual(data, {
             'data': {
-                'type': 'article',
+                'type': 'tests_article',
                 'relationships': {
                     'publications': {
                         'links': {
-                            'related': '/forest/Article/1/relationships/publications'
+                            'related': '/forest/tests_article/1/relationships/publications'
                         },
                         'data': [
                             {
-                                'type': 'publication',
+                                'type': 'tests_publication',
                                 'id': '1'
                             }
                         ]
@@ -234,19 +234,19 @@ class UtilsJsonApiSchemaTests(TestCase):
                     'headline': 'Django lets you build Web apps easily'
                 },
                 'links': {
-                    'self': '/forest/Article/1'
+                    'self': '/forest/tests_article/1'
                 }
             },
             'links': {
-                'self': '/forest/Article/1'
+                'self': '/forest/tests_article/1'
             },
             'included': [
                 {
-                    'type': 'publication',
+                    'type': 'tests_publication',
                     'relationships': {
                         'article_set': {
                             'links': {
-                                'related': '/forest/Publication/1/relationships/article_set'
+                                'related': '/forest/tests_publication/1/relationships/article_set'
                             }
                         }
                     },
@@ -255,7 +255,7 @@ class UtilsJsonApiSchemaTests(TestCase):
                         'title': 'The Python Journal'
                     },
                     'links': {
-                        'self': '/forest/Publication/1'
+                        'self': '/forest/tests_publication/1'
                     }
                 }
             ]

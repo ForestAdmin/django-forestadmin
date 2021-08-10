@@ -19,8 +19,8 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
     def setUp(self):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'Question'})}?timezone=Europe%2FParis"
-        self.empty_url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'Waiter'})}?timezone=Europe%2FParis"
+        self.url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'tests_question'})}?timezone=Europe%2FParis"
+        self.empty_url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'tests_waiter'})}?timezone=Europe%2FParis"
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -41,7 +41,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'query': None,
             'time_range': None,
             'type': 'Value'
@@ -64,7 +64,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         body = {
             'aggregate': 'Sum',
             'aggregate_field': 'id',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'query': None,
             'time_range': None,
             'type': 'Value'
@@ -87,7 +87,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         body = {
             'aggregate': 'Sum',
             'aggregate_field': 'id',
-            'collection': 'Waiter',
+            'collection': 'tests_waiter',
             'query': None,
             'time_range': None,
             'type': 'Value'
@@ -111,7 +111,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 6, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"field\":\"pub_date\",\"operator\":\"yesterday\",\"value\":null}",
             'query': None,
             'time_range': None,
@@ -137,7 +137,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 6, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"aggregator\":\"and\",\"conditions\":[{\"field\":\"pub_date\",\"operator\":\"yesterday\",\"value\":null},{\"field\":\"pub_date\",\"operator\":\"present\",\"value\":null}]}",
             'query': None,
             'time_range': None,
@@ -163,7 +163,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"field\":\"pub_date\",\"operator\":\"previous_month\",\"value\":null}",
             'query': None,
             'time_range': None,
@@ -189,7 +189,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"field\":\"pub_date\",\"operator\":\"previous_quarter\",\"value\":null}",
             'query': None,
             'time_range': None,
@@ -215,7 +215,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2021, 7, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"field\":\"pub_date\",\"operator\":\"previous_quarter_to_date\",\"value\":null}",
             'query': None,
             'time_range': None,
@@ -241,7 +241,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_datetime.now.return_value = datetime(2022, 7, 4, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"field\":\"pub_date\",\"operator\":\"previous_year\",\"value\":null}",
             'query': None,
             'time_range': None,
@@ -265,7 +265,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'query': None,
             'time_range': None,
             'type': 'Objective'
@@ -287,7 +287,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'query': None,
             'group_by_field': 'pub_date',
             'type': 'Pie'
@@ -317,7 +317,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         body = {
             'aggregate': 'Sum',
             'aggregate_field': 'id',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'query': None,
             'group_by_field': 'pub_date',
             'type': 'Pie'
@@ -346,7 +346,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'time_range': 'Day',
             'group_by_date_field': 'pub_date',
             'type': 'Line'
@@ -379,7 +379,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'time_range': 'Week',
             'group_by_date_field': 'pub_date',
             'type': 'Line'
@@ -406,7 +406,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'time_range': 'Month',
             'group_by_date_field': 'pub_date',
             'type': 'Line'
@@ -433,7 +433,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'time_range': 'Year',
             'group_by_date_field': 'pub_date',
             'type': 'Line'
@@ -460,7 +460,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'filters': "{\"field\":\"id\",\"operator\":\"equal\",\"value\":0}",
             'time_range': 'Day',
             'group_by_date_field': 'pub_date',
@@ -481,7 +481,7 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
         mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         body = {
             'aggregate': 'Count',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'label_field': 'question_text',
             'limit': 5,
             'query': None,

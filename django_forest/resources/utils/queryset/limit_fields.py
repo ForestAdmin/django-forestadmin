@@ -18,7 +18,7 @@ class LimitFieldsMixin:
 
     def handle_limit_fields(self, params, Model, queryset):
 
-        lookup = f'fields[{Model.__name__}]'
+        lookup = f'fields[{Model._meta.db_table}]'
         if lookup in params:
             queryset = self.handle_fields(params, lookup, Model, queryset)
 

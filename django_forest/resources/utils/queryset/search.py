@@ -98,7 +98,7 @@ class SearchMixin:
 
         related_fields = [x for x in Model._meta.get_fields() if x.is_relation and not x.many_to_many]
         for related_field in related_fields:
-            q_objects |= self.fill_conditions(search, related_field.related_model.__name__, related_field.name)
+            q_objects |= self.fill_conditions(search, related_field.related_model._meta.db_table, related_field.name)
 
         return q_objects
 
@@ -137,7 +137,7 @@ class SearchMixin:
         q_objects = Q()
         search = params['search']
 
-        q_objects |= self.fill_conditions(search, Model.__name__)
+        q_objects |= self.fill_conditions(search, Model._meta.db_table)
 
         if 'searchExtended' in params and strtobool(str(params['searchExtended'])):
             q_objects |= self.handle_search_extended(search, Model)

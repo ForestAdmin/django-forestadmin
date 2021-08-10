@@ -23,7 +23,7 @@ from django_forest.utils.scope import ScopeManager
 mocked_config = {
     'data': {
         'collections': {
-            'Question': {
+            'tests_question': {
                 'collection': {
                     'browseEnabled': True,
                     'readEnabled': True,
@@ -55,7 +55,7 @@ mocked_config = {
 
 mocked_config_scope = copy.deepcopy(mocked_config)
 mocked_config_scope['data']['renderings']['1'] = {
-    'Question': {
+    'tests_question': {
         'scope': {
             'filter': {
                 'aggregator': 'and',
@@ -72,9 +72,9 @@ mocked_config_scope['data']['renderings']['1'] = {
 }
 
 mocked_config_scope_dynamic = copy.deepcopy(mocked_config_scope)
-mocked_config_scope_dynamic['data']['renderings']['1']['Question']['scope']['filter']['conditions'][0][
+mocked_config_scope_dynamic['data']['renderings']['1']['tests_question']['scope']['filter']['conditions'][0][
     'value'] = '$currentUser.firstName'
-mocked_config_scope_dynamic['data']['renderings']['1']['Question']['scope']['dynamicScopesValues'] = {
+mocked_config_scope_dynamic['data']['renderings']['1']['tests_question']['scope']['dynamicScopesValues'] = {
     'users': {
         '1': {
             '$currentUser.firstName': 'Guillaume'
@@ -83,19 +83,19 @@ mocked_config_scope_dynamic['data']['renderings']['1']['Question']['scope']['dyn
 }
 
 mocked_config_none = copy.deepcopy(mocked_config)
-mocked_config_none['data']['collections']['Question']['collection']['browseEnabled'] = None
+mocked_config_none['data']['collections']['tests_question']['collection']['browseEnabled'] = None
 
 mocked_config_user = copy.deepcopy(mocked_config)
-mocked_config_user['data']['collections']['Question']['collection']['browseEnabled'] = ['1']
+mocked_config_user['data']['collections']['tests_question']['collection']['browseEnabled'] = ['1']
 
 mocked_config_no_collection = copy.deepcopy(mocked_config)
-del mocked_config_no_collection['data']['collections']['Question']
+del mocked_config_no_collection['data']['collections']['tests_question']
 
 mocked_config_list_forbidden = copy.deepcopy(mocked_config)
-mocked_config_list_forbidden['data']['collections']['Question']['collection']['browseEnabled'] = False
+mocked_config_list_forbidden['data']['collections']['tests_question']['collection']['browseEnabled'] = False
 
 mocked_config_action = copy.deepcopy(mocked_config)
-mocked_config_action['data']['collections']['Question']['actions'] = {
+mocked_config_action['data']['collections']['tests_question']['actions'] = {
     'Send invoice': {
         'triggerEnabled': True
     }
@@ -104,12 +104,12 @@ mocked_config_action['data']['collections']['Question']['actions'] = {
 mocked_config_stats = copy.deepcopy(mocked_config)
 mocked_config_stats['stats'] = {
     'queries': ['SELECT COUNT(*) AS value, 5 as objective FROM tests_question', 'SELECT SUM(tests_question.id) AS value FROM tests_question'],
-    'leaderboards': [{'type': 'Leaderboard', 'limit': 5, 'aggregator': 'Count', 'labelFieldName': 'question_text', 'aggregateFieldName': None, 'sourceCollectionId': 'Question', 'relationshipFieldName': 'choice_set'}],
-    'lines': [{'type': 'Line', 'filter': '{"field":"id","operator":"equal","value":0}', 'timeRange': 'Day', 'aggregator': 'Count', 'groupByFieldName': 'pub_date', 'aggregateFieldName': None, 'sourceCollectionId': 'Question'}],
+    'leaderboards': [{'type': 'Leaderboard', 'limit': 5, 'aggregator': 'Count', 'labelFieldName': 'question_text', 'aggregateFieldName': None, 'sourceCollectionId': 'tests_question', 'relationshipFieldName': 'choice_set'}],
+    'lines': [{'type': 'Line', 'filter': '{"field":"id","operator":"equal","value":0}', 'timeRange': 'Day', 'aggregator': 'Count', 'groupByFieldName': 'pub_date', 'aggregateFieldName': None, 'sourceCollectionId': 'tests_question'}],
     'objectives': [],
     'percentages': [{'type': 'Percentage', 'numeratorChartId': 'ffd97b70-e3b9-11eb-aaf7-0ffaf80df470', 'denominatorChartId': '49dd5600-e587-11eb-aaf6-e990d6816f15'}],
-    'pies': [{'type': 'Pie', 'filter': None, 'aggregator': 'Sum', 'groupByFieldName': 'pub_date', 'aggregateFieldName': 'id', 'sourceCollectionId': 'Question'}],
-    'values': [{'type': 'Value', 'filter': '{"field":"pub_date","operator":"previous_month","value":null}', 'aggregator': 'Sum', 'aggregateFieldName': 'id', 'sourceCollectionId': 'Question'}]
+    'pies': [{'type': 'Pie', 'filter': None, 'aggregator': 'Sum', 'groupByFieldName': 'pub_date', 'aggregateFieldName': 'id', 'sourceCollectionId': 'tests_question'}],
+    'values': [{'type': 'Value', 'filter': '{"field":"pub_date","operator":"previous_month","value":null}', 'aggregator': 'Sum', 'aggregateFieldName': 'id', 'sourceCollectionId': 'tests_question'}]
 }
 
 mocked_config_missing_stats = copy.deepcopy(mocked_config)
@@ -131,7 +131,7 @@ class MiddlewarePermissionsNoTokenTests(TestCase):
         set_middlewares()
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
 
     def tearDown(self):
         # reset _registry after each test
@@ -155,7 +155,7 @@ class MiddlewarePermissionsTests(TestCase):
         set_middlewares()
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
 
@@ -294,7 +294,7 @@ class MiddlewarePermissionsCookieTests(TestCase):
         set_middlewares()
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
         self.client = self.client_class(
             HTTP_COOKIE='forest_session_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
 
@@ -333,14 +333,14 @@ class MiddlewarePermissionsCachedTests(TestCase):
         set_middlewares()
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
-        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'Question'})
+        self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         Permission.roles_acl_activated = True
         Permission.permissions_cached = {
             'data': {
                 'collections': {
-                    'Question': {
+                    'tests_question': {
                         'collection': {
                             'browseEnabled': True,
                             'readEnabled': True,
@@ -473,7 +473,7 @@ class MiddlewarePermissionsActionsTests(TestCase):
         self.body = {
             'data': {
                 'attributes': {
-                    'collection_name': 'Question',
+                    'collection_name': 'tests_question',
                     'values': {},
                     'ids': [
                         '1'
@@ -483,7 +483,7 @@ class MiddlewarePermissionsActionsTests(TestCase):
                     'parent_association_name': None,
                     'all_records': False,
                     'all_records_subset_query': {
-                        'fields[pollsQuestion]': 'id,pubDate,questionText',
+                        'fields[pollstests_question]': 'id,pubDate,questionText',
                         'fields[subject]': 'name',
                         'fields[subject2]': 'name',
                         'fields[topic]': 'name',
@@ -497,7 +497,7 @@ class MiddlewarePermissionsActionsTests(TestCase):
                         '2',
                         '3'
                     ],
-                    'smart_action_id': 'Question-Send@@@Invoice@@@'
+                    'smart_action_id': 'tests_question-Send@@@Invoice@@@'
                 },
                 'type': 'custom-action-requests'
             }
@@ -575,7 +575,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
         self.live_queries_url = f"{reverse('django_forest:stats:liveQueries')}?timezone=Europe%2FParis"
-        self.stats_with_parameters_url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'Question'})}?timezone=Europe%2FParis"
+        self.stats_with_parameters_url = f"{reverse('django_forest:stats:statsWithParameters', kwargs={'resource': 'tests_question'})}?timezone=Europe%2FParis"
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         self.live_queries_body = {
@@ -585,7 +585,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
         }
         self.stats_with_parameters_body = {
             'type': 'Leaderboard',
-            'collection': 'Question',
+            'collection': 'tests_question',
             'timezone': 'Europe/Paris',
             'label_field': 'question_text',
             'relationship_field': 'choice_set',
@@ -694,7 +694,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
         stats_with_parameters_body = {
             'type': 'Value',
             'aggregator': 'Count',
-            'sourceCollectionId': 'Question',
+            'sourceCollectionId': 'tests_question',
             'timezone': 'Europe/Paris'
         }
         response = self.client.post(self.stats_with_parameters_url, json.dumps(stats_with_parameters_body),

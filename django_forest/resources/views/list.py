@@ -19,7 +19,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             queryset = self.enhance_queryset(queryset, self.Model, params, request)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, self.Model.__name__, many=True)
+            self.handle_smart_fields(queryset, self.Model._meta.db_table, many=True)
 
             # json api serializer
             data = self.serialize(queryset, self.Model, params)
@@ -41,7 +41,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             return self.error_response(e)
         else:
             # json api serializer
-            Schema = JsonApiSchema._registry[f'{self.Model.__name__}Schema']
+            Schema = JsonApiSchema._registry[f'{self.Model._meta.db_table}Schema']
             data = Schema().dump(instance)
             return JsonResponse(data, safe=False)
 

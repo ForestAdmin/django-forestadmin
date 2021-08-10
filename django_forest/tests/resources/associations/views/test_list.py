@@ -8,7 +8,7 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
-from django_forest.tests.models import Question, Restaurant, Publication, Article, Choice
+from django_forest.tests.models import Restaurant, Publication, Article, Choice
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
@@ -24,22 +24,22 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         Schema.schema = copy.deepcopy(test_schema)
         Schema.handle_json_api_schema()
         self.url = reverse('django_forest:resources:associations:list',
-                           kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'choice_set'})
+                           kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
         self.reverse_url = reverse('django_forest:resources:associations:list',
-                                   kwargs={'resource': 'Choice', 'pk': 1, 'association_resource': 'question'})
+                                   kwargs={'resource': 'tests_choice', 'pk': 1, 'association_resource': 'question'})
         self.bad_url = reverse('django_forest:resources:associations:list',
                                kwargs={'resource': 'Foo', 'pk': 1, 'association_resource': 'choice_set'})
         self.bad_association_url = reverse('django_forest:resources:associations:list',
-                                           kwargs={'resource': 'Question', 'pk': 1, 'association_resource': 'foo'})
+                                           kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'foo'})
 
         self.many_url = reverse('django_forest:resources:associations:list',
-                                kwargs={'resource': 'Publication', 'pk': 2, 'association_resource': 'article_set'})
+                                kwargs={'resource': 'tests_publication', 'pk': 2, 'association_resource': 'article_set'})
         self.many_reverse_url = reverse('django_forest:resources:associations:list',
-                                        kwargs={'resource': 'Article', 'pk': 1, 'association_resource': 'publications'})
+                                        kwargs={'resource': 'tests_article', 'pk': 1, 'association_resource': 'publications'})
         self.many_bad_url = reverse('django_forest:resources:associations:list',
                                     kwargs={'resource': 'Foo', 'pk': 2, 'association_resource': 'article_set'})
         self.many_bad_association_url = reverse('django_forest:resources:associations:list',
-                                                kwargs={'resource': 'Publication', 'pk': 2,
+                                                kwargs={'resource': 'tests_publication', 'pk': 2,
                                                         'association_resource': 'foo'})
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
@@ -62,7 +62,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         response = self.client.get(self.url, {
             'page[number]': '1',
             'page[size]': '15',
-            'fields[Choice]': 'id,question,choice_text',
+            'fields[tests_choice]': 'id,question,choice_text',
             'fields[question]': 'question_text'
         })
         self.assertEqual(response.status_code, 200)
@@ -70,14 +70,14 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'data': [
                 {
-                    'type': 'choice',
+                    'type': 'tests_choice',
                     'relationships': {
                         'question': {
                             'links': {
-                                'related': '/forest/Choice/1/relationships/question'
+                                'related': '/forest/tests_choice/1/relationships/question'
                             },
                             'data': {
-                                'type': 'question',
+                                'type': 'tests_question',
                                 'id': '1'
                             }
                         }
@@ -87,18 +87,18 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                         'choice_text': 'yes'
                     },
                     'links': {
-                        'self': '/forest/Choice/1'
+                        'self': '/forest/tests_choice/1'
                     }
                 },
                 {
-                    'type': 'choice',
+                    'type': 'tests_choice',
                     'relationships': {
                         'question': {
                             'links': {
-                                'related': '/forest/Choice/2/relationships/question'
+                                'related': '/forest/tests_choice/2/relationships/question'
                             },
                             'data': {
-                                'type': 'question',
+                                'type': 'tests_question',
                                 'id': '1'
                             }
                         }
@@ -108,19 +108,19 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                         'choice_text': 'no'
                     },
                     'links': {
-                        'self': '/forest/Choice/2'
+                        'self': '/forest/tests_choice/2'
                     }
                 }
             ],
             'included': [
                 {
-                    'type': 'question',
+                    'type': 'tests_question',
                     'id': 1,
                     'attributes': {
                         'question_text': 'what is your favorite color?'
                     },
                     'links': {
-                        'self': '/forest/Question/1'
+                        'self': '/forest/tests_question/1'
                     }
                 }
             ]
@@ -130,7 +130,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         response = self.client.get(self.bad_url, {
             'page[number]': '1',
             'page[size]': '15',
-            'fields[Choice]': 'id,question,choice_text',
+            'fields[tests_choice]': 'id,question,choice_text',
             'fields[question]': 'question_text'
         })
         data = response.json()
@@ -141,12 +141,12 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         response = self.client.get(self.bad_association_url, {
             'page[number]': '1',
             'page[size]': '15',
-            'fields[Choice]': 'id,question,choice_text',
+            'fields[tests_choice]': 'id,question,choice_text',
             'fields[question]': 'question_text'
         })
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model Question'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_question'}]})
 
     def test_post(self):
         publication = Publication.objects.get(pk=2)
@@ -220,7 +220,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(data, {
             'errors': [
                 {
-                    'detail': 'cannot find association resource foo for Model Publication'
+                    'detail': 'cannot find association resource foo for Model tests_publication'
                 }
             ]
         })
@@ -269,15 +269,15 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                             'type': 'choice'
                         }
                     ],
-                    'collection_name': 'Choice',
-                    'parent_collection_name': 'Question',
+                    'collection_name': 'tests_choice',
+                    'parent_collection_name': 'tests_question',
                     'parent_collection_id': '1',
                     'parent_association_name': 'choice_set',
                     'all_records': True,
                     'all_records_subset_query': {
                         'page[number]': 1,
                         'page[size]': 15,
-                        'fields[Choice]': 'id,question,choice_text,foo,bar'
+                        'fields[tests_choice]': 'id,question,choice_text,foo,bar'
                     },
                     'all_records_ids_excluded': ['2'],
                     'smart_action_id': None
@@ -302,15 +302,15 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                             'type': 'choice'
                         }
                     ],
-                    'collection_name': 'Choice',
-                    'parent_collection_name': 'Question',
+                    'collection_name': 'tests_choice',
+                    'parent_collection_name': 'tests_question',
                     'parent_collection_id': '1',
                     'parent_association_name': 'foo',
                     'all_records': True,
                     'all_records_subset_query': {
                         'page[number]': 1,
                         'page[size]': 15,
-                        'fields[Choice]': 'id,question,choice_text,foo,bar'
+                        'fields[tests_choice]': 'id,question,choice_text,foo,bar'
                     },
                     'all_records_ids_excluded': ['2'],
                     'smart_action_id': None
@@ -323,7 +323,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                                       content_type='application/json')
         self.assertEqual(response.status_code, 400)
         data = response.json()
-        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model Question'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_question'}]})
 
     def test_delete_no_model(self):
         data = {
@@ -355,7 +355,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                                       content_type='application/json')
         data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model Publication'}]})
+        self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_publication'}]})
 
     def test_dissociate(self):
         publication = Publication.objects.get(pk=2)

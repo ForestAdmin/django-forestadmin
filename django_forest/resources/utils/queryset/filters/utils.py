@@ -78,7 +78,7 @@ class ConditionsMixin(DatesMixin):
     def get_expression(self, condition, Model, tz):
         field = condition['field'].replace(':', '__')
 
-        resource = Model.__name__
+        resource = Model._meta.db_table
         collection = Schema.get_collection(resource)
         smart_fields = {x['field']: x for x in collection['fields'] if x['is_virtual']}
         if field in smart_fields.keys():
