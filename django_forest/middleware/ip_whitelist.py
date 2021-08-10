@@ -30,6 +30,5 @@ class IpWhitelistMiddleware:
             if client_ip is None:
                 return HttpResponse(status=403)
             else:
-                # check ip
-                for rule in IpWhitelist.rules:
-                    print(rule)
+                if not IpWhitelist.is_ip_matches_any_rule(client_ip):
+                    return HttpResponse(status=403)
