@@ -7,7 +7,7 @@ class ChoiceForest(Collection):
         self.fields = [
             {
                 'field': 'topic',
-                'reference': 'Topic.id',
+                'reference': 'tests_topic.id',
                 'type': 'String',
                 'get': self.get_topic,
             }

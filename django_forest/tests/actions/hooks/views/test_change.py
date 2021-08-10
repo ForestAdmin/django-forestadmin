@@ -94,7 +94,7 @@ class ChangeHooksViewTests(TransactionTestCase):
             'recordIds': [
                 '70'
             ],
-            'collectionName': 'Question',
+            'collectionName': 'tests_question',
             'changedField': 'city'
         }
         response = self.client.post(self.url, json.dumps(body), content_type='application/json')

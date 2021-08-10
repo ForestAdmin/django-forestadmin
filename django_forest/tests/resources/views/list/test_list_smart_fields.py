@@ -143,7 +143,7 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
     def test_get_filter_callable(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',
             'filters': '{"field":"foo","operator":"contains","value":"favorite"}',
             'page[number]': '1',
@@ -166,7 +166,6 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                         'self': '/forest/tests_question/1'
                     },
                     'relationships': {
-                        'choice_set': {'links': {'related': '/forest/tests_question/1/relationships/choice_set'}},
                         'topic': {
                             'data': None,
                             'links': {
@@ -187,7 +186,6 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                         'self': '/forest/tests_question/3'
                     },
                     'relationships': {
-                        'choice_set': {'links': {'related': '/forest/tests_question/3/relationships/choice_set'}},
                         'topic': {
                             'data': None,
                             'links': {
@@ -204,7 +202,7 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
     def test_get_filter_string(self, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
-            'fields[Question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',
             'filters': '{"field":"bar","operator":"contains","value":"favorite"}',
             'page[number]': '1',
@@ -227,7 +225,6 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                         'self': '/forest/tests_question/1'
                     },
                     'relationships': {
-                        'choice_set': {'links': {'related': '/forest/tests_question/1/relationships/choice_set'}},
                         'topic': {
                             'data': None,
                             'links': {
@@ -248,7 +245,6 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                         'self': '/forest/tests_question/3'
                     },
                     'relationships': {
-                        'choice_set': {'links': {'related': '/forest/tests_question/3/relationships/choice_set'}},
                         'topic': {
                             'data': None,
                             'links': {
