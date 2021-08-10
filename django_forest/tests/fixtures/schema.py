@@ -387,8 +387,29 @@ test_schema = {
              'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}
 
 test_choice_schema = {
-    'collections': [], 'meta': {'liana': 'django-forest', 'liana_version': '0.0.0',
-                                'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}
+    'collections': [
+        {'name': 'tests_choice', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
+         'only_for_relationships': False, 'pagination_type': 'page', 'search_fields': None, 'actions': [],
+         'segments': [], 'fields': [
+            {'field': 'id', 'type': 'Number', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+             'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None, 'reference': None,
+             'inverse_of': None, 'relationship': None, 'widget': None},
+            {'field': 'choice_text', 'type': 'String', 'is_filterable': True, 'is_sortable': True,
+             'is_read_only': False, 'is_required': False, 'is_virtual': False, 'default_value': None,
+             'integration': None, 'reference': None, 'inverse_of': None, 'relationship': None, 'widget': None,
+             'validations': [
+                 {'type': 'is shorter than', 'message': 'Ensure this value has at most 200 characters', 'value': 200},
+                 {'type': 'is present', 'message': 'Ensure this value is not null or not empty'}]},
+            {'field': 'votes', 'type': 'Number', 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
+             'is_required': False, 'is_virtual': False, 'default_value': 0, 'integration': None, 'reference': None,
+             'inverse_of': None, 'relationship': None, 'widget': None, 'validations': [{'type': 'is greater than',
+                                                                                        'message': 'Ensure this value is greater than or equal to -2147483648 characters',
+                                                                                        'value': -2147483648},
+                                                                                       {'type': 'is less than',
+                                                                                        'message': 'Ensure this value is less than or equal to 2147483647 characters',
+                                                                                        'value': 2147483647}]}]}],
+    'meta': {'liana': 'django-forest', 'liana_version': '0.0.0',
+             'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}
 
 test_question_schema_data = {'collections': [
     {

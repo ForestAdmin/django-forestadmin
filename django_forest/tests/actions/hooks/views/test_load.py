@@ -39,7 +39,7 @@ class LoadHooksViewTests(TransactionTestCase):
     def test_load(self, mocked_decode):
         body = {
             'recordIds': ['70'],
-            'collectionName': 'Question'
+            'collectionName': 'tests_question'
         }
         response = self.client.post(self.url, json.dumps(body), content_type='application/json')
         self.assertEqual(response.status_code, 200)
@@ -62,7 +62,7 @@ class LoadHooksViewTests(TransactionTestCase):
     def test_load_not_exists(self, mocked_decode):
         body = {
             'recordIds': ['70'],
-            'collectionName': 'Question'
+            'collectionName': 'tests_question'
         }
         response = self.client.post(self.not_exists_url, json.dumps(body), content_type='application/json')
         self.assertEqual(response.status_code, 400)
@@ -87,7 +87,7 @@ class LoadHooksViewNoTokenTests(TransactionTestCase):
     def test_load(self):
         body = {
             'recordIds': ['70'],
-            'collectionName': 'Question'
+            'collectionName': 'tests_question'
         }
         response = self.client.post(self.url, json.dumps(body), content_type='application/json')
         self.assertEqual(response.status_code, 403)

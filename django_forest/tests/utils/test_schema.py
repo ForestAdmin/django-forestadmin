@@ -58,7 +58,7 @@ class UtilsSchemaTests(TestCase):
         schema = Schema.build_schema()
         self.assertEqual(schema, test_schema)
 
-    @override_settings(FOREST={'INCLUDED_MODELS': ['Choice']})
+    @override_settings(FOREST={'INCLUDED_MODELS': ['tests_choice']})
     @mock.patch.object(django, 'get_version', return_value='9.9.9')
     @mock.patch('importlib.metadata.version', return_value='0.0.0')
     def test_build_schema_included_models(self, mock_version, mock_orm_version):
@@ -78,7 +78,7 @@ class UtilsSchemaTests(TestCase):
         schema = Schema.build_schema()
         self.assertEqual(schema, test_choice_schema)
 
-    @override_settings(FOREST={'EXCLUDED_MODELS': ['Permission', 'Group', 'User', 'ContentType']})
+    @override_settings(FOREST={'EXCLUDED_MODELS': ['tests_permission', 'tests_group', 'tests_user', 'tests_contentType']})
     @mock.patch.object(django, 'get_version', return_value='9.9.9')
     @mock.patch('importlib.metadata.version', return_value='0.0.0')
     def test_build_schema_excluded_models(self, mock_version, mock_orm_version):

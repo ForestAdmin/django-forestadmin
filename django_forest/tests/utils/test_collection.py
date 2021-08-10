@@ -102,7 +102,7 @@ class QuestionForest(Collection):
         return obj
 
     def best_questions(self, obj):
-        questions = Question.objects.raw('''SELECT question.id, COUNT(choices.*)
+        questions = Question.objects.raw('''SELECT tests_question.id, COUNT(tests_choices.*)
             FROM tests_question
             JOIN tests_choices ON tests_choices.question_id = question.id
             GROUP BY question.id
