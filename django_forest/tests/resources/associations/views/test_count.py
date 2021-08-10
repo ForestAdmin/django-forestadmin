@@ -7,6 +7,7 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
+from django_forest.utils.ip_whitelist import IpWhitelist
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager

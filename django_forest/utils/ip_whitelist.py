@@ -1,5 +1,7 @@
 import ipaddress
 
+import requests
+
 from django_forest.utils.forest_api_requester import ForestApiRequester
 
 
@@ -11,19 +13,18 @@ class IpWhitelist:
 
     @classmethod
     def get_rules(cls):
-        try:
-            response = ForestApiRequester.get('/liana/v1/ip-whitelist-rules')
-        except Exception:
+        response = ForestApiRequester.get('/liana/v1/ip-whitelist-rules')
+        if response.status_code != requests.codes.ok:
             raise Exception('Unable to retrieve ip whitelist rules')
-        else:
-            data = response.json()
-            cls.fetched = True
-            cls.use_ip_whitelist = data['data']['attributes']['use_ip_whitelist']
-            cls.rules = data['data']['attributes']['rules']
+
+        data = response.json()
+        cls.fetched = True
+        cls.use_ip_whitelist = data['data']['attributes']['use_ip_whitelist']
+        cls.rules = data['data']['attributes']['rules']
 
     @staticmethod
     def same_version(ip1, ip2):
-        return isinstance(type(ip1), type(ip2))
+        return isinstance(ip1, type(ip2))
 
     @staticmethod
     def is_both_loopback(ip1, ip2):
@@ -41,16 +42,16 @@ class IpWhitelist:
 
     @classmethod
     def is_ip_match_range(cls, ip, rule):
-        ip_minimum = ipaddress.ip_address(rule['ip_minimum'])
-        ip_maximum = ipaddress.ip_address(rule['ip_maximum'])
+        ip_minimum = ipaddress.ip_address(rule['ipMinimum'])
+        ip_maximum = ipaddress.ip_address(rule['ipMaximum'])
         if not cls.same_version(ip, ip_minimum):
             return False
 
         return int(ip_minimum) <= int(ip) <= int(ip_maximum)
 
     @classmethod
-    def is_ip_match_subnet(cls, ip, range):
-        return ip in range
+    def is_ip_match_subnet(cls, ip, subnet):
+        return ip in list(ipaddress.ip_network(subnet).hosts())
 
     @classmethod
     def is_ip_matches_rule(cls, ip, rule):
@@ -59,7 +60,7 @@ class IpWhitelist:
         elif rule['type'] == 1:
             return cls.is_ip_match_range(ipaddress.ip_address(ip), rule)
         elif rule['type'] == 2:
-            return cls.is_ip_match_subnet(ip, rule['range'])
+            return cls.is_ip_match_subnet(ipaddress.ip_address(ip), rule['range'])
 
     @classmethod
     def is_ip_matches_any_rule(cls, ip):

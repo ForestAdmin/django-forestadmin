@@ -13,48 +13,16 @@ from django.test import TestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
+from django_forest.tests.middleware import mocked_permissions, mocked_config, \
+    mocked_requests_permission
 from django_forest.utils.middlewares import set_middlewares
 from django_forest.utils.permissions import Permission
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
-from django_forest.tests.utils.test_forest_api_requester import mocked_requests
 from django_forest.utils.scope import ScopeManager
 
-mocked_config = {
-    'data': {
-        'collections': {
-            'tests_question': {
-                'collection': {
-                    'browseEnabled': True,
-                    'readEnabled': True,
-                    'addEnabled': True,
-                    'editEnabled': True,
-                    'deleteEnabled': True,
-                    'exportEnabled': True
-                },
-                'actions': {}
-            },
-        },
-        'renderings': {
-            '1': {}
-        }
-    },
-    'stats': {
-        'queries': [],
-        'leaderboards': [],
-        'lines': [],
-        'objectives': [],
-        'percentages': [],
-        'pies': [],
-        'values': []
-    },
-    'meta': {
-        'rolesACLActivated': True
-    }
-}
-
-mocked_config_scope = copy.deepcopy(mocked_config)
-mocked_config_scope['data']['renderings']['1'] = {
+mocked_permissions_scope = copy.deepcopy(mocked_permissions)
+mocked_permissions_scope['data']['renderings']['1'] = {
     'tests_question': {
         'scope': {
             'filter': {
@@ -71,10 +39,10 @@ mocked_config_scope['data']['renderings']['1'] = {
     }
 }
 
-mocked_config_scope_dynamic = copy.deepcopy(mocked_config_scope)
-mocked_config_scope_dynamic['data']['renderings']['1']['tests_question']['scope']['filter']['conditions'][0][
+mocked_permissions_scope_dynamic = copy.deepcopy(mocked_permissions_scope)
+mocked_permissions_scope_dynamic['data']['renderings']['1']['tests_question']['scope']['filter']['conditions'][0][
     'value'] = '$currentUser.firstName'
-mocked_config_scope_dynamic['data']['renderings']['1']['tests_question']['scope']['dynamicScopesValues'] = {
+mocked_permissions_scope_dynamic['data']['renderings']['1']['tests_question']['scope']['dynamicScopesValues'] = {
     'users': {
         '1': {
             '$currentUser.firstName': 'Guillaume'
@@ -82,47 +50,67 @@ mocked_config_scope_dynamic['data']['renderings']['1']['tests_question']['scope'
     }
 }
 
-mocked_config_none = copy.deepcopy(mocked_config)
-mocked_config_none['data']['collections']['tests_question']['collection']['browseEnabled'] = None
+mocked_permissions_none = copy.deepcopy(mocked_permissions)
+mocked_permissions_none['data']['collections']['tests_question']['collection']['browseEnabled'] = None
 
-mocked_config_user = copy.deepcopy(mocked_config)
-mocked_config_user['data']['collections']['tests_question']['collection']['browseEnabled'] = ['1']
+mocked_permissions_user = copy.deepcopy(mocked_permissions)
+mocked_permissions_user['data']['collections']['tests_question']['collection']['browseEnabled'] = ['1']
 
-mocked_config_no_collection = copy.deepcopy(mocked_config)
-del mocked_config_no_collection['data']['collections']['tests_question']
+mocked_permissions_no_collection = copy.deepcopy(mocked_permissions)
+del mocked_permissions_no_collection['data']['collections']['tests_question']
 
-mocked_config_list_forbidden = copy.deepcopy(mocked_config)
-mocked_config_list_forbidden['data']['collections']['tests_question']['collection']['browseEnabled'] = False
+mocked_permissions_list_forbidden = copy.deepcopy(mocked_permissions)
+mocked_permissions_list_forbidden['data']['collections']['tests_question']['collection']['browseEnabled'] = False
 
-mocked_config_action = copy.deepcopy(mocked_config)
-mocked_config_action['data']['collections']['tests_question']['actions'] = {
+mocked_permissions_action = copy.deepcopy(mocked_permissions)
+mocked_permissions_action['data']['collections']['tests_question']['actions'] = {
     'Send invoice': {
         'triggerEnabled': True
     }
 }
 
-mocked_config_stats = copy.deepcopy(mocked_config)
-mocked_config_stats['stats'] = {
-    'queries': ['SELECT COUNT(*) AS value, 5 as objective FROM tests_question', 'SELECT SUM(tests_question.id) AS value FROM tests_question'],
-    'leaderboards': [{'type': 'Leaderboard', 'limit': 5, 'aggregator': 'Count', 'labelFieldName': 'question_text', 'aggregateFieldName': None, 'sourceCollectionId': 'tests_question', 'relationshipFieldName': 'choice_set'}],
-    'lines': [{'type': 'Line', 'filter': '{"field":"id","operator":"equal","value":0}', 'timeRange': 'Day', 'aggregator': 'Count', 'groupByFieldName': 'pub_date', 'aggregateFieldName': None, 'sourceCollectionId': 'tests_question'}],
+mocked_permissions_stats = copy.deepcopy(mocked_permissions)
+mocked_permissions_stats['stats'] = {
+    'queries': ['SELECT COUNT(*) AS value, 5 as objective FROM tests_question',
+                'SELECT SUM(tests_question.id) AS value FROM tests_question'],
+    'leaderboards': [{'type': 'Leaderboard', 'limit': 5, 'aggregator': 'Count', 'labelFieldName': 'question_text',
+                      'aggregateFieldName': None, 'sourceCollectionId': 'tests_question',
+                      'relationshipFieldName': 'choice_set'}],
+    'lines': [{'type': 'Line', 'filter': '{"field":"id","operator":"equal","value":0}', 'timeRange': 'Day',
+               'aggregator': 'Count', 'groupByFieldName': 'pub_date', 'aggregateFieldName': None,
+               'sourceCollectionId': 'tests_question'}],
     'objectives': [],
-    'percentages': [{'type': 'Percentage', 'numeratorChartId': 'ffd97b70-e3b9-11eb-aaf7-0ffaf80df470', 'denominatorChartId': '49dd5600-e587-11eb-aaf6-e990d6816f15'}],
-    'pies': [{'type': 'Pie', 'filter': None, 'aggregator': 'Sum', 'groupByFieldName': 'pub_date', 'aggregateFieldName': 'id', 'sourceCollectionId': 'tests_question'}],
-    'values': [{'type': 'Value', 'filter': '{"field":"pub_date","operator":"previous_month","value":null}', 'aggregator': 'Sum', 'aggregateFieldName': 'id', 'sourceCollectionId': 'tests_question'}]
+    'percentages': [{'type': 'Percentage', 'numeratorChartId': 'ffd97b70-e3b9-11eb-aaf7-0ffaf80df470',
+                     'denominatorChartId': '49dd5600-e587-11eb-aaf6-e990d6816f15'}],
+    'pies': [
+        {'type': 'Pie', 'filter': None, 'aggregator': 'Sum', 'groupByFieldName': 'pub_date', 'aggregateFieldName': 'id',
+         'sourceCollectionId': 'Question'}],
+    'values': [{'type': 'Value', 'filter': '{"field":"pub_date","operator":"previous_month","value":null}',
+                'aggregator': 'Sum', 'aggregateFieldName': 'id', 'sourceCollectionId': 'tests_question'}]
 }
 
+mocked_permissions_missing_stats = copy.deepcopy(mocked_permissions)
+mocked_permissions_missing_stats['stats'] = {}
+
+mocked_config_bad_request = copy.deepcopy(mocked_config)
+mocked_config_bad_request['permissions'] = {
+    'data': {},
+    'status': 400
+}
+mocked_config_no_collection = copy.deepcopy(mocked_config)
+mocked_config_no_collection['permissions']['data'] = mocked_permissions_no_collection
+mocked_config_none = copy.deepcopy(mocked_config)
+mocked_config_none['permissions']['data'] = mocked_permissions_none
+mocked_config_user = copy.deepcopy(mocked_config)
+mocked_config_user['permissions']['data'] = mocked_permissions_user
+mocked_config_list_forbidden = copy.deepcopy(mocked_config)
+mocked_config_list_forbidden['permissions']['data'] = mocked_permissions_list_forbidden
+mocked_config_action = copy.deepcopy(mocked_config)
+mocked_config_action['permissions']['data'] = mocked_permissions_action
+mocked_config_stats = copy.deepcopy(mocked_config)
+mocked_config_stats['permissions']['data'] = mocked_permissions_stats
 mocked_config_missing_stats = copy.deepcopy(mocked_config)
-mocked_config_missing_stats['stats'] = {}
-
-
-def mocked_requests_permission(value, *args):
-    def m(url, **kwargs):
-        if url == 'https://api.test.forestadmin.com/liana/v3/permissions':
-            return mocked_requests(value['permissions']['data'], value['permissions']['status'])
-        elif url == 'https://api.test.forestadmin.com/liana/scopes':
-            return mocked_requests(value['scope']['data'], value['scope']['status'])
-    return m
+mocked_config_missing_stats['permissions']['data'] = mocked_permissions_missing_stats
 
 
 class MiddlewarePermissionsNoTokenTests(TestCase):
@@ -140,6 +128,7 @@ class MiddlewarePermissionsNoTokenTests(TestCase):
         Permission.renderings_cached = {}
         ScopeManager.cache = {}
         settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
+        settings.MIDDLEWARE.remove('django_forest.middleware.IpWhitelistMiddleware')
 
     def test_list(self):
         response = self.client.get(self.url, {
@@ -166,19 +155,11 @@ class MiddlewarePermissionsTests(TestCase):
         Permission.renderings_cached = {}
         ScopeManager.cache = {}
         settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
+        settings.MIDDLEWARE.remove('django_forest.middleware.IpWhitelistMiddleware')
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config))
     def test_list(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -189,16 +170,7 @@ class MiddlewarePermissionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': {},
-            'status': 400
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_bad_request))
     def test_list_error_server(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -209,16 +181,7 @@ class MiddlewarePermissionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_no_collection,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_no_collection))
     def test_list_no_collection(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -229,16 +192,7 @@ class MiddlewarePermissionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_none,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_none))
     def test_list_none(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -249,16 +203,7 @@ class MiddlewarePermissionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_user,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_user))
     def test_list_user(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -269,16 +214,7 @@ class MiddlewarePermissionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_list_forbidden,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_list_forbidden))
     def test_list_forbidden(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -305,19 +241,11 @@ class MiddlewarePermissionsCookieTests(TestCase):
         Permission.renderings_cached = {}
         ScopeManager.cache = {}
         settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
+        settings.MIDDLEWARE.remove('django_forest.middleware.IpWhitelistMiddleware')
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config))
     def test_list(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
@@ -403,19 +331,11 @@ class MiddlewarePermissionsCachedTests(TestCase):
         Permission.renderings_cached = {}
         ScopeManager.cache = {}
         settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
+        settings.MIDDLEWARE.remove('django_forest.middleware.IpWhitelistMiddleware')
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config))
     @mock.patch('django_forest.utils.permissions.Permission.fetch_permissions')
     def test_list_once_again(self, mocked_fetch_permissions, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
@@ -428,16 +348,7 @@ class MiddlewarePermissionsCachedTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config))
     @mock.patch('django_forest.utils.permissions.Permission.fetch_permissions')
     def test_list_no_last_fetch_renderings_cached(self, mocked_fetch_permissions, mocked_requests, mocked_datetime,
                                                   mocked_decode):
@@ -510,19 +421,11 @@ class MiddlewarePermissionsActionsTests(TestCase):
         Permission.renderings_cached = {}
         ScopeManager.cache = {}
         settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
+        settings.MIDDLEWARE.remove('django_forest.middleware.IpWhitelistMiddleware')
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_action,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_action))
     def test_actions(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.post(self.url, json.dumps(self.body), content_type='application/json')
@@ -532,16 +435,7 @@ class MiddlewarePermissionsActionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_action,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_action))
     def test_actions_not_exist(self, mocked_requests, mocked_datetime, mocked_decode):
         url = reverse('actions:not-exists')
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
@@ -550,16 +444,7 @@ class MiddlewarePermissionsActionsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_action,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_action))
     def test_actions_no_resource(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         body = copy.deepcopy(self.body)
@@ -603,33 +488,16 @@ class MiddlewarePermissionsStatsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_stats,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_stats))
     def test_live_queries(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
-        response = self.client.post(self.live_queries_url, json.dumps(self.live_queries_body), content_type='application/json')
+        response = self.client.post(self.live_queries_url, json.dumps(self.live_queries_body),
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_stats,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_stats))
     def test_live_queries_forbidden(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         live_queries_body = {
@@ -644,16 +512,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_missing_stats,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_missing_stats))
     def test_live_queries_missing_stats(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.post(self.live_queries_url, json.dumps(self.live_queries_body),
@@ -662,33 +521,16 @@ class MiddlewarePermissionsStatsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_stats,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_stats))
     def test_stats_with_parameters(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
-        response = self.client.post(self.stats_with_parameters_url, json.dumps(self.stats_with_parameters_body), content_type='application/json')
+        response = self.client.post(self.stats_with_parameters_url, json.dumps(self.stats_with_parameters_body),
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_stats,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_stats))
     def test_stats_with_parameters_forbidden(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         stats_with_parameters_body = {
@@ -703,16 +545,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('requests.get', side_effect=mocked_requests_permission({
-        'permissions': {
-            'data': mocked_config_missing_stats,
-            'status': 200
-        },
-        'scope': {
-            'data': {},
-            'status': 200
-        }
-    }))
+    @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_missing_stats))
     def test_stats_with_parameters_missing_stats(self, mocked_requests, mocked_datetime, mocked_decode):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
         response = self.client.post(self.stats_with_parameters_url, json.dumps(self.stats_with_parameters_body),
