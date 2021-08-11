@@ -18,8 +18,17 @@ class MockResponse:
         return self.json_data
 
 
+class MockResponseNoData:
+    def __init__(self, status_code):
+        self.status_code = status_code
+
+
 def mocked_requests(json_data, status_code):
     return MockResponse(json_data, status_code)
+
+
+def mocked_requests_no_data(status_code):
+    return MockResponseNoData(status_code)
 
 
 class UtilsForestApiRequesterTests(TestCase):
