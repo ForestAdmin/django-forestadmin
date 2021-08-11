@@ -210,11 +210,19 @@ class Schema:
         }
 
     @staticmethod
-    def handle_status_code(r):
+    def handle_data(r):
+        try:
+            data = r.json()
+        except Exception:
+            pass
+        else:
+            if 'warning' in data:
+                logger.warning(data['warning'])
+
+    @classmethod
+    def handle_status_code(cls, r):
         if r.status_code in (200, 202, 204):
-            r = r.json()
-            if 'warning' in r:
-                logger.warning(r['warning'])
+            cls.handle_data(r)
         elif r.status_code in APIMAP_ERRORS.keys():
             getattr(logger, APIMAP_ERRORS[r.status_code]['level'])(APIMAP_ERRORS[r.status_code]['message'])
         else:

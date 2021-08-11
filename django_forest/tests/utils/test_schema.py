@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 
 from django_forest.tests.fixtures.schema import test_schema, test_choice_schema, \
     test_exclude_django_contrib_schema, test_serialized_schema, test_question_schema_data
-from django_forest.tests.utils.test_forest_api_requester import mocked_requests
+from django_forest.tests.utils.test_forest_api_requester import mocked_requests, mocked_requests_no_data
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.models import Models
@@ -221,6 +221,19 @@ class UtilsSchemaSendTests(TestCase):
     @override_settings(DEBUG=True)
     @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
     def test_send_apimap(self, mocked_requests_post):
+        Schema.schema_data = test_question_schema_data
+        Schema.send_apimap()
+        mocked_requests_post.assert_called_once_with(
+            'https://api.test.forestadmin.com/forest/apimaps',
+            data=json.dumps(test_serialized_schema),
+            headers={'Content-Type': 'application/json', 'forest-secret-key': 'foo'},
+            params={},
+            verify=False
+        )
+
+    @override_settings(DEBUG=True)
+    @mock.patch('requests.post', return_value=mocked_requests_no_data(204))
+    def test_send_apimap_no_changes(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
         Schema.send_apimap()
         mocked_requests_post.assert_called_once_with(
