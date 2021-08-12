@@ -214,9 +214,7 @@ test_schema = {
              'inverse_of': None, 'relationship': None, 'widget': None},
             {'field': 'board', 'type': ['String'], 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
              'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None, 'reference': None,
-             'inverse_of': None, 'relationship': None, 'widget': None, 'validations': [
-                {'type': 'is shorter than', 'message': 'Ensure this value has at most 8 characters', 'value': 8},
-                {'type': 'is present', 'message': 'Ensure this value is not null or not empty'}]}]},
+             'inverse_of': None, 'relationship': None, 'widget': None}]},
         {'name': 'tests_serial', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
          'only_for_relationships': False, 'pagination_type': 'page', 'search_fields': None, 'actions': [],
          'segments': [], 'fields': [
@@ -656,9 +654,7 @@ test_exclude_django_contrib_schema = {
              'inverse_of': None, 'relationship': None, 'widget': None},
             {'field': 'board', 'type': ['String'], 'is_filterable': True, 'is_sortable': True, 'is_read_only': False,
              'is_required': False, 'is_virtual': False, 'default_value': None, 'integration': None, 'reference': None,
-             'inverse_of': None, 'relationship': None, 'widget': None, 'validations': [
-                {'type': 'is shorter than', 'message': 'Ensure this value has at most 8 characters', 'value': 8},
-                {'type': 'is present', 'message': 'Ensure this value is not null or not empty'}]}]},
+             'inverse_of': None, 'relationship': None, 'widget': None}]},
         {'name': 'tests_serial', 'is_virtual': False, 'icon': None, 'is_read_only': False, 'is_searchable': True,
          'only_for_relationships': False, 'pagination_type': 'page', 'search_fields': None, 'actions': [],
          'segments': [], 'fields': [
