@@ -9,7 +9,7 @@ else:
 def get_app_version():
     version = '0.0.0'
     try:
-        version = metadata.version('django_forest')
+        version = metadata.version('django-forestadmin')
     except Exception:
         pass
     finally:

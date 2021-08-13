@@ -60,7 +60,7 @@ module.exports = {
             }],
           }],
         },
-        packageName: 'django-forest',
+        packageName: 'django-forestadmin',
       }
     ],
   ],
