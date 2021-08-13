@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/ForestAdmin/django-forest/compare/v1.0.0...v1.0.1) (2021-08-13)
+
+
+### Bug Fixes
+
+* add missing actions package in final release + use django-forestadmin as agent name ([#58](https://github.com/ForestAdmin/django-forest/issues/58)) ([5c5f7aa](https://github.com/ForestAdmin/django-forest/commit/5c5f7aaac25e6569a9885ddb79767dfe55dd1b0e))
+
 # 1.0.0 (2021-08-13)
 
 
