@@ -381,7 +381,7 @@ test_schema = {
              'inverse_of': None, 'relationship': None, 'widget': None, 'validations': [
                 {'type': 'is shorter than', 'message': 'Ensure this value has at most 100 characters', 'value': 100},
                 {'type': 'is present', 'message': 'Ensure this value is not null or not empty'}]}]}],
-    'meta': {'liana': 'django-forest', 'liana_version': '0.0.0',
+    'meta': {'liana': 'django-forestadmin', 'liana_version': '0.0.0',
              'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}
 
 test_choice_schema = {
@@ -406,7 +406,7 @@ test_choice_schema = {
                                                                                        {'type': 'is less than',
                                                                                         'message': 'Ensure this value is less than or equal to 2147483647 characters',
                                                                                         'value': 2147483647}]}]}],
-    'meta': {'liana': 'django-forest', 'liana_version': '0.0.0',
+    'meta': {'liana': 'django-forestadmin', 'liana_version': '0.0.0',
              'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}
 
 test_question_schema_data = {'collections': [
@@ -451,7 +451,7 @@ test_question_schema_data = {'collections': [
              'is_read_only': False, 'is_required': False, 'default_value': None, 'integration': None, 'reference': None,
              'inverse_of': None, 'relationship': None, 'widget': None}]}],
     'meta': {
-        'liana': 'django-forest',
+        'liana': 'django-forestadmin',
         'liana_version': '0.0.0',
         'stack': {
             'database_type': 'sqlite',
@@ -842,7 +842,7 @@ test_exclude_django_contrib_schema = {
              'inverse_of': None, 'relationship': None, 'widget': None, 'validations': [
                 {'type': 'is shorter than', 'message': 'Ensure this value has at most 100 characters', 'value': 100},
                 {'type': 'is present', 'message': 'Ensure this value is not null or not empty'}]}]}],
-    'meta': {'liana': 'django-forest', 'liana_version': '0.0.0',
+    'meta': {'liana': 'django-forestadmin', 'liana_version': '0.0.0',
              'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}
 
 test_serialized_schema = {
@@ -905,5 +905,5 @@ test_serialized_schema = {
                                  'endpoint': '/forest/actions/send-invoice', 'baseUrl': None, 'httpMethod': 'POST',
                                  'redirect': None, 'download': False}},
                  {'id': 'tests_question.Best questions', 'type': 'segments', 'attributes': {'name': 'Best questions'}}],
-    'meta': {'liana': 'django-forest', 'liana_version': '0.0.0',
+    'meta': {'liana': 'django-forestadmin', 'liana_version': '0.0.0',
              'stack': {'database_type': 'sqlite', 'orm_version': '9.9.9'}}}

@@ -31,7 +31,7 @@ class Schema:
     schema = {
         'collections': [],
         'meta': {
-            'liana': 'django-forest',
+            'liana': 'django-forestadmin',
             'liana_version': get_app_version(),
             'stack': {
                 'database_type': connection.vendor,

@@ -46,7 +46,7 @@ class UtilsSchemaTests(TestCase):
         Schema.schema = {
             'collections': [],
             'meta': {
-                'liana': 'django-forest',
+                'liana': 'django-forestadmin',
                 'liana_version': '0.0.0',
                 'stack': {
                     'database_type': 'sqlite',
@@ -66,7 +66,7 @@ class UtilsSchemaTests(TestCase):
         Schema.schema = {
             'collections': [],
             'meta': {
-                'liana': 'django-forest',
+                'liana': 'django-forestadmin',
                 'liana_version': '0.0.0',
                 'stack': {
                     'database_type': 'sqlite',
@@ -87,7 +87,7 @@ class UtilsSchemaTests(TestCase):
         Schema.schema = {
             'collections': [],
             'meta': {
-                'liana': 'django-forest',
+                'liana': 'django-forestadmin',
                 'liana_version': '0.0.0',
                 'stack': {
                     'database_type': 'sqlite',
