@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/ForestAdmin/django-forest/compare/v1.0.1...v1.0.2) (2021-08-13)
+
+
+### Bug Fixes
+
+* correctly set version for schema ([#60](https://github.com/ForestAdmin/django-forest/issues/60)) ([f1a33e7](https://github.com/ForestAdmin/django-forest/commit/f1a33e7c33d6c911bde294d3758166e779020ed2))
+
 ## [1.0.1](https://github.com/ForestAdmin/django-forest/compare/v1.0.0...v1.0.1) (2021-08-13)
 
 
