@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/ForestAdmin/django-forest/compare/v1.0.2...v1.0.3) (2021-08-13)
+
+
+### Bug Fixes
+
+* fix update one to one after new permission middleware ([#61](https://github.com/ForestAdmin/django-forest/issues/61)) ([d0c91a1](https://github.com/ForestAdmin/django-forest/commit/d0c91a1ca8dea94ad6f62bc781392b0990e540fe))
+
 ## [1.0.2](https://github.com/ForestAdmin/django-forest/compare/v1.0.1...v1.0.2) (2021-08-13)
 
 
