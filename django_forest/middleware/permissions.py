@@ -11,6 +11,7 @@ class PermissionMiddleware:
         'list': {
             'GET': 'browseEnabled',
             'POST': 'addEnabled',
+            'PUT': 'editEnabled',
             'DELETE': 'deleteEnabled'
         },
         'detail': {
