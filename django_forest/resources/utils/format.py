@@ -25,7 +25,7 @@ class FormatFieldMixin:
         # TODO other special fields
         if isinstance(field, models.DateTimeField):
             return make_aware(datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ'), timezone.utc)
-        elif isinstance(field, models.ForeignKey):
+        elif isinstance(field, models.ForeignKey) or isinstance(field, models.OneToOneRel):
             return self.handle_foreign_key(name, value)
 
         return value
