@@ -63,7 +63,7 @@ def handle_is_present(field, f):
 
 
 def handle_validations(field, f):
-    if not field.is_relation and not field.auto_created:
+    if not field.is_relation and not field.auto_created and field.get_internal_type() != 'ArrayField':
         f = handle_validators(field.validators, f)
         f = handle_is_present(field, f)
 
