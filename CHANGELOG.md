@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/ForestAdmin/django-forest/compare/v1.0.3...v1.0.4) (2021-08-20)
+
+
+### Bug Fixes
+
+* fix get ids from request with smart action ([#62](https://github.com/ForestAdmin/django-forest/issues/62)) ([29ffbd4](https://github.com/ForestAdmin/django-forest/commit/29ffbd41d8135f584d99c10093c2c7a4ece31143))
+
 ## [1.0.3](https://github.com/ForestAdmin/django-forest/compare/v1.0.2...v1.0.3) (2021-08-13)
 
 
