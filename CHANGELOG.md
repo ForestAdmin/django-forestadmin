@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/ForestAdmin/django-forest/compare/v1.0.4...v1.0.5) (2021-08-20)
+
+
+### Bug Fixes
+
+* fix stats permissions ([#63](https://github.com/ForestAdmin/django-forest/issues/63)) ([70ebca7](https://github.com/ForestAdmin/django-forest/commit/70ebca731710cc100f3f09f42dfc8402325fe4d0))
+
 ## [1.0.4](https://github.com/ForestAdmin/django-forest/compare/v1.0.3...v1.0.4) (2021-08-20)
 
 
