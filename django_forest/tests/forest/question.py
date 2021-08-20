@@ -5,6 +5,9 @@ from django_forest.utils.collection import Collection
 
 
 # adding smart fields on existing collection
+from django_forest.utils.views.base import BaseView
+
+
 class QuestionForest(Collection):
     def load(self):
         self.fields = [
@@ -121,6 +124,8 @@ class QuestionForest(Collection):
         return Q(**{'id__in': [question.id for question in questions]})
 
     def invoice_load(self, fields, request, *args, **kwargs):
+        ids = BaseView().get_ids_from_request(request, Question)
+
         country = next((x for x in fields if x['field'] == 'country'), None)
         country['value'] = 'IT'
 

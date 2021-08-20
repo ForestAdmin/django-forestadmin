@@ -51,13 +51,16 @@ class BaseView(QuerysetMixin, generic.View):
     def get_ids_from_request(self, request, Model):
         body = self.get_body(request.body)
 
-        data = body['data']
-        if 'attributes' not in data:
-            return [x['id'] for x in body['data']]
+        if 'data' in body:
+            data = body['data']
+            if 'attributes' not in data:
+                return [x['id'] for x in body['data']]
+            else:
+                attributes = data['attributes']
 
-        attributes = body['data']['attributes']
-
-        if not attributes.get('all_records', False):
-            return attributes.get('ids', [])
-        else:
-            return self.handle_all_records(attributes, Model, request)
+                if not attributes.get('all_records', False):
+                    return attributes.get('ids', [])
+                else:
+                    return self.handle_all_records(attributes, Model, request)
+        elif 'recordIds' in body:
+            return body['recordIds']
