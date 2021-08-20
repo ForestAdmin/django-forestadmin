@@ -5,22 +5,22 @@ def date_difference_in_seconds(date1, date2):
     return (date1 - date2).total_seconds()
 
 
-def is_stat_permission_not_allowed(array_permission_infos, pool_permission):
+def is_stat_permission_allowed(array_permission_infos, pool_permission):
     for info in array_permission_infos:
         if info not in pool_permission:
-            return True
+            return False
     else:
-        return False
+        return True
 
 
 def is_stat_allowed(pool_permissions, array_permission_infos):
     # NOTICE: Is there any pool_permissions containing the array_permission_infos
     for pool_permission in pool_permissions:
         pool_permission = [x for x in pool_permission.values() if x is not None]
-        if is_stat_permission_not_allowed(array_permission_infos, pool_permission):
-            return False
+        if is_stat_permission_allowed(array_permission_infos, pool_permission):
+            return True
     else:
-        return True
+        return False
 
 
 def is_user_allowed(user_id, permission_value):
