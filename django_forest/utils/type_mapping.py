@@ -25,7 +25,7 @@ TYPE_CHOICES = {
     'SmallIntegerField': 'Integer',
     'TextField': 'String',
     'TimeField': 'Time',
-    'UUIDField': 'String',
+    'UUIDField': 'Uuid',
     'CICharField': 'String',
     'CIEmailField': 'String',
     'CITextField': 'String',
