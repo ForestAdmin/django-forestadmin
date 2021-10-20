@@ -52,8 +52,9 @@ class JsonApiSerializerMixin:
 
         return only
 
-    def get_include_data(self, Model):
-        relationships = [x.name for x in Model._meta.get_fields() if x.is_relation and (x.many_to_one or x.one_to_one)]
+    def get_include_data(self, Model, params=[]):
+        relationships = [x.name for x in Model._meta.get_fields()
+            if x.name in params and x.is_relation and (x.many_to_one or x.one_to_one)]
         smart_relationships = self.get_smart_relationships(Model._meta.db_table)
         return relationships + smart_relationships
 
@@ -61,7 +62,7 @@ class JsonApiSerializerMixin:
         Schema = JsonApiSchema._registry[f'{Model._meta.db_table}Schema']
 
         kwargs = {
-            'include_data': self.get_include_data(Model)
+            'include_data': self.get_include_data(Model, params)
         }
 
         if f'fields[{Model._meta.db_table}]' in params or 'context[field]' in params:
