@@ -4,9 +4,7 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 
 class JsonApiSerializerMixin:
     def get_pk_name(self, Model):
-        if Model._meta.pk.name != 'id':
-            return 'pk'
-        return 'id'
+        return Model._meta.pk.name
 
     def compute_only(self, only, field_name, params, Model):
         collection = Schema.get_collection(Model._meta.db_table)

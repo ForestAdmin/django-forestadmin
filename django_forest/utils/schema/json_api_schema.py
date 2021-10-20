@@ -55,9 +55,7 @@ def handle_pk_attribute(attrs, Model):
 
 def get_pk_name(collection_name):
     Model = Models.get(collection_name)
-    if Model is not None and Model._meta.pk.name != 'id':
-        return 'pk'
-    return 'id'
+    return Model._meta.pk.name
 
 
 def get_marshmallow_field(field, Model):
