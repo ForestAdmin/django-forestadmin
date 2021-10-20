@@ -10,7 +10,14 @@ def get_accessor_name(field):
     if isinstance(field, ManyToManyField) or isinstance(field, ForeignKey):
         accessor_name = field.name
     else:
-        accessor_name = field.get_accessor_name()
+        try:
+            accessor_name = field.get_accessor_name()
+        except AttributeError:
+            # Avoid a crash when the field doesn't have a get_accessor_name() method.
+            # Example: it avoids a crash when using a project that uses the
+            # Taggit package: 'TaggableManager' object has no attribute
+            # 'get_accessor_name'
+            return
 
     return accessor_name
 
