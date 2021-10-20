@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 TYPE_CHOICES = {
     'AutoField': 'String',
     'BigAutoField': 'Integer',
@@ -49,7 +53,12 @@ def get_type(field):
     if hasattr(field, 'choices') and field.choices is not None:
         return 'Enum'
 
-    field_type = field.get_internal_type()
+    try:
+        field_type = field.get_internal_type()
+    except AttributeError:
+        logger.warning("Can't detect the field type of ({})".format(field))
+        return
+
     # Special case for one to one field which can redirect to an Integer or String
     if field_type == 'OneToOneField':
         return handle_one_to_one_field(field)

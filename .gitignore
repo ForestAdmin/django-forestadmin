@@ -25,6 +25,9 @@ media
 .idea
 *.iws /out/
 
+# If you are using VSCode #
+.vscode
+
 # Python #
 *.py[cod]
 *$py.class
