@@ -3,7 +3,7 @@ from django.db.models import Q
 from django_forest.resources.utils.queryset.filters.date import DatesMixin
 from django_forest.resources.utils.queryset.filters.date.utils import DATE_OPERATORS
 from django_forest.utils import get_association_field
-from django_forest.utils.type_mapping import get_type
+from django_forest.types.fields import get_type
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 

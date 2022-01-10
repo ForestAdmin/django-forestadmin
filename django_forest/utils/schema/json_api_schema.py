@@ -6,7 +6,7 @@ from marshmallow_jsonapi.fields import DocumentMeta, ResourceMeta, BaseRelations
 from marshmallow_jsonapi.schema import TYPE
 
 from django_forest.utils.models import Models
-from django_forest.utils.type_mapping import get_type
+from django_forest.types.fields import get_type
 
 
 TYPE_CHOICES = {

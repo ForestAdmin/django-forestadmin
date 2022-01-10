@@ -10,7 +10,7 @@ from django.utils.module_loading import autodiscover_modules
 
 from django_forest.utils.schema.apimap_errors import APIMAP_ERRORS
 from django_forest.utils.models import Models
-from django_forest.utils.type_mapping import get_type
+from django_forest.types.fields import get_type
 from django_forest.utils.schema.json_api_schema import create_json_api_schema
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from .definitions import COLLECTION, FIELD
