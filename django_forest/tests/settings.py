@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django_forest.tests.apps.TestsConfig',
+    'django_forest.tests',
     'django.contrib.auth',
     'django.contrib.contenttypes',
 ]

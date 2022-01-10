@@ -13,6 +13,9 @@ from django.db.models import UUIDField
 class Topic(models.Model):
     name = models.CharField(max_length=200)
 
+    class Meta:
+        app_label = "tests"
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200, validators=[MinLengthValidator(1)], default='how are you?')
     pub_date = models.DateTimeField('date published', default=datetime.datetime(2020, 5, 17))
@@ -21,6 +24,8 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text
 
+    class Meta:
+        app_label = "tests"
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
@@ -29,16 +34,24 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice_text
+    
+
+    class Meta:
+        app_label = "tests"
 
 
 # Complex ForeignKey example
 class Car(models.Model):
     brand = models.CharField(max_length=200, unique=True)
 
+    class Meta:
+        app_label = "tests"
 
 class Wheel(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='wheels', to_field='brand')
 
+    class Meta:
+        app_label = "tests"
 
 # custom pk example
 class Session(models.Model):
@@ -46,6 +59,8 @@ class Session(models.Model):
     session_data = models.TextField()
     expire_date = models.DateTimeField()
 
+    class Meta:
+        app_label = "tests"
 
 # ManyToManyField example
 class Publication(models.Model):
@@ -54,6 +69,8 @@ class Publication(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        app_label = "tests"
 
 class Article(models.Model):
     headline = models.CharField(max_length=100)
@@ -62,6 +79,8 @@ class Article(models.Model):
     def __str__(self):
         return self.headline
 
+    class Meta:
+        app_label = "tests"
 
 # OneToOneField example
 class Place(models.Model):
@@ -71,6 +90,8 @@ class Place(models.Model):
     def __str__(self):
         return "%s the place" % self.name
 
+    class Meta:
+        app_label = "tests"
 
 class Restaurant(models.Model):
     place = models.OneToOneField(
@@ -84,6 +105,8 @@ class Restaurant(models.Model):
     def __str__(self):
         return "%s the restaurant" % self.place.name
 
+    class Meta:
+        app_label = "tests"
 
 class Waiter(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
@@ -92,6 +115,8 @@ class Waiter(models.Model):
     def __str__(self):
         return "%s the waiter at %s" % (self.name, self.restaurant)
 
+    class Meta:
+        app_label = "tests"
 
 # Enums example
 class Student(models.Model):
@@ -113,6 +138,8 @@ class Student(models.Model):
         default=FRESHMAN,
     )
 
+    class Meta:
+        app_label = "tests"
 
 # ArrayField example
 class ChessBoard(models.Model):
@@ -121,7 +148,12 @@ class ChessBoard(models.Model):
         size=8,
     )
 
+    class Meta:
+        app_label = "tests"
 
 # UUID Field
 class Serial(models.Model):
     uuid = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    class Meta:
+        app_label = "tests"
