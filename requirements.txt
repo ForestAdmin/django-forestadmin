@@ -13,4 +13,4 @@ pytest-django>=4.5, <5.0
 pytest-pythonpath>=0.7, <1.0
 python-dateutil>=2.8, <3.0
 python-jose>=3.3, <4.0
-requests==2.25.1
+requests>=2.25, <3.0
