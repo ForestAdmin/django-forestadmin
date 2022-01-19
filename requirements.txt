@@ -1,6 +1,6 @@
 coverage==5.5
 Django==3.2.4
-django-cors-headers==3.7.0
+django-cors-headers>=3.7, <3.11 #3.11 remove the support of python3.6
 django-ipware==3.0.7
 flake8==3.9.2
 importlib-metadata==4.6.3
