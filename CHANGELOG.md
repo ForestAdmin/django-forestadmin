@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/ForestAdmin/django-forest/compare/v1.0.5...v1.0.6) (2022-01-20)
+
+
+### Bug Fixes
+
+* **onboarding:** make it possible to install the agent in more projects ([#75](https://github.com/ForestAdmin/django-forest/issues/75)) ([9c04647](https://github.com/ForestAdmin/django-forest/commit/9c04647e237c161ab94de981aeddc6452f1cf30d))
+
 ## [1.0.5](https://github.com/ForestAdmin/django-forest/compare/v1.0.4...v1.0.5) (2021-08-20)
 
 
