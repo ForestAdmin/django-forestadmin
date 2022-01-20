@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/ForestAdmin/django-forest/compare/v1.0.6...v1.0.7) (2022-01-20)
+
+
+### Bug Fixes
+
+* **onboarding:** avoid issues if our required packages change their dependencies ([#76](https://github.com/ForestAdmin/django-forest/issues/76)) ([5e11eb8](https://github.com/ForestAdmin/django-forest/commit/5e11eb81c93501b614880bbefe479a64a43c7e86))
+
 ## [1.0.6](https://github.com/ForestAdmin/django-forest/compare/v1.0.5...v1.0.6) (2022-01-20)
 
 
