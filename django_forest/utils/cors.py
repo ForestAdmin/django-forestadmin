@@ -16,10 +16,10 @@ def set_cors():
         common_middleware_index = 0
     settings.MIDDLEWARE.insert(common_middleware_index, 'corsheaders.middleware.CorsMiddleware')
 
-    cors_allowed_origins_regexes = [r'.*\.forestadmin\.com.*']
-    cors_allowed_origins_regexes.extend(get_list_setting('CORS_ALLOWED_ORIGIN_REGEXES'))
-
-    settings.CORS_ALLOWED_ORIGIN_REGEXES = cors_allowed_origins_regexes
+    settings.CORS_ALLOWED_ORIGIN_REGEXES = [
+        r'.*\.forestadmin\.com.*',
+        *getattr(settings, 'CORS_ALLOWED_ORIGIN_REGEXES', [])
+    ]
 
     settings.CORS_ALLOW_HEADERS = list(default_headers) + [
         'forest-context-url',

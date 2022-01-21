@@ -19,7 +19,7 @@ class UtilsCorsTests(TestCase):
         self.assertTrue('corsheaders.middleware.CorsMiddleware' in settings.MIDDLEWARE)
         self.assertEqual(settings.MIDDLEWARE, ['corsheaders.middleware.CorsMiddleware'])
 
-    @override_settings(FOREST={'CORS_ALLOWED_ORIGIN_REGEXES': '/\.foo\.com$/,/\.bar\.com$/'})
-    def test_set_cors_forest_settings(self):
+    @override_settings(CORS_ALLOWED_ORIGIN_REGEXES=[r'/\.foo\.com$/',r'/\.bar\.com$/'])
+    def test_extends_allowed_origin_regexes(self):
         set_cors()
         self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, ['.*\\.forestadmin\\.com.*', '/\\.foo\\.com$/', '/\\.bar\\.com$/'])
