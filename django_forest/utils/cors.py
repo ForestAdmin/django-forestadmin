@@ -10,11 +10,12 @@ def get_list_setting(setting):
 
 def set_cors():
     settings.INSTALLED_APPS += ['corsheaders']
-    try:
-        common_middleware_index = settings.MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
-    except ValueError:
-        common_middleware_index = 0
-    settings.MIDDLEWARE.insert(common_middleware_index, 'corsheaders.middleware.CorsMiddleware')
+    if 'corsheaders.middleware.CorsMiddleware' not in settings.MIDDLEWARE:
+        try:
+            common_middleware_index = settings.MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
+        except ValueError:
+            common_middleware_index = 0
+        settings.MIDDLEWARE.insert(common_middleware_index, 'corsheaders.middleware.CorsMiddleware')
 
     settings.CORS_ALLOWED_ORIGIN_REGEXES = [
         r'.*\.forestadmin\.com.*',
