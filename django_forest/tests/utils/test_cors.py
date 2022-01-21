@@ -12,7 +12,6 @@ class UtilsCorsTests(TestCase):
         common_middleware_index = settings.MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
         self.assertEqual(settings.MIDDLEWARE.index('corsheaders.middleware.CorsMiddleware'), common_middleware_index - 1)
         self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, ['.*\\.forestadmin\\.com.*'])
-        self.assertEqual(settings.CORS_URLS_REGEX, r'^/forest(/.*)?$')
         self.assertEqual(settings.CORS_PREFLIGHT_MAX_AGE, 86400)
         self.assertEqual(settings.CORS_ALLOW_CREDENTIALS, True)
 

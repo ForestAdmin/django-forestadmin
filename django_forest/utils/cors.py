@@ -20,7 +20,6 @@ def set_cors():
     cors_allowed_origins_regexes.extend(get_list_setting('CORS_ALLOWED_ORIGIN_REGEXES'))
 
     settings.CORS_ALLOWED_ORIGIN_REGEXES = cors_allowed_origins_regexes
-    settings.CORS_URLS_REGEX = r'^/forest(/.*)?$'  # restrict it to /forest
     settings.CORS_PREFLIGHT_MAX_AGE = 86400  # one day
     settings.CORS_ALLOW_CREDENTIALS = True
 
