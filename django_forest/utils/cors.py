@@ -21,6 +21,7 @@ def set_cors():
         *getattr(settings, 'CORS_ALLOWED_ORIGIN_REGEXES', [])
     ]
 
-    settings.CORS_ALLOW_HEADERS = list(default_headers) + [
+    settings.CORS_ALLOW_HEADERS = [
+        *getattr(settings, 'CORS_ALLOW_HEADERS', list(default_headers)),
         'forest-context-url',
     ]
