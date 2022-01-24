@@ -9,7 +9,10 @@ def get_list_setting(setting):
 
 
 def set_cors():
-    settings.INSTALLED_APPS += ['corsheaders']
+
+    if 'corsheaders' not in settings.INSTALLED_APPS:
+        settings.INSTALLED_APPS += ['corsheaders']
+
     if 'corsheaders.middleware.CorsMiddleware' not in settings.MIDDLEWARE:
         try:
             common_middleware_index = settings.MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
