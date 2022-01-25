@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/ForestAdmin/django-forest/compare/v1.0.7...v1.0.8) (2022-01-25)
+
+
+### Bug Fixes
+
+* **onboarding:** improve the cors settings to allow more onboarding ([#77](https://github.com/ForestAdmin/django-forest/issues/77)) ([3b96749](https://github.com/ForestAdmin/django-forest/commit/3b967495040f7a01091dd62e191ed7dd6d250498))
+
 ## [1.0.7](https://github.com/ForestAdmin/django-forest/compare/v1.0.6...v1.0.7) (2022-01-20)
 
 
