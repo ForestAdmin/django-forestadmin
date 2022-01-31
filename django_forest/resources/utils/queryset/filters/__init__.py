@@ -1,7 +1,6 @@
 import json
 
-from pytz import timezone
-
+from django_forest.utils.date import get_timezone
 from .utils import ConditionsMixin
 
 
@@ -11,7 +10,7 @@ class FiltersMixin(ConditionsMixin):
 
         tz = None
         if 'timezone' in params:
-            tz = timezone(params['timezone'])
+            tz = get_timezone(params['timezone'])
 
         if 'aggregator' in filters:
             return self.handle_aggregator(filters, Model, tz)

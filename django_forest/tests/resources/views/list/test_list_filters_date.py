@@ -3,17 +3,19 @@ from datetime import datetime
 from unittest import mock
 
 import pytest
-import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
-from pytz import timezone
+from freezegun import freeze_time
 
 from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
+from django_forest.utils.date import get_timezone
 
 
+@mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
+@mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})    
 class ResourceListFilterDateViewTests(TransactionTestCase):
     fixtures = ['question.json']
 
@@ -30,7 +32,7 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         ScopeManager.cache = {
             '1': {
                 'scopes': {},
-                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+                'fetched_at': 'useless-here'
             }
         }
 
@@ -39,12 +41,10 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_past(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
+    @freeze_time(
+        lambda: datetime(2021, 6, 2, 17, 0, 0, 0, tzinfo=get_timezone('Europe/Paris'))
+    )
+    def test_past(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -79,12 +79,11 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             ]
         })
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_future(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
+
+    @freeze_time(
+        lambda: datetime(2021, 6, 2, 17, 0, 0, 0, tzinfo=get_timezone('Europe/Paris')),
+    )
+    def test_future(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -138,12 +137,10 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             ]
         })
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_today(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
+    @freeze_time(
+        lambda: datetime(2021, 6, 2, 15, 0, 0, 0, tzinfo=get_timezone('Europe/Paris')),
+    )
+    def test_today(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'filters': '{"field":"pub_date","operator":"today","value":null}',
@@ -196,12 +193,10 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             ]
         })
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_before_x_hours_ago(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=timezone('Europe/Paris'))
+    @freeze_time(
+        lambda: datetime(2021, 6, 2, 17, 53, 0, 0, tzinfo=get_timezone('Europe/Paris')),
+    )
+    def test_before_x_hours_ago(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -236,12 +231,10 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             ]
         })
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_after_x_hours_ago(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=timezone('Europe/Paris'))
+    @freeze_time(
+        lambda: datetime(2021, 6, 2, 15, 53, 0, 0, tzinfo=get_timezone('Europe/Paris')),
+    )
+    def test_after_x_hours_ago(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -295,12 +288,10 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             ]
         })
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_previous_quarter(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 7, 1, 0, 0, 0, 0, tzinfo=timezone('Europe/Paris'))
+    @freeze_time(
+        lambda: datetime(2021, 7, 1, 0, 0, 0, 0, tzinfo=get_timezone('Europe/Paris')),
+    )
+    def test_previous_quarter(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -373,12 +364,10 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             ]
         })
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.resources.utils.queryset.filters.date.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_previous_quarter_to_date(self, mocked_scope_datetime, mocked_now, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_now.now.return_value = datetime(2021, 6, 30, 23, 59, 59, 999999, tzinfo=timezone('Europe/Paris'))
+    @freeze_time(
+        lambda: datetime(2021, 6, 30, 23, 59, 59, 999999, tzinfo=get_timezone('Europe/Paris')),
+    )
+    def test_previous_quarter_to_date(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',

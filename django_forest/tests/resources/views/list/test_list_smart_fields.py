@@ -7,11 +7,13 @@ import pytest
 import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
+from freezegun import freeze_time
 
 from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
+from django_forest.utils.date import get_timezone
 
 
 # reset forest config dir auto import
@@ -59,9 +61,10 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         Collection._registry = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get(self, mocked_decode):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',
@@ -139,9 +142,10 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_filter_callable(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_filter_callable(self, mocked_decode):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',
@@ -198,9 +202,10 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_filter_string(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_filter_string(self, mocked_decode):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
             'fields[topic]': 'name',

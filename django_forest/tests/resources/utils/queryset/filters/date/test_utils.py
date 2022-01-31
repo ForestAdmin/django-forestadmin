@@ -683,7 +683,7 @@ def test_get_date_range(current: datetime, frequency: str, period: int, previous
         ]
         pd.to_datetime.return_value = 'faketimestamp'
         res = get_date_range(current, frequency, period, previous, offset)
-        pd.to_datetime.assert_called_with(current.replace(tzinfo=zoneinfo.ZoneInfo('utc')))
+        pd.to_datetime.assert_called_with(current.replace(tzinfo=zoneinfo.ZoneInfo('UTC')))
         kwargs = {
             'freq': frequency,
             'periods': offset + 2,

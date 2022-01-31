@@ -6,12 +6,14 @@ import pytest
 import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
+from freezegun import freeze_time
 
 from django_forest.tests.resources.views.list.test_list_scope import mocked_scope
 from django_forest.utils.collection import Collection
 from django_forest.utils.models import Models
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
+from django_forest.utils.date import get_timezone
 
 
 # reset forest config dir auto import
@@ -50,11 +52,11 @@ class ResourceListSmartRelationshipViewTests(TransactionTestCase):
         Models.models = None
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.permissions.datetime')
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get(self, mocked_scope_datetime, mocked_datetime, mocked_decode):
-        mocked_scope_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 6, 4, 9, 20, 22, 582772, tzinfo=get_timezone('UTC'))
+    )
+    @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
+    def test_get(self, mocked_scope_has_expired, mocked_decode):
         ScopeManager.cache = {
             '1': {
                 'scopes': mocked_scope,

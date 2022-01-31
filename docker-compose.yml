@@ -1,9 +1,11 @@
-postgres :
-  image : postgres:latest
-  container_name : django_forest
-  ports :
-    - "5447:5432"
-  environment:
-    - POSTGRES_DB=django_forest
-    - POSTGRES_USER=forest
-    - POSTGRES_PASSWORD=secret
+services:
+  postgres :
+    image : postgres:latest
+    container_name : django_forest
+    ports :
+      - "5447:5432"
+    environment:
+      - POSTGRES_DB=django_forest
+      - POSTGRES_USER=forest
+      - POSTGRES_PASSWORD=secret
+    command: postgres -c log_min_duration_statement=0

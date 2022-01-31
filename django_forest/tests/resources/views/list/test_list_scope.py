@@ -6,12 +6,14 @@ import pytest
 import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
+from freezegun import freeze_time
 
 from django_forest.tests.fixtures.schema import test_schema
 from django_forest.tests.utils.test_forest_api_requester import mocked_requests
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
+from django_forest.utils.date import get_timezone
 
 mocked_scope = {
     'tests_question': {
@@ -90,9 +92,10 @@ class ResourceListScopeViewTests(TransactionTestCase):
         ScopeManager.cache = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_scope_cached(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_scope_cached(self, mocked_decode):
         ScopeManager.cache = {
             '1': {
                 'scopes': mocked_scope,

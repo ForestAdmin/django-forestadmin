@@ -13,6 +13,7 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
 
 
+@mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
 class ResourceListFilterViewTests(TransactionTestCase):
     fixtures = ['question.json', 'choice.json']
 
@@ -40,9 +41,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         ScopeManager.cache = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_is(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_is(self, mocked_datetime, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -78,9 +77,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_aggregator(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_aggregator(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -116,9 +113,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_aggregator_or(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_aggregator_or(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -173,9 +168,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_is_not(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_is_not(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
@@ -230,9 +223,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_is_related_data(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_is_related_data(self, *args, **kwargs):
         response = self.client.get(self.reverse_url, {
             'fields[tests_choice]': 'id,choice_text,question',
             'fields[question]': 'question_text',
@@ -303,9 +294,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_wrong_operator(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_wrong_operator(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,question_text,pub_date',
             'filters': '{"field":"question_text","operator":"foo","value":"what is your favorite color?"}',
@@ -324,9 +313,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_blank(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_blank(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,question_text,pub_date',
             'filters': '{"field":"question_text","operator":"blank","value":null}',
@@ -339,9 +326,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         self.assertEqual(data, {'data': []})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_blank_date(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_blank_date(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,question_text,pub_date',
             'filters': '{"field":"id","operator":"blank","value":null}',
@@ -354,9 +339,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
         self.assertEqual(data, {'data': []})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_is_present(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_is_present(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',

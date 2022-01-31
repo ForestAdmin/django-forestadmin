@@ -1,9 +1,7 @@
 import logging
 
 # 5 minutes expiration cache
-from datetime import datetime
-
-import pytz
+from django_forest.utils.date import get_utc_now
 
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.permissions import date_difference_in_seconds
@@ -22,7 +20,7 @@ class ScopeManager:
         if rendering_id not in cls.cache:
             return True
         rendering_scopes = cls.cache[rendering_id]
-        seconds_since_last_fetch = date_difference_in_seconds(datetime.now(pytz.UTC), rendering_scopes['fetched_at'])
+        seconds_since_last_fetch = date_difference_in_seconds(get_utc_now(), rendering_scopes['fetched_at'])
         return seconds_since_last_fetch > SCOPE_CACHE_EXPIRATION_DELTA
 
     @classmethod
@@ -34,7 +32,7 @@ class ScopeManager:
         else:
             cls.cache[rendering_id] = {
                 'scopes': scopes,
-                'fetched_at': datetime.now(pytz.UTC)
+                'fetched_at': get_utc_now()
             }
 
     @staticmethod

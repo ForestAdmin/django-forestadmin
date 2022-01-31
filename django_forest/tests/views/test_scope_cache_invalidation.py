@@ -26,9 +26,8 @@ class ScopeCacheInvalidationViewTests(TestCase):
         ScopeManager.cache = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_post(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
+    def test_post(self, mocked_scope_has_expired, mocked_decode):
         response = self.client.post(reverse('django_forest:scope-cache-invalidation'),
                                     json.dumps({'renderingId': 1}),
                                     content_type='application/json')

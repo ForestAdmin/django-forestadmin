@@ -7,7 +7,6 @@ import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
 
-from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
@@ -62,9 +61,8 @@ class ResourceListViewTests(TransactionTestCase):
         Collection._registry = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
+    @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
     def test_get_sort(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
                 'fields[tests_question]': 'id,topic,question_text,pub_date',
@@ -145,9 +143,8 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_sort_related_data(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
+    def test_get_sort_related_data(self, mocked_scope_has_expired, mocked_decode):
         with self._django_assert_num_queries(7) as captured:
             response = self.client.get(self.reverse_url, {
                 'fields[tests_choice]': 'id,topic,question,choice_text',

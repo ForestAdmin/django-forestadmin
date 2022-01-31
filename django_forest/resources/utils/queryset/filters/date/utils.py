@@ -13,7 +13,7 @@ def get_date_range(
     offset: int = 0,
 ) -> tuple:
     tzinfo = current_datetime.tzinfo
-    current_datetime = current_datetime.replace(tzinfo=zoneinfo.ZoneInfo('utc'))
+    current_datetime = current_datetime.replace(tzinfo=zoneinfo.ZoneInfo('UTC'))
     current_dt = pd.to_datetime(current_datetime)
     kwargs = {
         'freq': frequency,

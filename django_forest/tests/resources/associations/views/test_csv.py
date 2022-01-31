@@ -1,10 +1,8 @@
 import copy
 import sys
-from datetime import datetime
 from unittest import mock
 
 import pytest
-import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
 
@@ -25,6 +23,7 @@ def reset_config_dir_import():
 
 
 @pytest.mark.usefixtures('reset_config_dir_import')
+@mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
 class ResourceAssociationCsvViewTests(TransactionTestCase):
     fixtures = ['question.json', 'choice.json']
 
@@ -43,7 +42,7 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
         ScopeManager.cache = {
             '1': {
                 'scopes': {},
-                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+                'fetched_at': 'useless-here'
             }
         }
 
@@ -53,9 +52,7 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
         ScopeManager.cache = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_get(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'fields[tests_choice]': 'id,question,topic,choice_text',
             'fields[question]': 'question_text',
@@ -69,7 +66,7 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), 'id,question,choice text,\r\n1,what is your favorite color?,,yes\r\n2,what is your favorite color?,,no\r\n')
 
-    def test_get_no_association(self):
+    def test_get_no_association(self, *args, **kwargs):
         response = self.client.get(self.bad_association_url, {
             'fields[tests_choice]': 'id,question,choice_text',
             'fields[question]': 'question_text',
