@@ -14,7 +14,6 @@ pytest-pythonpath>=0.7, <1.0
 python-dateutil>=2.8, <3.0
 python-jose>=3.3, <4.0
 requests>=2.25, <3.0
-pytz #no need a specific version because we used only pytz.UTC
 marshmallow>=3.14,<3.15 #3.15 remove the support of python3.6
 tox>=3.24, < 4.0
 tox-pyenv>=1.1,<2.0
