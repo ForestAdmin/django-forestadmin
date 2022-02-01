@@ -15,6 +15,7 @@ class UtilsCorsTests(TestCase):
         self.assertEqual(settings.MIDDLEWARE.index('corsheaders.middleware.CorsMiddleware'), 0)
         self.assertEqual(settings.CORS_ALLOWED_ORIGIN_REGEXES, ['.*\\.forestadmin\\.com.*'])
         self.assertEqual(settings.CORS_ALLOW_HEADERS, list(default_headers) + ['forest-context-url'])
+        self.assertEqual(settings.CORS_ALLOW_CREDENTIALS, True)
 
     @override_settings(INSTALLED_APPS=['corsheaders'])
     def test_set_cors_apps_already_present(self):

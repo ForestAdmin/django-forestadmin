@@ -29,3 +29,5 @@ def set_cors():
         *getattr(settings, 'CORS_ALLOW_HEADERS', list(default_headers)),
         'forest-context-url',
     ]
+
+    settings.CORS_ALLOW_CREDENTIALS = True
