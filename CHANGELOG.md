@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/ForestAdmin/django-forest/compare/v1.0.8...v1.0.9) (2022-02-01)
+
+
+### Bug Fixes
+
+* **cors:** allow_crential is mandatory ([#80](https://github.com/ForestAdmin/django-forest/issues/80)) ([f69193a](https://github.com/ForestAdmin/django-forest/commit/f69193abae9e68e939ed09aa6f0a241afb889b22))
+
 ## [1.0.8](https://github.com/ForestAdmin/django-forest/compare/v1.0.7...v1.0.8) (2022-01-25)
 
 
