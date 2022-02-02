@@ -24,10 +24,6 @@ class UtilsJsonApiSchemaTests(TestCase):
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
 
-    def test_handle_json_api_schema(self):
-        Schema.handle_json_api_schema()
-        self.assertEqual(len(JsonApiSchema._registry), 22)
-
     def test_json_api_schema_bad_name(self):
         Schema.handle_json_api_schema()
         with self.assertRaises(Exception) as cm:
@@ -277,33 +273,6 @@ class UtilsJsonApiSchemaTests(TestCase):
             FooSchema()
 
         self.assertEqual(cm.exception.args[0], 'Must specify `self_url` Meta option when `self_url_kwargs` is specified')
-
-    def test_django_schema_handle_attribute_document_meta(self):
-        class FooSchema(DjangoSchema):
-            metadata = fields.DocumentMeta()
-            class Meta:
-                type_ = 'foo'
-
-        schema = FooSchema()
-        ret = {}
-        attribute = 'metadata'
-        field_name = 'metadata'
-        value = {'foo': 'bar'}
-        schema.handle_attribute(ret, attribute, field_name, value)
-        self.assertEqual(schema.document_meta, {'foo': 'bar'})
-
-    def test_django_schema_handle_attribute_resource_meta(self):
-        class FooSchema(DjangoSchema):
-            meta_resource = fields.ResourceMeta()
-            class Meta:
-                type_ = 'foo'
-
-        schema = FooSchema()
-        ret = {}
-        attribute = 'meta_resource'
-        field_name = 'meta_resource'
-        value = {'foo': 'bar'}
-        self.assertEqual(schema.handle_attribute(ret, attribute, field_name, value), {'meta': {'foo': 'bar'}})
 
     def test_django_schema_format_item_none(self):
         class FooSchema(DjangoSchema):

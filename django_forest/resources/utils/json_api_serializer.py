@@ -46,10 +46,6 @@ class JsonApiSerializerMixin:
             smart_relationships = self.get_smart_relationships(Model._meta.db_table)
             only = fields_and_relationships + smart_relationships
 
-        if 'id' not in only:
-            pk_name = self.get_pk_name(Model)
-            only.append(pk_name)
-
         return only
 
     def get_include_data(self, Model):
