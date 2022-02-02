@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/ForestAdmin/django-forest/compare/v1.0.9...v1.0.10) (2022-02-02)
+
+
+### Bug Fixes
+
+* **apimap:** fix the way to retrieve the related field name and the internal type ([#81](https://github.com/ForestAdmin/django-forest/issues/81)) ([505729c](https://github.com/ForestAdmin/django-forest/commit/505729c14d954d028f4da2c9f54141047ccd6c51))
+
 ## [1.0.9](https://github.com/ForestAdmin/django-forest/compare/v1.0.8...v1.0.9) (2022-02-01)
 
 
