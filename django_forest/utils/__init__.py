@@ -1,18 +1,18 @@
 import re
 
-from django.db.models import ManyToManyField, ForeignKey
 from jose import jwt
 
 from django_forest.utils.forest_setting import get_forest_setting
 
 
 def get_accessor_name(field):
-    if isinstance(field, ManyToManyField) or isinstance(field, ForeignKey):
-        accessor_name = field.name
-    else:
-        accessor_name = field.get_accessor_name()
-
-    return accessor_name
+    name = None
+    try:
+        # model_set
+        name = field.get_accessor_name()
+    except AttributeError:
+        name = field.name
+    return name
 
 
 def get_token(request):

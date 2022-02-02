@@ -49,10 +49,16 @@ def get_type(field):
     if hasattr(field, 'choices') and field.choices is not None:
         return 'Enum'
 
-    field_type = field.get_internal_type()
-    # Special case for one to one field which can redirect to an Integer or String
-    if field_type == 'OneToOneField':
-        return handle_one_to_one_field(field)
-    elif field_type == 'ArrayField':
-        return [TYPE_CHOICES.get(field.base_field.get_internal_type(), 'unknown')]
-    return TYPE_CHOICES.get(field_type, 'unknown')
+    field_type = None
+    try:
+        field_type = field.get_internal_type()
+    except AttributeError:
+        # Some field as GenericForeignKey hasn't one internal type
+        field_type = field.__class__.__name__
+    finally:
+        # Special case for one to one field which can redirect to an Integer or String
+        if field_type == 'OneToOneField':
+            return handle_one_to_one_field(field)
+        elif field_type == 'ArrayField':
+            return [TYPE_CHOICES.get(field.base_field.get_internal_type(), 'unknown')]
+        return TYPE_CHOICES.get(field_type, 'unknown')
