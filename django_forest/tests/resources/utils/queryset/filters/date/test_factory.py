@@ -194,11 +194,11 @@ def test_build_yesterday_condition(current, expected, offset):
     "current,days,expected,offset",
     (   
         (
-            datetime(2022, 1, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+            datetime(2022, 1, 1, 23, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
             1,
             RangeCondition(
-                datetime(2021, 12, 31, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")),
-                datetime(2022, 1, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
+                datetime(2021, 12, 31, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")),
+                datetime(2022, 1, 1, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
             ),
             0
         ),

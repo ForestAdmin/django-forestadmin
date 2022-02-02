@@ -24,11 +24,11 @@ from django_forest.resources.utils.queryset.filters.date.utils import (
     "current,days,expected,offset",
     (
         (
-            datetime(2021, 1, 12, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+            datetime(2021, 1, 12, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
             1, 
             (
-                datetime(2021, 1, 11, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
-                datetime(2021, 1, 12, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
+                datetime(2021, 1, 11, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+                datetime(2021, 1, 12, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
             ),
             0
         ),
@@ -141,11 +141,11 @@ def test_get_previous_x_days(current: datetime, days: int, expected: Tuple[datet
     "current,days,expected,offset",
     (
         (
-            datetime(2021, 1, 12, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+            datetime(2021, 1, 12, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
             1, 
             (
-                datetime(2021, 1, 12, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
-                datetime(2021, 1, 13, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
+                datetime(2021, 1, 12, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+                datetime(2021, 1, 13, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
             ),
             0
         ),
@@ -239,11 +239,11 @@ def test_get_next_x_days(current: datetime, days: int, expected: Tuple[datetime]
     "current,weeks,expected,offset",
     (
         (
-            datetime(2022, 1, 5, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+            datetime(2022, 1, 5, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
             52, 
             (
-                datetime(2021, 1, 4, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
-                datetime(2022, 1, 3, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
+                datetime(2021, 1, 4, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+                datetime(2022, 1, 3, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
             ),
             0
         ),
@@ -302,11 +302,11 @@ def test_get_previous_x_weeks(current: datetime, weeks: int, expected: Tuple[dat
     "current,months,expected,offset",
     (
         (
-            datetime(2022, 1, 4, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+            datetime(2022, 1, 4, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
             1, 
             (
-                datetime(2021, 12, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
-                datetime(2022, 1, 1, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
+                datetime(2021, 12, 1, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe")), 
+                datetime(2022, 1, 1, 0, tzinfo=zoneinfo.ZoneInfo("Asia/Aqtobe"))
             ),
             0
         ),

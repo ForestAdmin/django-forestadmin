@@ -5,6 +5,7 @@ try:
 except ImportError:
     from backports import zoneinfo
 
+
 def get_date_range(
     current_datetime: datetime,
     frequency: str,
@@ -31,9 +32,21 @@ def get_date_range(
         last_idx = -1
         start_idx = -2
     date_range = pd.date_range(**kwargs)
+
+    replace_kwargs = {
+        'tzinfo': tzinfo,
+    }
+    if frequency != 'H':
+        replace_kwargs = {
+            **replace_kwargs,
+            'hour': 0,
+            'minute': 0,
+            'second': 0,
+            'microsecond': 0,
+        }
     return (
-        date_range[start_idx].to_pydatetime().replace(tzinfo=tzinfo),
-        date_range[last_idx].to_pydatetime().replace(tzinfo=tzinfo),
+        date_range[start_idx].to_pydatetime().replace(**replace_kwargs),
+        date_range[last_idx].to_pydatetime().replace(**replace_kwargs),
     )
 
 def get_previous_x_days(current_datetime: datetime, period: int = 0, offset: int = 0) -> tuple:
