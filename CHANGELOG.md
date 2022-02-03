@@ -1,3 +1,10 @@
+## [1.0.12](https://github.com/ForestAdmin/django-forest/compare/v1.0.11...v1.0.12) (2022-02-03)
+
+
+### Bug Fixes
+
+* **jsonapischema:** fix issue with the primary key in jsonapi schema ([#82](https://github.com/ForestAdmin/django-forest/issues/82)) ([d54aefa](https://github.com/ForestAdmin/django-forest/commit/d54aefa077a89a8e14f7aae313a4cb10fd3759ac))
+
 ## [1.0.11](https://github.com/ForestAdmin/django-forest/compare/v1.0.10...v1.0.11) (2022-02-03)
 
 
