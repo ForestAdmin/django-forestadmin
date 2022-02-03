@@ -1,3 +1,10 @@
+## [1.0.11](https://github.com/ForestAdmin/django-forest/compare/v1.0.10...v1.0.11) (2022-02-03)
+
+
+### Bug Fixes
+
+* **date:** fix and refactor the date uses ([#78](https://github.com/ForestAdmin/django-forest/issues/78)) ([50d0503](https://github.com/ForestAdmin/django-forest/commit/50d05034a944ee9cf9e03abffb319013fc5e00f0))
+
 ## [1.0.10](https://github.com/ForestAdmin/django-forest/compare/v1.0.9...v1.0.10) (2022-02-02)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "django-forest",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "The official Django liana for Forest.",
   "scripts": {
     "prepare": "husky install",
