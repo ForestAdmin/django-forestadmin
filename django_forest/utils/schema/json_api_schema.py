@@ -1,13 +1,11 @@
 import re
 
+import marshmallow as ma
 from marshmallow.schema import SchemaMeta
 from marshmallow_jsonapi import Schema, fields
-from marshmallow_jsonapi.fields import DocumentMeta, ResourceMeta, BaseRelationship
-from marshmallow_jsonapi.schema import TYPE
 
 from django_forest.utils.models import Models
 from django_forest.utils.type_mapping import get_type
-
 
 TYPE_CHOICES = {
     'String': fields.Str,
@@ -47,19 +45,6 @@ def get_type_name(name):
     return re.sub(r'(\w)([A-Z])', r'\1 \2', name)
 
 
-def handle_pk_attribute(attrs, Model):
-    if 'id' not in attrs:
-        attrs['pk'] = TYPE_CHOICES.get(get_type(Model._meta.pk), fields.Str)()
-    return attrs
-
-
-def get_pk_name(collection_name):
-    Model = Models.get(collection_name)
-    if Model is not None and Model._meta.pk.name != 'id':
-        return 'pk'
-    return 'id'
-
-
 def get_marshmallow_field(field, Model):
     # Notice, handle Model is None (Smart Collection)
     model_fields = [] if Model is None else Model._meta.get_fields()
@@ -72,6 +57,14 @@ def get_marshmallow_field(field, Model):
     return TYPE_CHOICES.get(_type, fields.Str)()
 
 
+class DjangoRelationship(fields.Relationship):
+
+    def _serialize(self, value, attr, obj):
+        if value and self.many:
+            value = value.all()
+        return super(DjangoRelationship, self)._serialize(value, attr, obj)
+
+
 def populate_attrs(collection, collection_name):
     Model = Models.get(collection_name)
     attrs = {}
@@ -79,7 +72,7 @@ def populate_attrs(collection, collection_name):
         field_name = field['field']
         if field['reference'] is not None:
             related_name = field['reference'].split('.')[0]
-            attrs[field_name] = fields.Relationship(
+            attrs[field_name] = DjangoRelationship(
                 type_=get_type_name(related_name).lower(),
                 many=field['relationship'] == 'HasMany',
                 schema=f'{related_name}Schema',
@@ -89,16 +82,12 @@ def populate_attrs(collection, collection_name):
             )
         else:
             attrs[field_name] = get_marshmallow_field(field, Model)
-
-    # Add pk field if id not present
-    attrs = handle_pk_attribute(attrs, Model)
-
     return attrs
 
 
 # override Marshmallow Schema for Django needs
 class DjangoSchema(Schema):
-    # Notice override init for not having id error, as we are working with pk
+
     def __init__(self, *args, **kwargs):
         self.include_data = kwargs.pop("include_data", ())
         super(Schema, self).__init__(*args, **kwargs)
@@ -116,72 +105,27 @@ class DjangoSchema(Schema):
         self.included_data = {}
         self.document_meta = {}
 
-    def handle_document_meta(self, value):
-        if not self.document_meta:
-            self.document_meta = self.dict_class()
-        self.document_meta.update(value)
-
-    def handle_resource_meta(self, ret, value):
-        if "meta" not in ret:
-            ret["meta"] = self.dict_class()
-        ret["meta"].update(value)
-
-        return ret
-
-    def handle_relation(self, ret, field_name, value):
-        if value:
-            if "relationships" not in ret:
-                ret["relationships"] = self.dict_class()
-            ret["relationships"][self.inflect(field_name)] = value
-
-        return ret
-
-    def handle_default(self, ret, field_name, value):
-        if "attributes" not in ret:
-            ret["attributes"] = self.dict_class()
-        ret["attributes"][self.inflect(field_name)] = value
-
-        return ret
-
-    def handle_attribute(self, ret, attribute, field_name, value):
-        # Notice: this part has been overridden for handling pk in django
-        if attribute in ('pk', 'id'):
-            ret['id'] = value
-        elif isinstance(self.fields[attribute], DocumentMeta):
-            self.handle_document_meta(value)
-        elif isinstance(self.fields[attribute], ResourceMeta):
-            ret = self.handle_resource_meta(ret, value)
-        elif isinstance(self.fields[attribute], BaseRelationship):
-            ret = self.handle_relation(ret, field_name, value)
-        else:
-            ret = self.handle_default(ret, field_name, value)
-
-        return ret
-
-    def handle_item(self, ret, item, attributes):
-        for field_name, value in item.items():
-            ret = self.handle_attribute(ret, attributes[field_name], field_name, value)
-
-        return ret
-
     def format_item(self, item):
-        if not item:
-            return None
-
-        ret = self.dict_class()
-        ret[TYPE] = self.opts.type_
-
-        # Get the schema attributes so we can confirm `dump-to` values exist
-        attributes = {
-            (self.fields[field].data_key or field): field for field in self.fields
-        }
-
-        ret = self.handle_item(ret, item, attributes)
-
-        links = self.get_resource_links(item)
-        if links:
-            ret['links'] = links
+        ret = super(DjangoSchema, self).format_item(item)
+        if ret and self._original:
+            ret['id'] = self._original.pk
         return ret
+
+    def format_items(self, data, many):
+        if many:
+            res = []
+            queryset = self._original
+            for i, item in enumerate(data):
+                self._original = queryset[i]
+                res.append(self.format_item(item))
+        else:
+            res = super(DjangoSchema, self).format_items(data, many)
+        return res
+
+    @ma.post_dump(pass_many=True, pass_original=True)
+    def format_json_api_response(self, data, original, many):
+        self._original = original  # needed to get the id value
+        return super(DjangoSchema, self).format_json_api_response(data, many)
 
     def get_attribute(self, obj, attr, default):
         value = super().get_attribute(obj, attr, default)
@@ -189,16 +133,22 @@ class DjangoSchema(Schema):
             value = value.all()
         return value
 
+    def get_resource_links(self, item):
+        item['__id__'] = self._original.pk
+        res = super(DjangoSchema, self).get_resource_links(item)
+        del item['__id__']
+        return res
 
 def create_json_api_schema(collection):
     collection_name = collection['name']
     attrs = populate_attrs(collection, collection_name)
 
     class MarshmallowSchema(DjangoSchema):
+
         class Meta:
             type_ = get_type_name(collection_name).lower()
             self_url = f'/forest/{collection_name}/{{{collection_name.lower()}_id}}'
-            self_url_kwargs = {f'{collection_name.lower()}_id': f'<{get_pk_name(collection_name)}>'}
+            self_url_kwargs = {f'{collection_name.lower()}_id': '<__id__>'}
             strict = True
 
     return MarshmallowType(f'{collection_name}Schema', (MarshmallowSchema,), attrs)
