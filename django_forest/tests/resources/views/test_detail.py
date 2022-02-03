@@ -1,8 +1,6 @@
 import json
-from datetime import datetime
 from unittest import mock
 
-import pytz
 import sys
 
 import pytest
@@ -24,7 +22,7 @@ def reset_config_dir_import():
         if key.startswith('django_forest.tests.forest'):
             del sys.modules[key]
 
-
+@mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
 @pytest.mark.usefixtures('reset_config_dir_import')
 class ResourceDetailViewTests(TransactionTestCase):
     fixtures = ['article.json', 'publication.json',
@@ -33,7 +31,7 @@ class ResourceDetailViewTests(TransactionTestCase):
                 'place.json', 'restaurant.json',
                 ]
 
-    def setUp(self):
+    def setUp(self, *args, **kwargs):
         Schema.build_schema()
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
@@ -46,19 +44,17 @@ class ResourceDetailViewTests(TransactionTestCase):
         ScopeManager.cache = {
             '1': {
                 'scopes': {},
-                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+                'fetched_at': 'useless-here'
             }
         }
 
-    def tearDown(self):
+    def tearDown(self, *args, **kwargs):
         # reset _registry after each test
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_get(self, *args, **kwargs):
         response = self.client.get(self.url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
@@ -93,30 +89,26 @@ class ResourceDetailViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_invalid_token(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_get_invalid_token(self, *args, **kwargs):
         response = self.client.get(self.url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'Missing required rendering_id'}]})
 
-    def test_get_no_model(self):
+    def test_get_no_model(self, *args, **kwargs):
         response = self.client.get(self.bad_url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_scope(self, mocked_datetime, mocked_decode):
+    def test_get_scope(self, *args, **kwargs):
         ScopeManager.cache = {
             '1': {
                 'scopes': mocked_scope,
-                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+                'fetched_at': 'useless-here'
             }
         }
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
             'timezone': 'Europe/Paris',
         })
@@ -151,8 +143,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_scope_no_record(self, mocked_datetime, mocked_decode):
+    def test_get_scope_no_record(self, *args, **kwargs):
         ScopeManager.cache = {
             '1': {
                 'scopes': {
@@ -172,10 +163,9 @@ class ResourceDetailViewTests(TransactionTestCase):
                         }
                     }
                 },
-                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+                'fetched_at': 'useless-here'
             }
         }
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.url, {
             'timezone': 'Europe/Paris',
         })
@@ -184,9 +174,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(data, {'errors': [{'detail': "Record does not exist or you don't have the right to query it"}]})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_put(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_put(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {
@@ -227,9 +215,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_put_invalid_token(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_put_invalid_token(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {
@@ -245,9 +231,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(data, {'errors': [{'detail': 'Missing required rendering_id'}]})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_put_related_data(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_put_related_data(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {
@@ -302,9 +286,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(Place.objects.count(), 2)
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_put_related_data_none(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_put_related_data_none(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {},
@@ -349,7 +331,7 @@ class ResourceDetailViewTests(TransactionTestCase):
             }
         })
 
-    def test_put_related_data_do_not_exist(self):
+    def test_put_related_data_do_not_exist(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {
@@ -380,7 +362,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         })
         self.assertEqual(Restaurant.objects.count(), 1)
 
-    def test_put_no_model(self):
+    def test_put_no_model(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {
@@ -396,9 +378,7 @@ class ResourceDetailViewTests(TransactionTestCase):
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource tests_foo'}]})
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_put_smart_field(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_put_smart_field(self, *args, **kwargs):
         body = {
             'data': {
                 'attributes': {
@@ -441,9 +421,7 @@ class ResourceDetailViewTests(TransactionTestCase):
 
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_delete(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_delete(self, *args, **kwargs):
         self.assertEqual(Question.objects.count(), 3)
         self.assertTrue(Question.objects.get(pk=1))
         response = self.client.delete(self.url)
@@ -453,15 +431,13 @@ class ResourceDetailViewTests(TransactionTestCase):
             Question.objects.get(pk=1)
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_delete_invalid_token(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_delete_invalid_token(self, *args, **kwargs):
         response = self.client.delete(self.url)
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'Missing required rendering_id'}]})
 
-    def test_delete_no_model(self):
+    def test_delete_no_model(self, *args, **kwargs):
         response = self.client.delete(self.bad_url)
         data = response.json()
         self.assertEqual(response.status_code, 400)

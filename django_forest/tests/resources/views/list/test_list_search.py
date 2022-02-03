@@ -2,6 +2,7 @@ import copy
 import sys
 from datetime import datetime
 from unittest import mock
+from freezegun import freeze_time
 
 import pytest
 import pytz
@@ -12,6 +13,7 @@ from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
+from django_forest.utils.date import get_timezone
 
 
 # reset forest config dir auto import
@@ -65,8 +67,10 @@ class ResourceListViewTests(TransactionTestCase):
         Collection._registry = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_to_edit(self, mocked_datetime, mocked_decode):
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_to_edit(self, mocked_datetime):
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.reverse_url, {
             'context[relationship]': 'HasMany',
@@ -140,9 +144,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_pk_no_id(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_pk_no_id(self, mocked_decode):
         response = self.client.get(self.one_to_one_url, {
             'context[relationship]': 'BelongsTo',
             'context[field]': 'restaurant',
@@ -201,9 +206,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_number(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_number(self, mocked_decode):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
                 'fields[tests_question]': 'id,topic,question_text,pub_date',
@@ -248,9 +254,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_number_max_size(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_number_max_size(self, mocked_decoded):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
                 'fields[tests_question]': 'id,question_text,pub_date',
@@ -274,9 +281,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_mutliple(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_mutliple(self, mocked_decode):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
                 'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
@@ -356,9 +364,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_enum(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_enum(self, mocked_decode):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.enum_url, {
                 'fields[tests_student]': 'id,year_in_school',
@@ -398,9 +407,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_search_uuid(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_uuid(self, mocked_datetime):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.uuid_url, {
                 'fields[tests_serial]': 'uuid',
@@ -439,9 +449,10 @@ class ResourceListViewTests(TransactionTestCase):
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get_extended_search(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_extended_search(self, mocked_decode):
         with self._django_assert_num_queries(1) as captured:
             response = self.client.get(self.url, {
                 'fields[tests_question]': 'id,topic,question_text,pub_date',

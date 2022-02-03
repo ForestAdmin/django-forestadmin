@@ -3,7 +3,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum, Count
 
-from django_forest.resources.utils.queryset.filters.date.utils import PREVIOUS_DATE_OPERATOR
+from django_forest.resources.utils.queryset.filters.date.factory import ConditionFactory as DateConditionFactory
 
 
 def compute_value(params, queryset):
@@ -94,7 +94,7 @@ def compute_line_values(bounds, periods, time_frame, format):
 def contains_previous_date_operator(filters):
     if 'aggregator' in filters:
         previous_date_operator = next(
-            (x for x in filters['conditions'] if x['operator'] in PREVIOUS_DATE_OPERATOR), None)
+            (x for x in filters['conditions'] if x['operator'] in DateConditionFactory.OFFSET_OPERATORS), None)
         return previous_date_operator is not None
     else:
-        return filters['operator'] in PREVIOUS_DATE_OPERATOR
+        return filters['operator'] in DateConditionFactory.OFFSET_OPERATORS

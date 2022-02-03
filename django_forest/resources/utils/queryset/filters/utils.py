@@ -1,7 +1,7 @@
 from django.db.models import Q
 
 from django_forest.resources.utils.queryset.filters.date import DatesMixin
-from django_forest.resources.utils.queryset.filters.date.utils import DATE_OPERATORS
+from django_forest.resources.utils.queryset.filters.date.factory import ConditionFactory as DateConditionFactory
 from django_forest.utils import get_association_field
 from django_forest.utils.type_mapping import get_type
 from django_forest.utils.collection import Collection
@@ -66,7 +66,7 @@ class ConditionsMixin(DatesMixin):
         field_type = self.get_field_type(condition['field'], Model)
 
         # special case date, blank and present
-        if operator in DATE_OPERATORS:
+        if operator in DateConditionFactory.OPERATORS:
             return self.handle_date_operator(operator, field, value, tz)
         if operator == 'blank':
             return self.handle_blank(field_type, field)

@@ -1,9 +1,7 @@
 import copy
 import json
-from datetime import datetime
 from unittest import mock
 
-import pytz
 from django.test import TransactionTestCase
 from django.urls import reverse
 
@@ -14,6 +12,7 @@ from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
 
 
+@mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
 class ResourceAssociationListViewTests(TransactionTestCase):
     fixtures = ['article.json', 'publication.json',
                 'session.json',
@@ -46,7 +45,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         ScopeManager.cache = {
             '1': {
                 'scopes': {},
-                'fetched_at': datetime(2021, 7, 8, 9, 20, 22, 582772, tzinfo=pytz.UTC)
+                'fetched_at': 'useless-here'
             }
         }
 
@@ -56,9 +55,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         ScopeManager.cache = {}
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_get(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_get(self, *args, **kwargs):
         response = self.client.get(self.url, {
             'page[number]': '1',
             'page[size]': '15',
@@ -126,7 +123,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
             ]
         })
 
-    def test_get_no_model(self):
+    def test_get_no_model(self, *args, **kwargs):
         response = self.client.get(self.bad_url, {
             'page[number]': '1',
             'page[size]': '15',
@@ -137,7 +134,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
 
-    def test_get_no_association(self):
+    def test_get_no_association(self, *args, **kwargs):
         response = self.client.get(self.bad_association_url, {
             'page[number]': '1',
             'page[size]': '15',
@@ -148,7 +145,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_question'}]})
 
-    def test_post(self):
+    def test_post(self, *args, **kwargs):
         publication = Publication.objects.get(pk=2)
         body = {
             'data': [
@@ -167,7 +164,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(data, {})
         self.assertEqual(publication.article_set.count(), 2)
 
-    def test_post_reverse(self):
+    def test_post_reverse(self, *args, **kwargs):
         article = Article.objects.get(pk=1)
         body = {
             'data': [
@@ -186,7 +183,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(data, {})
         self.assertEqual(article.publications.count(), 2)
 
-    def test_post_no_model(self):
+    def test_post_no_model(self, *args, **kwargs):
         body = {
             'data': [
                 {
@@ -202,7 +199,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
 
-    def test_post_related_data_do_not_exist(self):
+    def test_post_related_data_do_not_exist(self, *args, **kwargs):
         body = {
             'data': [
                 {
@@ -226,7 +223,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         })
         self.assertEqual(Restaurant.objects.count(), 1)
 
-    def test_put(self):
+    def test_put(self, *args, **kwargs):
         body = {
             'data': [
                 {
@@ -240,7 +237,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
                                    content_type='application/json')
         self.assertEqual(response.status_code, 204)
 
-    def test_delete(self):
+    def test_delete(self, *args, **kwargs):
         data = {
             'data': [
                 {
@@ -257,9 +254,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(Article.objects.count(), 1)
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
-    @mock.patch('django_forest.utils.scope.datetime')
-    def test_delete_all_records(self, mocked_datetime, mocked_decode):
-        mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
+    def test_delete_all_records(self, *args, **kwargs):
         data = {
             'data': {
                 'attributes': {
@@ -292,7 +287,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Choice.objects.count(), 2)
 
-    def test_delete_all_records_no_association(self):
+    def test_delete_all_records_no_association(self, *args, **kwargs):
         data = {
             'data': {
                 'attributes': {
@@ -325,7 +320,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_question'}]})
 
-    def test_delete_no_model(self):
+    def test_delete_no_model(self, *args, **kwargs):
         data = {
             'data': [
                 {
@@ -341,7 +336,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'no model found for resource Foo'}]})
 
-    def test_delete_no_association(self):
+    def test_delete_no_association(self, *args, **kwargs):
         data = {
             'data': [
                 {
@@ -357,7 +352,7 @@ class ResourceAssociationListViewTests(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, {'errors': [{'detail': 'cannot find association resource foo for Model tests_publication'}]})
 
-    def test_dissociate(self):
+    def test_dissociate(self, *args, **kwargs):
         publication = Publication.objects.get(pk=2)
         data = {
             'data': [
