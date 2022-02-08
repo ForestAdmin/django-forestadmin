@@ -164,10 +164,6 @@ class ResourceListViewTests(TransactionTestCase):
                 {
                     'type': 'tests_restaurant',
                     'id': 1,
-                    'attributes': {
-                        'serves_hot_dogs': True,
-                        'serves_pizza': True
-                    },
                     'relationships': {
                         'place': {
                             'links': {
