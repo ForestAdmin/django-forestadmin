@@ -1,3 +1,10 @@
+## [1.0.13](https://github.com/ForestAdmin/django-forest/compare/v1.0.12...v1.0.13) (2022-02-09)
+
+
+### Bug Fixes
+
+* **onboarding:** add an utils to init the agent ([#84](https://github.com/ForestAdmin/django-forest/issues/84)) ([9f53e17](https://github.com/ForestAdmin/django-forest/commit/9f53e1731a82f1bb9507e9cbf2e53d31e2993738))
+
 ## [1.0.12](https://github.com/ForestAdmin/django-forest/compare/v1.0.11...v1.0.12) (2022-02-03)
 
 
