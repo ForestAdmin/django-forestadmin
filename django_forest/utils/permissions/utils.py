@@ -29,7 +29,7 @@ def is_user_allowed(user_id, permission_value):
     elif permission_value in (True, False):
         return permission_value
     else:
-        return user_id in permission_value
+        return int(user_id) in permission_value
 
 
 def find_action_from_endpoint(obj):
