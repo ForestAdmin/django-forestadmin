@@ -1,44 +1,72 @@
+import os
+import pytest
 from django.test import TestCase, override_settings
 
 from django_forest.utils.forest_setting import get_forest_setting
 
-from test.support import EnvironmentVarGuard
-
 
 class UtilsCorsTests(TestCase):
-
-    def setUp(self):
-        self.env = EnvironmentVarGuard()
-        self.env.set('BAR', 'bar')
-
-    @override_settings(FOREST={'FOO': 'foo'})
+    
+    @override_settings(
+        FOREST={
+            'FOO': 'foo',
+            'BAR': 'bar'
+    })
     def test_get_forest_setting(self):
-        foo = get_forest_setting('FOO')
-        self.assertEqual(foo, 'foo')
-
-    def test_get_forest_setting_none(self):
-        foo = get_forest_setting('FOO')
-        self.assertEqual(foo, None)
-
+        self.assertEqual(
+            get_forest_setting('FOO'), 
+            'foo',
+        )
+        self.assertEqual(
+            get_forest_setting('BAR'), 
+            'bar',
+        )
+        self.assertEqual(
+            get_forest_setting('UNKNOWN'), 
+            None,
+        )
+    
+    @override_settings(
+        FOREST={
+            'FOO': 'foo',
+            'BAR': 'False'
+    })
     def test_get_forest_setting_default(self):
-        foo = get_forest_setting('FOO', True)
-        self.assertEqual(foo, True)
+        self.assertEqual(
+            get_forest_setting('FOO', 'default'), 
+            'foo'
+        )
+        self.assertEqual(
+            get_forest_setting('FOO', True), 
+            True,
+        )
+        self.assertEqual(
+            get_forest_setting('BAR', True), 
+            False
+        )
+        self.assertEqual(
+            get_forest_setting('Unknown', True), 
+            True
+        )
 
-    @override_settings(FOREST={'FOO': 'True'})
-    def test_get_forest_setting_bool(self):
-        foo = get_forest_setting('FOO', False)
-        self.assertEqual(foo, True)
-
-    @override_settings(FOREST={'FOO': 'foo'})
-    def test_get_forest_setting_bad_bool(self):
-        foo = get_forest_setting('FOO', False)
-        self.assertEqual(foo, False)
-
+    @override_settings(
+        FOREST={
+            'FOO': 'foo',
+            'BAR': 'bar'
+    })
     def test_get_forest_setting_env(self):
-        bar = get_forest_setting('BAR')
-        self.assertEqual(bar, 'bar')
+        os.environ['FOO'] = 'envfoo'
+        self.assertEqual(
+            get_forest_setting('FOO'), 
+            'envfoo'
+        )
+        self.assertEqual(
+            get_forest_setting('BAR'), 
+            'bar'
+        )
+        os.environ['BOOL'] = 'False'
+        self.assertEqual(
+            get_forest_setting('BOOL', True), 
+            False
+        )
 
-    @override_settings(FOREST={'BAR': 'new_bar'})
-    def test_get_forest_setting_env_setting(self):
-        bar = get_forest_setting('BAR')
-        self.assertEqual(bar, 'new_bar')
