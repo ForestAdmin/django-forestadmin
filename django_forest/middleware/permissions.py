@@ -54,6 +54,9 @@ class PermissionMiddleware:
         elif permission_name in 'statsWithParameters':
             if 'timezone' in body:
                 del body['timezone']
+            if 'group_by_field' in body:
+                #  usefull if the group_by_field is a related field
+                body['group_by_field'] = body['group_by_field'].split(':')[0]
             kwargs['query_request_info'] = body
 
     def is_authorized(self, request, token, resource):
