@@ -1,3 +1,10 @@
+## [1.0.16](https://github.com/ForestAdmin/django-forest/compare/v1.0.15...v1.0.16) (2022-02-10)
+
+
+### Bug Fixes
+
+* **jsonapiserializer:** fix and refactor the jsonapiserializer ([#83](https://github.com/ForestAdmin/django-forest/issues/83)) ([2284070](https://github.com/ForestAdmin/django-forest/commit/2284070121131aaad716d95e3cbbc9f8541e469c))
+
 ## [1.0.15](https://github.com/ForestAdmin/django-forest/compare/v1.0.14...v1.0.15) (2022-02-10)
 
 
