@@ -1,3 +1,10 @@
+## [1.0.14](https://github.com/ForestAdmin/django-forest/compare/v1.0.13...v1.0.14) (2022-02-10)
+
+
+### Bug Fixes
+
+* **onboarding:** the env variable should be override django settings ([#85](https://github.com/ForestAdmin/django-forest/issues/85)) ([eeb8305](https://github.com/ForestAdmin/django-forest/commit/eeb8305d37aca9eeae3c254fa173c84c249d438e))
+
 ## [1.0.13](https://github.com/ForestAdmin/django-forest/compare/v1.0.12...v1.0.13) (2022-02-09)
 
 
