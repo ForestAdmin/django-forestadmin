@@ -1,3 +1,10 @@
+## [1.0.15](https://github.com/ForestAdmin/django-forest/compare/v1.0.14...v1.0.15) (2022-02-10)
+
+
+### Bug Fixes
+
+* **permissions:** user_id in token is a string whereas user_id lists in permissions fetch are string ([#86](https://github.com/ForestAdmin/django-forest/issues/86)) ([9852365](https://github.com/ForestAdmin/django-forest/commit/9852365e13c45c4401defd64c8bda4ba68cb63e1))
+
 ## [1.0.14](https://github.com/ForestAdmin/django-forest/compare/v1.0.13...v1.0.14) (2022-02-10)
 
 
