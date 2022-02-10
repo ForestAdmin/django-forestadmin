@@ -21,8 +21,4 @@ class LimitFieldsMixin:
         lookup = f'fields[{Model._meta.db_table}]'
         if lookup in params:
             queryset = self.handle_fields(params, lookup, Model, queryset)
-
-        if 'context[field]' in params:
-            queryset = self.handle_context(Model, queryset)
-
         return queryset

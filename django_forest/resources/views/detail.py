@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 
 from django_forest.resources.utils.format import FormatFieldMixin
+from django_forest.utils.schema import Schema
 from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
 from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
@@ -37,9 +38,9 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             self.handle_smart_fields(instance, self.Model._meta.db_table)
 
             # json api serializer
-            include_data = self.get_include_data(self.Model)
-            Schema = JsonApiSchema._registry[f'{self.Model._meta.db_table}Schema']
-            data = Schema(include_data=include_data).dump(instance)
+            include_data = self.get_include_data(Schema.get_collection(self.Model._meta.db_table)['fields'])
+            JsonSchema = JsonApiSchema._registry[f'{self.Model._meta.db_table}Schema']
+            data = JsonSchema(include_data=include_data).dump(instance)
 
             return JsonResponse(data, safe=False)
 
