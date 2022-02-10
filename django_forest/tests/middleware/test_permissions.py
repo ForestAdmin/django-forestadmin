@@ -54,7 +54,7 @@ mocked_permissions_none = copy.deepcopy(mocked_permissions)
 mocked_permissions_none['data']['collections']['tests_question']['collection']['browseEnabled'] = None
 
 mocked_permissions_user = copy.deepcopy(mocked_permissions)
-mocked_permissions_user['data']['collections']['tests_question']['collection']['browseEnabled'] = ['1']
+mocked_permissions_user['data']['collections']['tests_question']['collection']['browseEnabled'] = [1]
 
 mocked_permissions_no_collection = copy.deepcopy(mocked_permissions)
 del mocked_permissions_no_collection['data']['collections']['tests_question']
