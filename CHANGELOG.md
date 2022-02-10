@@ -1,3 +1,10 @@
+## [1.0.17](https://github.com/ForestAdmin/django-forest/compare/v1.0.16...v1.0.17) (2022-02-10)
+
+
+### Bug Fixes
+
+* **dashboard:** use a related field as group_by value in chart was broken ([#87](https://github.com/ForestAdmin/django-forest/issues/87)) ([2795ae6](https://github.com/ForestAdmin/django-forest/commit/2795ae6d7a68eee509a5b16879e8a080f6807f72))
+
 ## [1.0.16](https://github.com/ForestAdmin/django-forest/compare/v1.0.15...v1.0.16) (2022-02-10)
 
 
