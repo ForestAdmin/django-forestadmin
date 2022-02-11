@@ -16,7 +16,7 @@ TYPE_CHOICES = {
     'DateOnly': fields.Date,
     'Date': fields.DateTime,
     'Time': fields.Time,
-    'Json': fields.Dict,  # maybe a fields.Mapping or fields.Raw,
+    'Json': fields.Raw,
 }
 
 
