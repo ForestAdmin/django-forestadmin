@@ -1,3 +1,10 @@
+## [1.0.19](https://github.com/ForestAdmin/django-forest/compare/v1.0.18...v1.0.19) (2022-02-11)
+
+
+### Bug Fixes
+
+* **apimap:** apimap init crashed the agent with some kinds of validators ([#89](https://github.com/ForestAdmin/django-forest/issues/89)) ([b32a5ff](https://github.com/ForestAdmin/django-forest/commit/b32a5ff21b749431f6b6e8b81e7b5ddad66c0d41))
+
 ## [1.0.18](https://github.com/ForestAdmin/django-forest/compare/v1.0.17...v1.0.18) (2022-02-11)
 
 
