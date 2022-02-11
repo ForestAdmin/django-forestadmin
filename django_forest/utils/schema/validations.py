@@ -50,7 +50,8 @@ def handle_validator(validator, f):
 def handle_validators(validators, f):
     if len(validators):
         for validator in validators:
-            f = handle_validator(validator, f)
+            if hasattr(validator, 'code'):
+                f = handle_validator(validator, f)
 
     return f
 
