@@ -1,3 +1,10 @@
+## [1.0.18](https://github.com/ForestAdmin/django-forest/compare/v1.0.17...v1.0.18) (2022-02-11)
+
+
+### Bug Fixes
+
+* **serializer:** the jsonfield's serializing returned an error ([#88](https://github.com/ForestAdmin/django-forest/issues/88)) ([737f0c0](https://github.com/ForestAdmin/django-forest/commit/737f0c00e18855ce57b08da761d64126191f0b6b))
+
 ## [1.0.17](https://github.com/ForestAdmin/django-forest/compare/v1.0.16...v1.0.17) (2022-02-10)
 
 
