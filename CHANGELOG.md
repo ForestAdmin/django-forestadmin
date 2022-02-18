@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ForestAdmin/django-forest/compare/v1.0.19...v1.1.0) (2022-02-18)
+
+
+### Features
+
+* **django:** update the requirements.txt, the tox.py and the github actions to handle django 4 and python 3.10 ([#90](https://github.com/ForestAdmin/django-forest/issues/90)) ([661e976](https://github.com/ForestAdmin/django-forest/commit/661e97660ab01167b9a1c74ec1482f83e5983ffc))
+
 ## [1.0.19](https://github.com/ForestAdmin/django-forest/compare/v1.0.18...v1.0.19) (2022-02-11)
 
 
