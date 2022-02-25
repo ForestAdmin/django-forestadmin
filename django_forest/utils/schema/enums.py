@@ -1,12 +1,12 @@
-from datetime import datetime
-
-from django.utils.functional import Promise
+import json
 
 
 # TODO handle other special type?
 def serialize_value(value):
-    if isinstance(value, datetime) or isinstance(value, Promise):
-        return str(value)  # TODO use strftime for date?
+    try:
+        json.dumps(value)
+    except TypeError:
+        value = str(value)
     return value
 
 
