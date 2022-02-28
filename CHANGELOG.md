@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/ForestAdmin/django-forest/compare/v1.1.0...v1.1.1) (2022-02-28)
+
+
+### Bug Fixes
+
+* **field:** the enum field raised an exception with Django custom field ([#92](https://github.com/ForestAdmin/django-forest/issues/92)) ([b94eb96](https://github.com/ForestAdmin/django-forest/commit/b94eb961fa0c81e0301504c7c7d1a851c0190180))
+
 # [1.1.0](https://github.com/ForestAdmin/django-forest/compare/v1.0.19...v1.1.0) (2022-02-18)
 
 
