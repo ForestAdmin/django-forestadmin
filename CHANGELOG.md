@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/ForestAdmin/django-forest/compare/v1.1.1...v1.1.2) (2022-03-02)
+
+
+### Bug Fixes
+
+* **onboarding:** the settings 'middleware' and 'installed_apps' should be lists ([#93](https://github.com/ForestAdmin/django-forest/issues/93)) ([2570a7a](https://github.com/ForestAdmin/django-forest/commit/2570a7ad863ae839bc529e31be1948ce6fc2662f))
+
 ## [1.1.1](https://github.com/ForestAdmin/django-forest/compare/v1.1.0...v1.1.1) (2022-02-28)
 
 
