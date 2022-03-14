@@ -40,16 +40,16 @@ class AuthenticationIndexViewTests(TestCase):
         response = self.client.post(reverse('django_forest:authentication:index'),
                                     {'foo': '1'},
                                     content_type='application/json')
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 401)
         r = response.json()
         self.assertEqual(r,
-                         {'errors': [{'status': 500, 'detail': 'Authentication request must contain a renderingId'}]})
+                         {'errors': [{'detail': 'Authentication request must contain a renderingId'}]})
 
     def test_post_bad_rendering(self):
         response = self.client.post(reverse('django_forest:authentication:index'),
                                     {'renderingId': ['foo']},
                                     content_type='application/json')
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 401)
         r = response.json()
         self.assertEqual(r,
-                         {'errors': [{'status': 500, 'detail': 'The parameter renderingId is not valid'}]})
+                         {'errors': [{'detail': 'The parameter renderingId is not valid'}]})

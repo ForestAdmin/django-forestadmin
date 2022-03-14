@@ -13,7 +13,8 @@ class IpWhitelist:
 
     @classmethod
     def get_rules(cls):
-        response = ForestApiRequester.get('/liana/v1/ip-whitelist-rules')
+        url = ForestApiRequester.build_url('/liana/v1/ip-whitelist-rules')
+        response = ForestApiRequester.get(url)
         if response.status_code != requests.codes.ok:
             raise Exception('Unable to retrieve ip whitelist rules')
 

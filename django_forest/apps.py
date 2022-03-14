@@ -14,6 +14,10 @@ finally:
         urllib3.disable_warnings()
 
 
+class BaseForestException(Exception):
+    pass
+
+
 class ForestConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'django_forest'
