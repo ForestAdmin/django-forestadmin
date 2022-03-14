@@ -39,6 +39,11 @@ class ForestApiRequester:
         return url
 
     @staticmethod
+    def build_url(resource):
+        forest_api_url = get_forest_setting('FOREST_URL', 'https://api.forestadmin.com')
+        return urljoin(forest_api_url, resource)
+
+    @staticmethod
     def get_params(body=None, query=None, headers=None):
         if body is None:
             body = {}
@@ -63,31 +68,27 @@ class ForestApiRequester:
         query = {
             'renderingId': rendering_id
         }
-
-        response = ForestApiRequester.get(route, query=query)
+        url = ForestApiRequester.build_url(route)
+        response = ForestApiRequester.get(url, query=query)
         if response.status_code == requests.codes.ok:
             return response.json()
         else:
             raise Exception(f'Forest API returned an #{response.content}')
 
     @classmethod
-    def get(cls, route, query=None, headers=None):
-        body, query, headers = cls.get_params(query=query, headers=headers)
-        url = cls._get_url(route)
-
+    def get(cls, url, query=None, headers=None):
         kwargs = {
-            'params': query,
-            'headers': cls.get_headers(headers)
+            'params': query or {},
+            'headers': cls.get_headers(headers or {})
         }
         if settings.DEBUG:
             kwargs['verify'] = False
 
-        return cls.run_method(requests.get, url, kwargs)
+        return requests.get(url, **kwargs)
 
     @classmethod
-    def post(cls, route, body=None, query=None, headers=None):
+    def post(cls, url, body=None, query=None, headers=None):
         body, query, headers = cls.get_params(body=body, query=query, headers=headers)
-        url = cls._get_url(route)
 
         kwargs = {
             'data': json.dumps(body),
@@ -96,5 +97,4 @@ class ForestApiRequester:
         }
         if settings.DEBUG:
             kwargs['verify'] = False
-
-        return cls.run_method(requests.post, url, kwargs)
+        return requests.post(url, **kwargs)
