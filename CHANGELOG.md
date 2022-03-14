@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/ForestAdmin/django-forest/compare/v1.1.2...v1.1.3) (2022-03-14)
+
+
+### Bug Fixes
+
+* **authentication:** authentication won't fail without trace ([#95](https://github.com/ForestAdmin/django-forest/issues/95)) ([7e577b2](https://github.com/ForestAdmin/django-forest/commit/7e577b2fc05ffc49be8776ebc2c1216e82b9cb5c))
+
 ## [1.1.2](https://github.com/ForestAdmin/django-forest/compare/v1.1.1...v1.1.2) (2022-03-02)
 
 
