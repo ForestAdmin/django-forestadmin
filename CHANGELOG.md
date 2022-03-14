@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/ForestAdmin/django-forest/compare/v1.1.3...v1.1.4) (2022-03-14)
+
+
+### Bug Fixes
+
+* **authentication:** add some logs in the authentication process ([#96](https://github.com/ForestAdmin/django-forest/issues/96)) ([a71c1fd](https://github.com/ForestAdmin/django-forest/commit/a71c1fd4accdada7fccb66d26a03898fc2b505e4))
+
 ## [1.1.3](https://github.com/ForestAdmin/django-forest/compare/v1.1.2...v1.1.3) (2022-03-14)
 
 
