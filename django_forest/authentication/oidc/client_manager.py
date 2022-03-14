@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urljoin
 
 from oic.oic import Client
@@ -6,6 +7,7 @@ from oic.oic.message import ProviderConfigurationResponse
 from .configuration_retriever import retrieve
 from .dynamic_client_registrator import register
 
+logger = logging.getLogger(__name__)
 
 class OidcClientManager:
     client = None
@@ -21,6 +23,7 @@ class OidcClientManager:
             'redirect_uris': [callback_url],
             'registration_endpoint': configuration['registration_endpoint']
         })
+        logger.debug(f"client_credentials: {client_credentials}")
         client_data = {
             'client_id': client_credentials['client_id'],
             'issuer': configuration['issuer']

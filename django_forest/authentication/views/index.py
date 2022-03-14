@@ -1,4 +1,5 @@
 import json
+import logging
 
 from oic.oic.message import AuthorizationRequest
 
@@ -10,6 +11,8 @@ from django_forest.authentication.oidc.client_manager import OidcClientManager
 from django_forest.authentication.utils import authentication_exception, get_callback_url
 from django_forest.utils.error_handler import MESSAGES
 
+
+logger = logging.getLogger(__name__)
 
 # Based on https://pyoidc.readthedocs.io/en/latest/examples/rp.html
 
@@ -38,6 +41,7 @@ class IndexView(View):
 
     def _get_authorization_url(self, redirect_url, state):
         client = OidcClientManager.get_client_for_callback_url(redirect_url)
+        logger.debug(f"client_id: {client.client_id}")
         args = {
             'client_id': client.client_id,
             'response_type': 'code',
