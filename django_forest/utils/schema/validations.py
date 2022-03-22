@@ -56,16 +56,35 @@ def handle_validators(validators, f):
     return f
 
 
-def handle_is_present(field, f):
-    if (not field.blank or not field.null) and not (hasattr(field, 'default') and field.default != NOT_PROVIDED):
+def handle_is_present(field, f, blank, null):
+    if (not blank or not null) and not (hasattr(field, 'default') and field.default != NOT_PROVIDED):
         f = add_validation(f, 'is present', 'Ensure this value is not null or not empty')
 
     return f
 
+def _blank_flag(field):
+    if hasattr(field, 'blank'):
+        blank = field.blank
+    else:
+        #  some custom field doesn't set the blank flag. Django default value is false
+        blank = False
+    return blank
+
+def _null_flag(field):
+    if hasattr(field, 'null'):
+        null = field.null
+    else:
+        #  some custom field doesn't set the null flag. Django default value is false
+        null = False
+    return null
 
 def handle_validations(field, f):
-    if not field.is_relation and not field.auto_created and field.get_internal_type() != 'ArrayField':
-        f = handle_validators(field.validators, f)
-        f = handle_is_present(field, f)
+    _type = None
+    if hasattr(field, 'get_internal_type'):
+        _type = field.get_internal_type()
+    if not field.is_relation and not field.auto_created and _type != 'ArrayField':
+        if hasattr(field, 'validators'):
+            f = handle_validators(field.validators, f)
+        f = handle_is_present(field, f, _blank_flag(field), _null_flag(field))
 
     return f
