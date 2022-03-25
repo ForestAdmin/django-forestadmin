@@ -3,9 +3,10 @@ import re
 import marshmallow as ma
 from marshmallow.schema import SchemaMeta
 from marshmallow_jsonapi import Schema, fields
-
+from django.core.exceptions import FieldDoesNotExist
 from django_forest.utils.models import Models
 from django_forest.utils.type_mapping import get_type
+
 
 TYPE_CHOICES = {
     'String': fields.Str,
@@ -127,14 +128,28 @@ class DjangoSchema(Schema):
         self._original = original  # needed to get the id value
         return super(DjangoSchema, self).format_json_api_response(data, many)
 
+    def cast_value(self, field, value):
+        return field.get_prep_value(value)
+
     def get_attribute(self, obj, attr, default):
         value = super().get_attribute(obj, attr, default)
         if value.__class__.__name__ == 'ManyRelatedManager':
             value = value.all()
+        else:
+            try:
+                field = obj.__class__._meta.get_field(attr)
+            except FieldDoesNotExist:
+                pass
+            else:
+                if not field.is_relation:
+                    value = self.cast_value(field, value)
+
         return value
 
     def get_resource_links(self, item):
-        item['__id__'] = self._original.pk
+        id_attr = self._original._meta.pk.attname
+        field = self._original._meta.get_field(id_attr)
+        item['__id__'] = self.cast_value(field, self._original.pk)
         res = super(DjangoSchema, self).get_resource_links(item)
         del item['__id__']
         return res
