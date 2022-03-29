@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/ForestAdmin/django-forest/compare/v1.1.4...v1.1.5) (2022-03-29)
+
+
+### Bug Fixes
+
+* **onboarding:** won't raised error with custom field ([#97](https://github.com/ForestAdmin/django-forest/issues/97)) ([8c0fbc8](https://github.com/ForestAdmin/django-forest/commit/8c0fbc83383fb3913c8c77893f5383b522855a2e))
+
 ## [1.1.4](https://github.com/ForestAdmin/django-forest/compare/v1.1.3...v1.1.4) (2022-03-14)
 
 
