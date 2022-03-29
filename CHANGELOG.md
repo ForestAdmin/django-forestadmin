@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/ForestAdmin/django-forest/compare/v1.1.5...v1.1.6) (2022-03-29)
+
+
+### Bug Fixes
+
+* **jsonapi:** the value are now cast to the good type ([#98](https://github.com/ForestAdmin/django-forest/issues/98)) ([5010a02](https://github.com/ForestAdmin/django-forest/commit/5010a028ad5cb5cf5afabd36f923784cbba9c7bc))
+
 ## [1.1.5](https://github.com/ForestAdmin/django-forest/compare/v1.1.4...v1.1.5) (2022-03-29)
 
 
