@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/ForestAdmin/django-forest/compare/v1.1.6...v1.2.0) (2022-04-01)
+
+
+### Features
+
+* **middleware:** add a middleware and some settings to deactive the count resources ([#99](https://github.com/ForestAdmin/django-forest/issues/99)) ([eb3b2e8](https://github.com/ForestAdmin/django-forest/commit/eb3b2e892c19ddb84e0f51f246e417a6b074e9a7))
+
 ## [1.1.6](https://github.com/ForestAdmin/django-forest/compare/v1.1.5...v1.1.6) (2022-03-29)
 
 
