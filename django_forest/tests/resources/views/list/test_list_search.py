@@ -2,6 +2,7 @@ import copy
 import sys
 from datetime import datetime
 from unittest import mock
+from django.conf import settings
 from freezegun import freeze_time
 
 import pytest
@@ -71,6 +72,7 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_search_to_edit(self, mocked_datetime):
+        settings.MIDDLEWARE.insert(0, 'django_forest.middleware.DeactivateCountMiddleware')
         mocked_datetime.now.return_value = datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=pytz.UTC)
         response = self.client.get(self.reverse_url, {
             'context[relationship]': 'HasMany',
