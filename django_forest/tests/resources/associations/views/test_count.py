@@ -1,11 +1,11 @@
 import copy
 from unittest import mock
+from django.conf import settings
 
 from django.test import TransactionTestCase
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
-from django_forest.utils.ip_whitelist import IpWhitelist
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.utils.scope import ScopeManager
@@ -39,6 +39,40 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, {'count': 2})
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    def test_deactivate(self, *args, **kwargs):
+        settings.MIDDLEWARE.insert(0, 'django_forest.middleware.DeactivateCountMiddleware')
+        settings.FOREST['DEACTIVATED_COUNT'] = ['tests_question']
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {'count': 2})
+        
+        settings.FOREST['DEACTIVATED_COUNT'] = ['tests_question:*']
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {'meta': {'count': 'deactivated '}})
+
+        settings.FOREST['DEACTIVATED_COUNT'] = ['tests_question:choice_set']
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {'meta': {'count': 'deactivated '}})
+
+        settings.FOREST['DEACTIVATED_COUNT'] = ['tests_question:fake']
+        url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {'count': 2})
+    
+        settings.FOREST['DEACTIVATED_COUNT'] = {}
+        del settings.MIDDLEWARE[0]
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1}) 
     def test_get_invalid_token(self, *args, **kwargs):
