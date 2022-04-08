@@ -89,8 +89,8 @@ class QuestionForest(Collection):
         return Q(question_text=search)
 
     def filter_foo(self, operator, value):
-        from django_forest.resources.utils.queryset.filters.utils import OPERATORS
-        kwargs = {f'question_text{OPERATORS[operator]}': value}
+        from django_forest.resources.utils.queryset.filters.utils import get_operators
+        kwargs = {f'question_text{get_operators()[operator]}': value}
         is_negated = operator.startswith('not')
         if is_negated:
             return ~Q(**kwargs)
@@ -107,8 +107,8 @@ class QuestionForest(Collection):
         return Q(question_text=search)
 
     def filter_bar(self, operator, value):
-        from django_forest.resources.utils.queryset.filters.utils import OPERATORS
-        kwargs = {f'question_text{OPERATORS[operator]}': value}
+        from django_forest.resources.utils.queryset.filters.utils import get_operators
+        kwargs = {f'question_text{get_operators()[operator]}': value}
         is_negated = operator.startswith('not')
         if is_negated:
             return ~Q(**kwargs)

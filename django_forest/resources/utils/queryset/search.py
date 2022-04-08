@@ -4,6 +4,7 @@ from uuid import UUID
 
 from django.db.models import Q
 
+from django_forest.utils import get_forest_setting
 from django_forest.utils.collection import Collection
 from ..in_search_fields import in_search_fields
 from django_forest.utils.schema import Schema
@@ -61,7 +62,8 @@ class SearchMixin:
         if is_uuid:
             q_object = Q(**{lookup_field: search})
         else:
-            q_object = Q(**{f'{lookup_field}__contains': search})
+            lookup_type = "icontains" if get_forest_setting('FOREST_CASE_INSENSITIVE_FILTER', False) else "contains"
+            q_object = Q(**{f'{lookup_field}__{lookup_type}': search})
 
         return q_object
 

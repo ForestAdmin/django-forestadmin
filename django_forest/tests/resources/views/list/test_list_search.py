@@ -7,7 +7,7 @@ from freezegun import freeze_time
 
 import pytest
 import pytz
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 
 from django_forest.tests.fixtures.schema import test_schema
@@ -481,6 +481,54 @@ class ResourceListViewTests(TransactionTestCase):
                         'question_text': 'what is your favorite color?',
                         'pub_date': '2021-06-02T13:52:53.528000+00:00'},
                     'id': 1,
+                    'links': {
+                        'self': '/forest/tests_question/1'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/tests_question/1/relationships/topic'
+                            }
+                        }
+                    },
+                }
+            ]
+        })
+
+    @override_settings(FOREST={'FOREST_CASE_INSENSITIVE_FILTER': True})
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_search_string_case_insensitive(self, mocked_decode):
+        with self._django_assert_num_queries(1) as captured:
+            response = self.client.get(self.url, {
+                'fields[tests_question]': 'id,topic,question_text,pub_date',
+                'fields[topic]': 'name',
+                'page[number]': 1,
+                'page[size]': 15,
+                'search': 'Color',
+                'searchExtended': 0
+            })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(captured.captured_queries[0]['sql'],
+                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
+                                  FROM "tests_question"
+                                   WHERE (UPPER("tests_question"."question_text"::text) LIKE UPPER('%Color%')
+                                    OR "tests_question"."question_text" = 'Color'
+                                    OR "tests_question"."question_text" = 'Color')
+                                  LIMIT 15'''.replace('\n', ' ').split()))
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'tests_question',
+                    'id': 1,
+                    'attributes': {
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'question_text': 'what is your favorite color?'
+                    },
                     'links': {
                         'self': '/forest/tests_question/1'
                     },

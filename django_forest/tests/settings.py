@@ -132,7 +132,8 @@ FOREST = {
     # 'INCLUDED_MODELS': [],
     # 'EXCLUDED_MODELS': ['Permission', 'Group', 'User', 'ContentType'],
     # 'CONFIG_DIR': 'forest',
-    # 'FOREST_DISABLE_AUTO_SCHEMA_APPLY': True
+    # 'FOREST_DISABLE_AUTO_SCHEMA_APPLY': True,
+    # 'FOREST_CASE_INSENSITIVE_FILTER': True
 }
 
 APPEND_SLASH = False

@@ -2,33 +2,35 @@ from django.db.models import Q
 
 from django_forest.resources.utils.queryset.filters.date import DatesMixin
 from django_forest.resources.utils.queryset.filters.date.factory import ConditionFactory as DateConditionFactory
-from django_forest.utils import get_association_field
+from django_forest.utils import get_association_field, get_forest_setting
 from django_forest.utils.type_mapping import get_type
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
 
 
-OPERATORS = {
-    'not': '',
-    'contains': '__contains',
-    'not_contains': '__contains',
-    'before': '__lt',
-    'less_than': '__lt',
-    'after': '__gt',
-    'greater_than': '__gt',
-    'starts_with': '__startswith',
-    'ends_with': '__endswith',
-    'not_equal': '',
-    'equal': '',
-    'includes_all': '__contains',
-    'in': '__in',
-}
+def get_operators():
+    case_insensitive = get_forest_setting('FOREST_CASE_INSENSITIVE_FILTER', False)
+    return {
+        'not': '__iexact' if case_insensitive else '',
+        'contains': '__icontains' if case_insensitive else '__contains',
+        'not_contains': '__icontains' if case_insensitive else '__contains',
+        'before': '__lt',
+        'less_than': '__lt',
+        'after': '__gt',
+        'greater_than': '__gt',
+        'starts_with': '__istartswith' if case_insensitive else '__startswith',
+        'ends_with': '__iendswith' if case_insensitive else '__endswith',
+        'not_equal': '__iexact' if case_insensitive else '',
+        'equal': '__iexact' if case_insensitive else '',
+        'includes_all': '__icontains' if case_insensitive else '__contains',
+        'in': '__in',
+    }
 
 
 class ConditionsMixin(DatesMixin):
     def get_basic_expression(self, field, operator, value):
         try:
-            lookup_field = f"{field}{OPERATORS[operator]}"
+            lookup_field = f"{field}{get_operators()[operator]}"
         except Exception:
             raise Exception(f'Unknown provided operator {operator}')
         else:
