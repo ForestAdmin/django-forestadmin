@@ -208,25 +208,16 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_search_number(self, mocked_decode):
-        with self._django_assert_num_queries(1) as captured:
-            response = self.client.get(self.url, {
-                'fields[tests_question]': 'id,topic,question_text,pub_date',
-                'fields[topic]': 'name',
-                'page[number]': 1,
-                'page[size]': 15,
-                'search': 1,
-                'searchExtended': 0
-            })
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': 1,
+            'searchExtended': 0
+        })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
-                                  FROM "tests_question"
-                                   WHERE ("tests_question"."id" = 1
-                                    OR "tests_question"."question_text"::text LIKE \'%1%\'
-                                    OR "tests_question"."question_text" = '1'
-                                    OR "tests_question"."question_text" = '1')
-                                  LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
                 {
@@ -256,24 +247,15 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_search_number_max_size(self, mocked_decoded):
-        with self._django_assert_num_queries(1) as captured:
-            response = self.client.get(self.url, {
-                'fields[tests_question]': 'id,question_text,pub_date',
-                'page[number]': 1,
-                'page[size]': 15,
-                'search': sys.maxsize + 1,
-                'searchExtended': 0
-            })
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,question_text,pub_date',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': sys.maxsize + 1,
+            'searchExtended': 0
+        })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date"
-                          FROM "tests_question"
-                           WHERE ("tests_question"."id"::text LIKE '%9223372036854775808%'
-                            OR "tests_question"."question_text"::text LIKE '%9223372036854775808%'
-                            OR "tests_question"."question_text" = '9223372036854775808'
-                            OR "tests_question"."question_text" = '9223372036854775808')
-                          LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': []
         })
@@ -283,25 +265,91 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_search_mutliple(self, mocked_decode):
-        with self._django_assert_num_queries(1) as captured:
-            response = self.client.get(self.url, {
-                'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
-                'fields[topic]': 'name',
-                'page[number]': 1,
-                'page[size]': 15,
-                'search': 'favorite',
-                'searchExtended': 0
-            })
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[topic]': 'name',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': 'favorite',
+            'searchExtended': 0
+        })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''
-                         SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
-                          FROM "tests_question"
-                           WHERE ("tests_question"."question_text"::text LIKE '%favorite%'
-                           OR "tests_question"."question_text" = 'favorite'
-                           OR "tests_question"."question_text" = 'favorite')
-                            LIMIT 15'''.replace('\n', ' ').split()))
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'tests_question',
+                    'attributes': {
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'question_text': 'what is your favorite color?',
+                        'foo': 'what is your favorite color?+foo',
+                        'bar': 'what is your favorite color?+bar',
+                    },
+                    'id': 1,
+                    'links': {
+                        'self': '/forest/tests_question/1'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/tests_question/1/relationships/topic'
+                            }
+                        }
+                    },
+                },
+                {
+                    'type': 'tests_question',
+                    'attributes': {
+                        'pub_date': '2021-06-03T13:52:53.528000+00:00',
+                        'question_text': 'who is your favorite singer?',
+                        'foo': 'who is your favorite singer?+foo',
+                        'bar': 'who is your favorite singer?+bar',
+                    },
+                    'id': 3,
+                    'links': {
+                        'self': '/forest/tests_question/3'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/tests_question/3/relationships/topic'
+                            }
+                        }
+                    },
+                }
+            ],
+            'meta': {
+                'decorators': [
+                    {
+                        'id': 1,
+                        'search': ['question_text', 'foo', 'bar']
+                    },
+                    {
+                        'id': 3,
+                        'search': ['question_text', 'foo', 'bar']
+                    }
+                ]
+            }
+        })
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_get_insensitive_search_mutliple(self, mocked_decode):
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,topic,question_text,pub_date,foo,bar',
+            'fields[topic]': 'name',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': 'FaVoRite',
+            'searchExtended': 0
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+
         self.assertEqual(data, {
             'data': [
                 {
@@ -366,21 +414,15 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_search_enum(self, mocked_decode):
-        with self._django_assert_num_queries(1) as captured:
-            response = self.client.get(self.enum_url, {
-                'fields[tests_student]': 'id,year_in_school',
-                'page[number]': 1,
-                'page[size]': 15,
-                'search': 'FR',
-                'searchExtended': 0
-            })
+        response = self.client.get(self.enum_url, {
+            'fields[tests_student]': 'id,year_in_school',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': 'FR',
+            'searchExtended': 0
+        })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_student"."id", "tests_student"."year_in_school"
-                          FROM "tests_student"
-                           WHERE "tests_student"."year_in_school" = 'FR'
-                          LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
                 {
@@ -409,21 +451,16 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_search_uuid(self, mocked_datetime):
-        with self._django_assert_num_queries(1) as captured:
-            response = self.client.get(self.uuid_url, {
-                'fields[tests_serial]': 'uuid',
-                'page[number]': 1,
-                'page[size]': 15,
-                'search': '4759e256-a27a-45e1-b248-09fb1523c978',
-                'searchExtended': 0
-            })
+        response = self.client.get(self.uuid_url, {
+            'fields[tests_serial]': 'uuid',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': '4759e256-a27a-45e1-b248-09fb1523c978',
+            'searchExtended': 0
+        })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_serial"."uuid"
-                          FROM "tests_serial"
-                           WHERE "tests_serial"."uuid" = '4759e256-a27a-45e1-b248-09fb1523c978'::uuid
-                          LIMIT 15'''.replace('\n', ' ').split()))
+
         self.assertEqual(data, {
             'data': [
                 {
@@ -451,28 +488,16 @@ class ResourceListViewTests(TransactionTestCase):
         lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
     )
     def test_get_extended_search(self, mocked_decode):
-        with self._django_assert_num_queries(1) as captured:
-            response = self.client.get(self.url, {
-                'fields[tests_question]': 'id,topic,question_text,pub_date',
-                'fields[topic]': 'name',
-                'page[number]': 1,
-                'page[size]': 15,
-                'search': 'yes',
-                'searchExtended': 1
-            })
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': 'yes',
+            'searchExtended': 1
+        })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
-                          FROM "tests_question"
-                           LEFT OUTER JOIN "tests_choice" ON ("tests_question"."id" = "tests_choice"."question_id")
-                           LEFT OUTER JOIN "tests_topic" ON ("tests_question"."topic_id" = "tests_topic"."id")
-                            WHERE ("tests_question"."question_text"::text LIKE '%yes%' 
-                            OR "tests_question"."question_text" = 'yes'
-                            OR "tests_question"."question_text" = 'yes'
-                            OR "tests_choice"."choice_text"::text LIKE '%yes%'
-                            OR "tests_topic"."name"::text LIKE '%yes%')
-                          LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
                 {

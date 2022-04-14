@@ -61,7 +61,7 @@ class SearchMixin:
         if is_uuid:
             q_object = Q(**{lookup_field: search})
         else:
-            q_object = Q(**{f'{lookup_field}__contains': search})
+            q_object = Q(**{f'{lookup_field}__icontains': search})
 
         return q_object
 

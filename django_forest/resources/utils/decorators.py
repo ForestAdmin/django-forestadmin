@@ -13,7 +13,8 @@ class DecoratorsMixin:
         return fields_to_search
 
     def handle_search_decorator_field(self, field, record, data, search):
-        if field['field'] in record['attributes'] and search in str(record['attributes'][field['field']]):
+        if field['field'] in record['attributes'] \
+           and search.upper() in str(record['attributes'][field['field']]).upper():
             decorator_instance = next((x for x in self.get_meta_decorators(data) if x['id'] == record['id']), None)
             if decorator_instance is None:
                 self.get_meta_decorators(data).append({
