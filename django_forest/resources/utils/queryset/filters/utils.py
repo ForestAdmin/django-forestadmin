@@ -24,11 +24,28 @@ OPERATORS = {
     'in': '__in',
 }
 
+INSENSITIVE_OPERATORS = {
+    'not': '__iexact',
+    'contains': '__icontains',
+    'not_contains': '__icontains',
+    'before': '__lt',
+    'less_than': '__lt',
+    'after': '__gt',
+    'greater_than': '__gt',
+    'starts_with': '__istartswith',
+    'ends_with': '__iendswith',
+    'not_equal': '__iexact',
+    'equal': '__iexact',
+    'includes_all': '__icontains',
+    'in': '__in',
+}
+
 
 class ConditionsMixin(DatesMixin):
     def get_basic_expression(self, field, operator, value):
+        operators = INSENSITIVE_OPERATORS if isinstance(value, str) else OPERATORS
         try:
-            lookup_field = f"{field}{OPERATORS[operator]}"
+            lookup_field = f"{field}{operators[operator]}"
         except Exception:
             raise Exception(f'Unknown provided operator {operator}')
         else:
