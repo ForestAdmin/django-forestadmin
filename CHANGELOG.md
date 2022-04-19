@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/ForestAdmin/django-forest/compare/v1.2.1...v1.2.2) (2022-04-19)
+
+
+### Bug Fixes
+
+* **resource:** the filter behavior must be insensitive ([#102](https://github.com/ForestAdmin/django-forest/issues/102)) ([432ed82](https://github.com/ForestAdmin/django-forest/commit/432ed82b2c4dd383aed56525dd4178233ced42bb))
+
 ## [1.2.1](https://github.com/ForestAdmin/django-forest/compare/v1.2.0...v1.2.1) (2022-04-19)
 
 
