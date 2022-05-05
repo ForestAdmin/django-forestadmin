@@ -1,7 +1,23 @@
+import re
 from django.conf import settings
 from corsheaders.defaults import default_headers
 
 from django_forest.utils.forest_setting import get_forest_setting
+
+
+#  Waiting cors-header implem
+def PnaMiddleware(get_response):
+    def middleware(request):
+        response = get_response(request)
+        if request.headers.get('Access-Control-Request-Private-Network'):
+            res = any([
+                re.match(pattern, request.headers['origin']) for pattern in settings.CORS_ALLOWED_ORIGIN_REGEXES
+            ])
+            if res:
+                response['Access-Control-Allow-Private-Network'] = 'true'
+        return response
+
+    return middleware
 
 
 def get_list_setting(setting):
@@ -21,6 +37,9 @@ def set_cors():
         except ValueError:
             common_middleware_index = 0
         settings.MIDDLEWARE.insert(common_middleware_index, 'corsheaders.middleware.CorsMiddleware')
+
+    pna_index = settings.MIDDLEWARE.index('corsheaders.middleware.CorsMiddleware')
+    settings.MIDDLEWARE.insert(pna_index, 'django_forest.utils.cors.PnaMiddleware')
 
     settings.CORS_ALLOWED_ORIGIN_REGEXES = [
         r'.*\.forestadmin\.com.*',
