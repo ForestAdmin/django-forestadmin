@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/ForestAdmin/django-forest/compare/v1.2.2...v1.3.0) (2022-05-05)
+
+
+### Features
+
+* **cors:** add the pna preflight headers to handle the last chrome versions ([#103](https://github.com/ForestAdmin/django-forest/issues/103)) ([9e458f4](https://github.com/ForestAdmin/django-forest/commit/9e458f401a76e9e81904df5bfeabdcb479c866bd))
+
 ## [1.2.2](https://github.com/ForestAdmin/django-forest/compare/v1.2.1...v1.2.2) (2022-04-19)
 
 
