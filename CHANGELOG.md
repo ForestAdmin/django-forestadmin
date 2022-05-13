@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/ForestAdmin/django-forest/compare/v1.3.0...v1.3.1) (2022-05-13)
+
+
+### Bug Fixes
+
+* **403_error:** add some content about the reason of the 403 raising ([#106](https://github.com/ForestAdmin/django-forest/issues/106)) ([63a3ae1](https://github.com/ForestAdmin/django-forest/commit/63a3ae1d34acf4976920ece4c15e5c4c90ea964c))
+
 # [1.3.0](https://github.com/ForestAdmin/django-forest/compare/v1.2.2...v1.3.0) (2022-05-05)
 
 
