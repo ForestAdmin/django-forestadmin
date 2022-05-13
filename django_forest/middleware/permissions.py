@@ -84,9 +84,11 @@ class PermissionMiddleware:
     def process_view(self, request, view_func, *args, **kwargs):
         if request.resolver_match.app_name.startswith('django_forest:resources') or \
                 request.resolver_match.app_name.startswith('django_forest:stats'):
+
+            token = get_token(request)
+            resource = self.get_resource(args)
+
             try:
-                token = get_token(request)
-                resource = self.get_resource(args)
                 self.is_authorized(request, token, resource)
-            except Exception:
-                return HttpResponse(status=403)
+            except Exception as e:
+                return HttpResponse(f'Unauthorized request ({e})', status=403)

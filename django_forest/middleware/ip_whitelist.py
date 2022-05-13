@@ -38,8 +38,8 @@ class IpWhitelistMiddleware:
         if not IpWhitelist.fetched or not self.is_ip_valid(request):
             try:
                 IpWhitelist.get_rules()
-            except Exception:
-                return HttpResponse(status=403)
+            except Exception as e:
+                return HttpResponse(f'Unable to retrieve the ip white list ({e})', status=403)
 
         if not self.is_ip_valid(request):
-            return HttpResponse(status=403)
+            return HttpResponse('IP client is invalid', status=403)
