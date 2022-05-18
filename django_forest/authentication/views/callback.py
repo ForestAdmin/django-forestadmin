@@ -15,6 +15,11 @@ from django_forest.utils.error_handler import MESSAGES
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.forest_setting import get_forest_setting
 
+try:
+    import zoneinfo
+except ImportError:
+    from backports import zoneinfo
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +28,7 @@ logger = logging.getLogger(__name__)
 class CallbackView(View):
 
     def _expiration_in_seconds(self):
-        return datetime.timestamp(datetime.utcnow() + timedelta(hours=1))
+        return datetime.timestamp(datetime.utcnow().replace(tzinfo=zoneinfo.ZoneInfo('UTC')) + timedelta(hours=1))
 
     def _handle_2fa_error(self, response):
         body = response.json()
