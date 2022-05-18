@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/ForestAdmin/django-forest/compare/v1.3.1...v1.3.2) (2022-05-18)
+
+
+### Bug Fixes
+
+* **authentication:** the jwt token expiration timestamp is based now … ([#107](https://github.com/ForestAdmin/django-forest/issues/107)) ([d8107c0](https://github.com/ForestAdmin/django-forest/commit/d8107c0aa4c88b7efc3bf104a35daf373af9cc3d))
+
 ## [1.3.1](https://github.com/ForestAdmin/django-forest/compare/v1.3.0...v1.3.1) (2022-05-13)
 
 
