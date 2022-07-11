@@ -92,7 +92,8 @@ class CallbackView(View):
             scope=['openid', 'email', 'profile'],
             authn_method='',
             request_args={'code': code},
-            verify=False
+            verify=False,
+            skew=5
         )
         rendering_id = state['renderingId']
         route = f'/liana/v2/renderings/{rendering_id}/authorization'
