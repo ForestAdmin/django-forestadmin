@@ -16,13 +16,12 @@ class CsvMixin:
         for name, value in record['relationships'].items():
             related_res = self.get_related_res(data, value)
             if related_res:
-                res[name] = related_res['attributes'][params[f'fields[{name}]']]
+                res[name] = related_res['id']
         return res
 
     def fill_csv(self, data, writer, params):
-        for record in data['data']:
+        for record in data['data']: 
             res = record['attributes']
-            res['id'] = record['id']
             if 'relationships' in record and 'included' in data:
                 res = self.fill_csv_relationships(res, record, data, params)
 
