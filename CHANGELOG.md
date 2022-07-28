@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/ForestAdmin/django-forest/compare/v1.3.2...v1.3.3) (2022-07-11)
+
+
+### Bug Fixes
+
+* **authentication:** add skew to id_token iat verification ([#109](https://github.com/ForestAdmin/django-forest/issues/109)) ([fef0774](https://github.com/ForestAdmin/django-forest/commit/fef0774b6689cfd4b4af3859aaa57da5ca57f00a))
+
 ## [1.3.2](https://github.com/ForestAdmin/django-forest/compare/v1.3.1...v1.3.2) (2022-05-18)
 
 

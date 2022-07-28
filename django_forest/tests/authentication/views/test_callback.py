@@ -1,5 +1,6 @@
 import requests
 from unittest import mock
+from oic.oic.message import IATError
 
 from django.test import TestCase
 from django.urls import reverse
@@ -252,3 +253,25 @@ class AuthenticationCallbackViewTests(TestCase):
                 }
             ]
         })
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623427968)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_iat_issued_in_future_within_allowed_skew(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        """
+        Given an id_token that has an iat timestamp 1 second ahead of the current time,
+        assert authentication is still successful.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch('oic.utils.time_util.utc_time_sans_frac', return_value=1623427963)
+    @mock.patch('requests.request', return_value=mocked_requests(mocked_token_response, 200))
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_iat_issued_in_future_outside_allowed_skew(self, mocked_requests_get, mocked_requests_request, mocked_utc_time_sans_frac):
+        """
+        Given an id_token that has an iat timestamp 11 second ahead of the current time,
+        assert authentication is not successful.
+        """
+        with self.assertRaises(IATError):
+            self.client.get(self.url)
