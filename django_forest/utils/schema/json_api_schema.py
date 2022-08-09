@@ -14,7 +14,7 @@ TYPE_CHOICES = {
     'Float': fields.Float,
     'Number': fields.Number,
     'Boolean': fields.Boolean,
-    'DateOnly': fields.Date,
+    'Dateonly': fields.Date,
     'Date': fields.DateTime,
     'Time': fields.Time,
     'Json': fields.Raw,

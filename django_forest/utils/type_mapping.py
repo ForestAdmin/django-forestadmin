@@ -4,7 +4,7 @@ TYPE_CHOICES = {
     'BinaryField': 'String',
     'BooleanField': 'Boolean',
     'CharField': 'String',
-    'DateField': 'DateOnly',
+    'DateField': 'Dateonly',
     'DateTimeField': 'Date',
     'DecimalField': 'Float',
     'DurationField': 'Number',
