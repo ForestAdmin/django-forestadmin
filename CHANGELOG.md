@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/ForestAdmin/django-forest/compare/v1.3.4...v1.3.5) (2022-08-09)
+
+
+### Bug Fixes
+
+* **field_type:** dateonly field type should not be in camel case ([#113](https://github.com/ForestAdmin/django-forest/issues/113)) ([8b17380](https://github.com/ForestAdmin/django-forest/commit/8b17380669052506865c58d7f4c802b01a583831))
+
 ## [1.3.4](https://github.com/ForestAdmin/django-forest/compare/v1.3.3...v1.3.4) (2022-08-02)
 
 
