@@ -24,7 +24,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
 
         instance = queryset[0]
         # handle smart fields
-        self.handle_smart_fields(instance, self.Model._meta.db_table)
+        self.handle_smart_fields(instance, self.Model._meta.db_table, None)
 
         return instance
 
@@ -35,7 +35,7 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             return self.error_response(e)
         else:
             # handle smart fields
-            self.handle_smart_fields(instance, self.Model._meta.db_table)
+            self.handle_smart_fields(instance, self.Model._meta.db_table, None)
 
             # json api serializer
             include_data = self.get_include_data(Schema.get_collection(self.Model._meta.db_table)['fields'])
