@@ -31,33 +31,19 @@ class HookView(BaseView):
             if 'enums' in field and isinstance(field['enums'], list):
                 self.handle_enums(field)
 
+    def _get_action(self, action_name):
+        for collection_schema in Collection._registry.values():
+            for action in collection_schema.actions:
+                if self.action_name_from_endpoint(action) == action_name:
+                    return action
+
+        raise Exception('action not found')
+
     def get_hook_result(self, action_name, request):
-
-        def flatten_actions(all_items):
-            return list(chain.from_iterable([items.actions for collection, items in all_items]))
-
-        def get_action(action_registry, requested_action):
-            """
-            From a flat registry collection, return the
-            hook that belongs to this action, or None.
-            """
-            return reduce(
-                lambda all_actions, next_action:
-                all_actions | {self.action_name_from_endpoint(next_action): {**next_action}}, action_registry, {}
-            ).get(requested_action)
-
-        # Flatten all actions into a single list
-        flat_actions = flatten_actions(Collection._registry.items())
-
-        # Get the action whose name matches that which was requested
-        action = get_action(flat_actions, action_name)
-        if action is None:
-            raise Exception('action not found')
-        else:
-            # TODO smart action field validator
-            data = self.handle_action(action, action_name, request)
-            self.format_enums(data)
-            return data
+        action = self._get_action(action_name)
+        data = self.handle_action(action, action_name, request)
+        self.format_enums(data)
+        return data
 
     def post(self, request, action_name, *args, **kwargs):
         try:
