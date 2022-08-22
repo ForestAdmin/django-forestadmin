@@ -1,6 +1,3 @@
-from functools import reduce
-from itertools import chain
-
 from django.http import JsonResponse, HttpResponse
 
 from django_forest.utils import get_token
