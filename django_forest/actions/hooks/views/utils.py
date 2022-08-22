@@ -1,3 +1,6 @@
+from functools import reduce
+from itertools import chain
+
 from django.http import JsonResponse, HttpResponse
 
 from django_forest.utils import get_token
@@ -7,8 +10,11 @@ from django_forest.utils.views.base import BaseView
 
 class HookView(BaseView):
 
+    def action_name_from_endpoint(self, action):
+        return str(action['endpoint'].split('/')[-1])
+
     def hook_exists(self, action, action_name, hook):
-        return action['endpoint'].split('/')[-1] == action_name and 'hooks' in action and hook in action['hooks']
+        return self.action_name_from_endpoint(action) == action_name and 'hooks' in action and hook in action['hooks']
 
     def value_in_enums(self, field):
         return next((value for value in field['value'] if value in field['enums']), None)
@@ -26,18 +32,32 @@ class HookView(BaseView):
                 self.handle_enums(field)
 
     def get_hook_result(self, action_name, request):
-        data = None
-        for name, value in Collection._registry.items():
-            for action in value.actions:
-                data = self.handle_action(action, action_name, request)
 
-        if data is None:
+        def flatten_actions(all_items):
+            return list(chain.from_iterable([items.actions for collection, items in all_items]))
+
+        def get_action(action_registry, requested_action):
+            """
+            From a flat registry collection, return the
+            hook that belongs to this action, or None.
+            """
+            return reduce(
+                lambda all_actions, next_action:
+                all_actions | {self.action_name_from_endpoint(next_action): {**next_action}}, action_registry, {}
+            ).get(requested_action)
+
+        # Flatten all actions into a single list
+        flat_actions = flatten_actions(Collection._registry.items())
+
+        # Get the action whose name matches that which was requested
+        action = get_action(flat_actions, action_name)
+        if action is None:
             raise Exception('action not found')
         else:
             # TODO smart action field validator
+            data = self.handle_action(action, action_name, request)
             self.format_enums(data)
-
-        return data
+            return data
 
     def post(self, request, action_name, *args, **kwargs):
         try:
