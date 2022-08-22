@@ -24,23 +24,20 @@ class SmartFieldMixin:
         for smart_field in smart_fields:
             self._handle_get_method(smart_field, item, resource)
 
-    def _get_smart_fields_for_request(self, collection, params):
+    def _get_smart_fields_for_request(self, collection, params=None):
 
-        def is_virtual(field):
-            return field.get('is_virtual')
+        fields = [field for field in collection['fields'] if field['is_virtual']]
 
-        def include_field(field, required_fields):
-            return is_virtual(field) and field['field'] in required_fields
+        if params is None:
+            return fields
 
-        # Either none provided, or a list of smart field names
-        queried_fields = (params or {}).get('fields', {}).get(collection.get('name'))
+        filtered_fields = params.get('fields', {}).get(collection.get('name'))
+        if filtered_fields is None:
+            return fields
 
-        if queried_fields is None:
-            return [field for field in collection['fields'] if is_virtual(field)]
+        return [field for field in fields if field['field'] in filtered_fields]
 
-        return [field for field in collection['fields'] if include_field(field, set(queried_fields))]
-
-    def handle_smart_fields(self, queryset, resource, params, many=False):
+    def handle_smart_fields(self, queryset, resource, params=None, many=False):
         collection = Schema.get_collection(resource)
 
         # Rather than calculate and then filter out smart fields, we want to ignore them entirely
