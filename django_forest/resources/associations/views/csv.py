@@ -21,7 +21,7 @@ class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView
 
             params = request.GET.dict()
             # enhance queryset
-            queryset = self.enhance_queryset(queryset, RelatedModel, params, request)
+            queryset = self.enhance_queryset(queryset, RelatedModel, params, request, apply_pagination=False)
 
             # handle smart fields
             self.handle_smart_fields(queryset, RelatedModel._meta.db_table, many=True)

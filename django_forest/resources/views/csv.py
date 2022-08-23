@@ -15,8 +15,8 @@ class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixi
         params = request.GET.dict()
 
         try:
-            # enhance queryset
-            queryset = self.enhance_queryset(queryset, self.Model, params, request)
+            # enhance queryset, ignoring any parameters about pagination
+            queryset = self.enhance_queryset(queryset, self.Model, params, request, apply_pagination=False)
 
             # handle smart fields
             self.handle_smart_fields(queryset, self.Model._meta.db_table, many=True)

@@ -25,7 +25,7 @@ class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, ScopeMixin, Deco
                 queryset = queryset.filter(method(params, Model))
         return queryset
 
-    def enhance_queryset(self, queryset, Model, params, request):
+    def enhance_queryset(self, queryset, Model, params, request, apply_pagination=True):
         # scopes + filter + search
         queryset = self.filter_queryset(queryset, Model, params, request)
 
@@ -44,6 +44,7 @@ class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, ScopeMixin, Deco
         queryset = self.handle_limit_fields(params, Model, queryset)
 
         # pagination
-        queryset = self.get_pagination(params, queryset)
+        if apply_pagination:
+            queryset = self.get_pagination(params, queryset)
 
         return queryset
