@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/ForestAdmin/django-forest/compare/v1.3.5...v1.3.6) (2022-08-23)
+
+
+### Bug Fixes
+
+* **csv:** pagination should be ignored ([#111](https://github.com/ForestAdmin/django-forest/issues/111)) ([f190464](https://github.com/ForestAdmin/django-forest/commit/f19046492854e10417ac1ae0bae242178a0dc182))
+
 ## [1.3.5](https://github.com/ForestAdmin/django-forest/compare/v1.3.4...v1.3.5) (2022-08-09)
 
 
