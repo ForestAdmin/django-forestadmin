@@ -1,3 +1,10 @@
+## [1.3.7](https://github.com/ForestAdmin/django-forest/compare/v1.3.6...v1.3.7) (2022-08-31)
+
+
+### Bug Fixes
+
+* **issue-115:** smart fields always calculated ([9ba8f15](https://github.com/ForestAdmin/django-forest/commit/9ba8f15d230deaf5f9082e1027543ddf1c5be0e3))
+
 ## [1.3.6](https://github.com/ForestAdmin/django-forest/compare/v1.3.5...v1.3.6) (2022-08-23)
 
 
