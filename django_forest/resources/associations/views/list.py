@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse
 
 from django_forest.resources.associations.utils import AssociationView
 from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
+from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils import get_association_field
 
@@ -26,7 +27,7 @@ class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
             queryset = self.enhance_queryset(queryset, RelatedModel, params, request)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, RelatedModel._meta.db_table, many=True)
+            self.handle_smart_fields(queryset, RelatedModel._meta.db_table, parse_qs(params), many=True)
 
             # json api serializer
             data = self.serialize(queryset, RelatedModel, params)
