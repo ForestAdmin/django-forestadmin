@@ -17,8 +17,7 @@ class AuthenticationIndexViewTests(TestCase):
                                            return_value=mocked_client_credentials)
         self.mocked_retrieve = self.retrieve_patcher.start()
         self.mocked_register = self.register_patcher.start()
-        callback_url = 'http://localhost:8000/authentication/callback'
-        self.oidc_client = OidcClientManager.get_client_for_callback_url(callback_url)
+        self.oidc_client = OidcClientManager.get_client()
 
     def tearDown(self):
         OidcClientManager.client = None

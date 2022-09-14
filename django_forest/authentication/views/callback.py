@@ -10,7 +10,7 @@ from django.views.generic import View
 from django_forest.authentication.exception import AuthenticationClientException, AuthenticationThirdPartyException
 
 from django_forest.authentication.oidc.client_manager import OidcClientManager
-from django_forest.authentication.utils import authentication_exception, get_callback_url
+from django_forest.authentication.utils import authentication_exception
 from django_forest.utils.error_handler import MESSAGES
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.forest_setting import get_forest_setting
@@ -118,9 +118,8 @@ class CallbackView(View):
         else:
             self._handle_authent_error(response)
 
-    def _verify_code_and_generate_token_body(self, redirect_url, request):
-        client = OidcClientManager.get_client_for_callback_url(redirect_url)
-        client.do_access_token_request
+    def _verify_code_and_generate_token_body(self, request):
+        client = OidcClientManager.get_client()
         state = self._get_state_params(request)
         if 'renderingId' not in state:
             raise AuthenticationClientException(MESSAGES['SERVER_TRANSACTION']['INVALID_STATE_RENDERING_ID'])
@@ -146,8 +145,7 @@ class CallbackView(View):
 
     @authentication_exception
     def get(self, request, *args, **kwargs):
-        callback_url = get_callback_url()
-        token_body = self._verify_code_and_generate_token_body(callback_url, request)
+        token_body = self._verify_code_and_generate_token_body(request)
         auth_secret = get_forest_setting('FOREST_AUTH_SECRET')
         return JsonResponse({
             'token': jwt.encode(
