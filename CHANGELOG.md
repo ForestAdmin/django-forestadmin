@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/ForestAdmin/django-forest/compare/v1.3.8...v1.4.0) (2022-09-14)
+
+
+### Features
+
+* **auth:** remove the APPLICATION_URL parameter ([#119](https://github.com/ForestAdmin/django-forest/issues/119)) ([e2ebd2d](https://github.com/ForestAdmin/django-forest/commit/e2ebd2d3138e02dad74bcab22b978f51d03102aa))
+
 ## [1.3.8](https://github.com/ForestAdmin/django-forest/compare/v1.3.7...v1.3.8) (2022-08-31)
 
 
