@@ -140,7 +140,8 @@ class CallbackView(View):
             'last_name': user['last_name'],
             'team': user['teams'][0],
             'rendering_id': state['renderingId'],
-            'exp': self._expiration_in_seconds()
+            'exp': self._expiration_in_seconds(),
+            'permission_level': user['permission_level']
         }
 
     @authentication_exception

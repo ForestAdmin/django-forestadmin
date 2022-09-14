@@ -40,6 +40,7 @@ mocked_user = {
             'first_name': 'Guillaume', 'last_name': 'Cisco',
             'email': 'guillaumec@forestadmin.com',
             'teams': ['Operations'],
+            'permission_level': 'admin',
             'two_factor_authentication_enabled': False,
             'two_factor_authentication_active': False,
             'two_factor_authentication_secret': None
