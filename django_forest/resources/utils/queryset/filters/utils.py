@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from django.db.models import Q
 
 from django_forest.resources.utils.queryset.filters.date import DatesMixin
@@ -42,15 +43,23 @@ INSENSITIVE_OPERATORS = {
 
 
 class ConditionsMixin(DatesMixin):
-    def get_basic_expression(self, field, operator, value):
+    DATETIME_FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
+    DATE_FMT = "%Y-%m-%d"
+
+    def get_basic_expression(self, field, field_type, operator, value):
         operators = INSENSITIVE_OPERATORS if isinstance(value, str) else OPERATORS
+
         try:
             lookup_field = f"{field}{operators[operator]}"
         except Exception:
             raise Exception(f'Unknown provided operator {operator}')
         else:
             is_negated = operator.startswith('not')
-            kwargs = {lookup_field: value}
+
+            if field_type == 'Date' and operator in ['equal', 'not_equal']:
+                kwargs = {f'{lookup_field}__range': (value, value + timedelta(seconds=1))}
+            else:
+                kwargs = {lookup_field: value}
 
             if is_negated:
                 return ~Q(**kwargs)
@@ -75,12 +84,33 @@ class ConditionsMixin(DatesMixin):
             elif callable(method):
                 return method(operator, value)
 
+    def _cast_dateonly_field(self, value):
+        try:
+            value = datetime.strptime(value, self.DATETIME_FMT).date()
+        except ValueError:
+            value = datetime.strptime(value, self.DATE_FMT).date()
+        return value
+
+    def cast_date_fields(self, value, field_type):
+        if field_type == 'Date':
+            value = datetime.strptime(value, self.DATETIME_FMT)
+        elif field_type == 'Dateonly':
+            value = self._cast_dateonly_field(value)
+        return value
+
     def get_expression_field(self, condition, Model, tz):
         operator = condition['operator']
         field = condition['field'].replace(':', '__')
         value = condition['value']
 
         field_type = self.get_field_type(condition['field'], Model)
+        if field_type in ['Date', 'Dateonly'] and value and operator not in [
+            'previous_x_days',
+            'previous_x_days_to_date',
+            'before_x_hours_ago',
+            'after_x_hours_ago'
+        ]:
+            value = self.cast_date_fields(value, field_type)
 
         # special case date, blank and present
         if operator in DateConditionFactory.OPERATORS:
@@ -90,7 +120,7 @@ class ConditionsMixin(DatesMixin):
         elif operator == 'present':
             return Q(**{f'{field}__isnull': False})
         else:
-            return self.get_basic_expression(field, operator, value)
+            return self.get_basic_expression(field, field_type, operator, value)
 
     def get_expression(self, condition, Model, tz):
         field = condition['field'].replace(':', '__')
