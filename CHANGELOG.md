@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/ForestAdmin/django-forest/compare/v1.4.1...v1.4.2) (2022-09-15)
+
+
+### Bug Fixes
+
+* **filters:** date and dateonly fields should be cast to avoid issues in filters ([#121](https://github.com/ForestAdmin/django-forest/issues/121)) ([e5fd115](https://github.com/ForestAdmin/django-forest/commit/e5fd1151dd27b4e5652302a6a5f6b6d59d800afb))
+
 ## [1.4.1](https://github.com/ForestAdmin/django-forest/compare/v1.4.0...v1.4.1) (2022-09-14)
 
 
