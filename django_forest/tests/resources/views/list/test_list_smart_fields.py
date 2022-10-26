@@ -9,6 +9,7 @@ from django.test import TransactionTestCase
 from django.urls import reverse
 from freezegun import freeze_time
 
+from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.tests.fixtures.schema import test_schema
 from django_forest.utils.collection import Collection
 from django_forest.utils.schema import Schema
@@ -260,3 +261,29 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
                 }
             ]
         })
+
+    @mock.patch.object(SmartFieldMixin, "_add_smart_fields")
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_smart_fields_not_requested_not_calculated(self, _, _add_smart_fields):
+        """
+        Given
+            - A collection is queried, where the smart fields are not
+              part of the query parameters
+        Then
+            - The smart fields should not be fetched at all.
+        """
+
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
+            'page[number]': '1',
+            'page[size]': '15'
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+        # The thing we really care about in this integration
+        # test is not adding *any* smart fields to the request
+        _add_smart_fields.assert_not_called()

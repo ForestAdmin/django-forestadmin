@@ -62,18 +62,20 @@ class PermissionMiddleware:
     def is_authorized(self, request, token, resource):
         permission_name = self.mapping[request.resolver_match.url_name][request.method]
 
+        is_chart = permission_name in ('liveQueries', 'statsWithParameters')
         kwargs = {}
-        if permission_name in ('liveQueries', 'statsWithParameters'):
+        if is_chart:
             body = json.loads(request.body.decode('utf-8'))
             self.populate_query_request_info(permission_name, body, kwargs)
 
-        permission = Permission(resource,
-                                permission_name,
-                                token['rendering_id'],
-                                token['id'],
-                                **kwargs)
-        if not Permission.is_authorized(permission):
-            raise Exception('not authorized')
+        if not (is_chart and token['permission_level'] in ['admin', 'editor', 'developer']):
+            permission = Permission(resource,
+                                    permission_name,
+                                    token['rendering_id'],
+                                    token['id'],
+                                    **kwargs)
+            if not Permission.is_authorized(permission):
+                raise Exception('not authorized')
 
     def get_resource(self, args):
         resource = None

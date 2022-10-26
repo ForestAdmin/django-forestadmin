@@ -31,12 +31,6 @@ class QuestionForest(Collection):
 
         self.actions = [
             {
-                'name': 'Mark as Live'
-            }, {
-                'name': 'Generate invoice',
-                'download': True,  # If true, the action triggers a file download in the Browser.
-            },
-            {
                 'name': 'Send invoice',
                 'type': 'single',
                 'fields': [
@@ -68,7 +62,13 @@ class QuestionForest(Collection):
                         'zipCodeChange': self.invoice_change_zip_code,
                     },
                 },
-            }
+            },
+            {
+                'name': 'Mark as Live'
+            }, {
+                'name': 'Generate invoice',
+                'download': True,  # If true, the action triggers a file download in the Browser.
+            },
         ]
 
         self.segments = [

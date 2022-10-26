@@ -7,8 +7,11 @@ from django_forest.utils.views.base import BaseView
 
 class HookView(BaseView):
 
+    def action_name_from_endpoint(self, action):
+        return str(action['endpoint'].split('/')[-1])
+
     def hook_exists(self, action, action_name, hook):
-        return action['endpoint'].split('/')[-1] == action_name and 'hooks' in action and hook in action['hooks']
+        return self.action_name_from_endpoint(action) == action_name and 'hooks' in action and hook in action['hooks']
 
     def value_in_enums(self, field):
         return next((value for value in field['value'] if value in field['enums']), None)
@@ -25,18 +28,18 @@ class HookView(BaseView):
             if 'enums' in field and isinstance(field['enums'], list):
                 self.handle_enums(field)
 
+    def _get_action(self, action_name):
+        for collection_schema in Collection._registry.values():
+            for action in collection_schema.actions:
+                if self.action_name_from_endpoint(action) == action_name:
+                    return action
+
+        raise Exception('action not found')
+
     def get_hook_result(self, action_name, request):
-        data = None
-        for name, value in Collection._registry.items():
-            for action in value.actions:
-                data = self.handle_action(action, action_name, request)
-
-        if data is None:
-            raise Exception('action not found')
-        else:
-            # TODO smart action field validator
-            self.format_enums(data)
-
+        action = self._get_action(action_name)
+        data = self.handle_action(action, action_name, request)
+        self.format_enums(data)
         return data
 
     def post(self, request, action_name, *args, **kwargs):

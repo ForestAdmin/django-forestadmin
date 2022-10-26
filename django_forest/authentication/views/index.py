@@ -8,7 +8,7 @@ from django.views.generic import View
 from django_forest.authentication.exception import AuthenticationClientException
 
 from django_forest.authentication.oidc.client_manager import OidcClientManager
-from django_forest.authentication.utils import authentication_exception, get_callback_url
+from django_forest.authentication.utils import authentication_exception
 from django_forest.utils.error_handler import MESSAGES
 
 
@@ -39,25 +39,22 @@ class IndexView(View):
             raise AuthenticationClientException(MESSAGES['SERVER_TRANSACTION']['INVALID_RENDERING_ID'])
         return int(rendering_id)
 
-    def _get_authorization_url(self, redirect_url, state):
-        client = OidcClientManager.get_client_for_callback_url(redirect_url)
-        logger.debug(f"client_id: {client.client_id}")
+    def _get_authorization_url(self, state):
+        client = OidcClientManager.get_client()
         args = {
             'client_id': client.client_id,
             'response_type': 'code',
             'scope': ['openid', 'email', 'profile'],
             'state': json.dumps(state),
-            'redirect_uri': redirect_url,
+            'redirect_uri': client.redirect_uris[0],
         }
         auth_req: AuthorizationRequest = client.construct_AuthorizationRequest(request_args=args)
         authorization_url = auth_req.request(client.authorization_endpoint)
-
         return authorization_url
 
     @authentication_exception
     def post(self, request, *args, **kwargs):
         payload = self._get_payload(request)
         rendering_id = self._get_rendering_id(payload)
-        callback_url = get_callback_url()
-        authorization_url = self._get_authorization_url(callback_url, {'renderingId': rendering_id})
+        authorization_url = self._get_authorization_url({'renderingId': rendering_id})
         return JsonResponse({'authorizationUrl': authorization_url})

@@ -2,6 +2,7 @@ from django.http import JsonResponse, HttpResponse
 
 from django_forest.resources.utils.format import FormatFieldMixin
 from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
+from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
@@ -19,7 +20,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             queryset = self.enhance_queryset(queryset, self.Model, params, request)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, self.Model._meta.db_table, many=True)
+            self.handle_smart_fields(queryset, self.Model._meta.db_table, parse_qs(params), many=True)
 
             # json api serializer
             data = self.serialize(queryset, self.Model, params)
