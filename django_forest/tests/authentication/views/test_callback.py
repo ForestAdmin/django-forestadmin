@@ -40,6 +40,7 @@ mocked_user = {
             'first_name': 'Guillaume', 'last_name': 'Cisco',
             'email': 'guillaumec@forestadmin.com',
             'teams': ['Operations'],
+            'permission_level': 'admin',
             'two_factor_authentication_enabled': False,
             'two_factor_authentication_active': False,
             'two_factor_authentication_secret': None
@@ -100,7 +101,7 @@ class AuthenticationCallbackViewTests(TestCase):
         self.mocked_retrieve = self.retrieve_patcher.start()
         self.mocked_register = self.register_patcher.start()
         callback_url = 'http://localhost:8000/authentication/callback'
-        self.oidc_client = OidcClientManager.get_client_for_callback_url(callback_url)
+        self.oidc_client = OidcClientManager.get_client()
         self.oidc_client.redirect_uris = ['http://localhost:8000/forest/authentication/callback']
 
         url = reverse('django_forest:authentication:callback')

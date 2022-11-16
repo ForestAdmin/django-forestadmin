@@ -3,6 +3,7 @@ import csv
 from django_forest.resources.utils.csv import CsvMixin
 from django_forest.resources.utils.format import FormatFieldMixin
 from django_forest.resources.utils.json_api_serializer import JsonApiSerializerMixin
+from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 
@@ -15,11 +16,11 @@ class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixi
         params = request.GET.dict()
 
         try:
-            # enhance queryset
-            queryset = self.enhance_queryset(queryset, self.Model, params, request)
+            # enhance queryset, ignoring any parameters about pagination
+            queryset = self.enhance_queryset(queryset, self.Model, params, request, apply_pagination=False)
 
             # handle smart fields
-            self.handle_smart_fields(queryset, self.Model._meta.db_table, many=True)
+            self.handle_smart_fields(queryset, self.Model._meta.db_table, parse_qs(params), many=True)
 
             # json api serializer
             data = self.serialize(queryset, self.Model, params)

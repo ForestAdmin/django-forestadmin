@@ -61,7 +61,9 @@ class ResourceAssociationCsvViewTests(TransactionTestCase):
             'searchExtended': '',
             'filename': 'choices',
             'header': 'id,question,choice text',
-            'timezone': 'Europe/Paris'
+            'timezone': 'Europe/Paris',
+            'page[number]': 10, # csv get should ignore these. If it doesn't we'll only receive the column names, but no rows
+            'page[size]': 100
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), 'id,question,choice text,\r\n1,what is your favorite color?,,yes\r\n2,what is your favorite color?,,no\r\n')

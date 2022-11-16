@@ -486,7 +486,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
         ScopeManager.cache = {}
         settings.MIDDLEWARE.remove('django_forest.middleware.PermissionMiddleware')
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1, 'permission_level': 'admin'})
     @mock.patch('django_forest.utils.permissions.datetime')
     @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_stats))
     def test_live_queries(self, mocked_requests, mocked_datetime, mocked_decode):
@@ -519,7 +519,7 @@ class MiddlewarePermissionsStatsTests(TestCase):
                                     content_type='application/json')
         self.assertEqual(response.status_code, 403)
 
-    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1, 'permission_level': 'admin'})
     @mock.patch('django_forest.utils.permissions.datetime')
     @mock.patch('requests.get', side_effect=mocked_requests_permission(mocked_config_stats))
     def test_stats_with_parameters(self, mocked_requests, mocked_datetime, mocked_decode):
