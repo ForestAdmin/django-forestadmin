@@ -101,7 +101,8 @@ class Schema:
         for field in model._meta.get_fields():
             f = cls.get_default({
                 'field': field.name,
-                'type': cls.get_type(field)
+                'type': cls.get_type(field),
+                'is_primary_key': model._meta.pk.name == field.name,
             }, FIELD)
             f = handle_default_value(field, f)
             f = handle_validations(field, f)
