@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/ForestAdmin/django-forest/compare/v1.4.2...v1.4.3) (2022-12-15)
+
+
+### Bug Fixes
+
+* **schema:** is_primary_key was missing in the jsonapi schema ([#122](https://github.com/ForestAdmin/django-forest/issues/122)) ([94ed592](https://github.com/ForestAdmin/django-forest/commit/94ed592eb51e18f1295228d0ecf0b76d4f511862))
+
 ## [1.4.2](https://github.com/ForestAdmin/django-forest/compare/v1.4.1...v1.4.2) (2022-09-15)
 
 
