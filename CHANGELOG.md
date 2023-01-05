@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/ForestAdmin/django-forest/compare/v1.4.3...v1.4.4) (2023-01-05)
+
+
+### Bug Fixes
+
+* **csv:** prevent error with model without id attribute ([#123](https://github.com/ForestAdmin/django-forest/issues/123)) ([66315d9](https://github.com/ForestAdmin/django-forest/commit/66315d9d2565420a659f88222a2471081f578379))
+
 ## [1.4.3](https://github.com/ForestAdmin/django-forest/compare/v1.4.2...v1.4.3) (2022-12-15)
 
 
