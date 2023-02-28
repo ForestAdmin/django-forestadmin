@@ -1,3 +1,5 @@
+## [1.4.5](https://github.com/ForestAdmin/django-forest/compare/v1.4.4...v1.4.5) (2023-02-28)
+
 ## [1.4.4](https://github.com/ForestAdmin/django-forest/compare/v1.4.3...v1.4.4) (2023-01-05)
 
 
