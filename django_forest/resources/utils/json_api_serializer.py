@@ -17,7 +17,9 @@ class JsonApiSerializerMixin:
     def serialize_field(self, field, parent=None):
         res = field['field']
         if field['is_virtual'] and field['reference']:
-            res = field['reference'].split('_')[1]
+            field_name = field['field']
+            target_key = field['reference'].split('.')[1]
+            res = f'{field_name}.{target_key}'
         if parent:
             res = f'{parent}.{res}'
         return res
