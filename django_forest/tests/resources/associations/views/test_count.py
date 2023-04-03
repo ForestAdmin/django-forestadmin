@@ -55,14 +55,14 @@ class ResourceAssociationCountViewTests(TransactionTestCase):
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, {'meta': {'count': 'deactivated '}})
+        self.assertEqual(data, {'meta': {'count': 'deactivated'}})
 
         settings.FOREST['DEACTIVATED_COUNT'] = ['tests_question:choice_set']
         url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, {'meta': {'count': 'deactivated '}})
+        self.assertEqual(data, {'meta': {'count': 'deactivated'}})
 
         settings.FOREST['DEACTIVATED_COUNT'] = ['tests_question:fake']
         url = reverse('django_forest:resources:associations:count', kwargs={'resource': 'tests_question', 'pk': 1, 'association_resource': 'choice_set'})

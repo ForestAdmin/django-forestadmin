@@ -57,7 +57,7 @@ class ResourceCountViewTests(TransactionTestCase):
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, {'meta': {'count': 'deactivated '}})
+        self.assertEqual(data, {'meta': {'count': 'deactivated'}})
         
         settings.FOREST['DEACTIVATED_COUNT'] = ['tests_fake']
         url = reverse('django_forest:resources:count', kwargs={'resource': 'tests_question'})
@@ -88,7 +88,7 @@ class ResourceCountViewTests(TransactionTestCase):
         })
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, {'meta': {'count': 'deactivated '}})
+        self.assertEqual(data, {'meta': {'count': 'deactivated'}})
         del settings.MIDDLEWARE[0]
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1})
