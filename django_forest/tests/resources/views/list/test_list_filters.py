@@ -111,7 +111,7 @@ class ResourceListFilterViewTests(TransactionTestCase):
                 }
             ]
         })
-    
+
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     def test_contains(self, mocked_datetime, *args, **kwargs):
         response = self.client.get(self.url, {
@@ -154,6 +154,42 @@ class ResourceListFilterViewTests(TransactionTestCase):
             'fields[tests_question]': 'id,topic,question_text,pub_date',
             'fields[topic]': 'name',
             'filters': '{"aggregator":"and","conditions":[{"field":"question_text","operator":"equal","value":"what is your favorite color?"},{"field":"id","operator":"equal","value":1}]}',
+            'timezone': 'Europe/Paris',
+            'page[number]': '1',
+            'page[size]': '15'
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'tests_question',
+                    'id': 1,
+                    'attributes': {
+                        'pub_date': '2021-06-02T13:52:53.528000+00:00',
+                        'question_text': 'what is your favorite color?'
+                    },
+                    'links': {
+                        'self': '/forest/tests_question/1'
+                    },
+                    'relationships': {
+                        'topic': {
+                            'data': None,
+                            'links': {
+                                'related': '/forest/tests_question/1/relationships/topic'
+                            }
+                        }
+                    },
+                }
+            ]
+        })
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    def test_nested_aggregator(self, *args, **kwargs):
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id,topic,question_text,pub_date',
+            'fields[topic]': 'name',
+            'filters': '{"aggregator":"and","conditions":[{"field":"question_text","operator":"equal","value":"what is your favorite color?"},{"aggregator":"and","conditions":[{"field":"id","operator":"equal","value":1}, {"field": "id", "operator": "present", "value":null}]}]}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
             'page[size]': '15'

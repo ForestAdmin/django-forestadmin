@@ -136,10 +136,16 @@ class ConditionsMixin(DatesMixin):
     def handle_aggregator(self, filters, Model, tz):
         q_objects = Q()
         for condition in filters['conditions']:
-            if filters['aggregator'] == 'or':
-                q_objects |= self.get_expression(condition, Model, tz)
+            if "aggregator" in condition:
+                if condition['aggregator'] == 'or':
+                    q_objects |= self.handle_aggregator(condition, Model, tz)
+                else:
+                    q_objects &= self.handle_aggregator(condition, Model, tz)
             else:
-                q_objects &= self.get_expression(condition, Model, tz)
+                if filters['aggregator'] == 'or':
+                    q_objects |= self.get_expression(condition, Model, tz)
+                else:
+                    q_objects &= self.get_expression(condition, Model, tz)
         return q_objects
 
     def get_field_type(self, field, Model):
