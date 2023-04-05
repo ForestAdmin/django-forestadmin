@@ -1,3 +1,10 @@
+## [1.4.7](https://github.com/ForestAdmin/django-forest/compare/v1.4.6...v1.4.7) (2023-04-05)
+
+
+### Bug Fixes
+
+* **filters:** nested aggregator weren't implemented ([#128](https://github.com/ForestAdmin/django-forest/issues/128)) ([4361849](https://github.com/ForestAdmin/django-forest/commit/4361849982530f34d30354a35644bc229bb279e4))
+
 ## [1.4.6](https://github.com/ForestAdmin/django-forest/compare/v1.4.5...v1.4.6) (2023-03-22)
 
 
