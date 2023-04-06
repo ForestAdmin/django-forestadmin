@@ -1,3 +1,10 @@
+## [1.4.8](https://github.com/ForestAdmin/django-forest/compare/v1.4.7...v1.4.8) (2023-04-06)
+
+
+### Bug Fixes
+
+* **stats:** users should be able to use related field in group by aggregation ([#129](https://github.com/ForestAdmin/django-forest/issues/129)) ([2699e31](https://github.com/ForestAdmin/django-forest/commit/2699e3101cef9cdc3837fc1820befeca3fc03e25))
+
 ## [1.4.7](https://github.com/ForestAdmin/django-forest/compare/v1.4.6...v1.4.7) (2023-04-05)
 
 
