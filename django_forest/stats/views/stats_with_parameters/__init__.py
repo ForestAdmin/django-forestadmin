@@ -47,7 +47,7 @@ class StatsWithParametersView(StatsMixin, ResourceView):
 
     def get_pie(self, params, queryset):
         pk_name = self.Model._meta.pk.name
-        group_by_field = params['group_by_field']
+        group_by_field = params['group_by_field'].replace(":", "__")
 
         queryset = queryset.order_by(group_by_field).values(group_by_field)
 
