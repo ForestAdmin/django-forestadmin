@@ -14,7 +14,7 @@ from django_forest.utils.scope import ScopeManager
 from django_forest.utils.date import get_timezone
 
 @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
-@mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})    
+@mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
 class StatsStatsWithParametersViewTests(TransactionTestCase):
     fixtures = ['question.json', 'choice.json', ]
 
@@ -280,6 +280,28 @@ class StatsStatsWithParametersViewTests(TransactionTestCase):
                 {
                     'key': '03/06/2021',
                     'value': 1
+                }
+            ]
+        })
+        self.assertEqual(data['data']['type'], 'stats')
+
+    def test_get_pie_count_group_by_related_field(self, *args, **kwargs):
+        body = {
+            'aggregate': 'Count',
+            'collection': 'tests_question',
+            'query': None,
+            'group_by_field': 'topic:name',
+            'type': 'Pie'
+        }
+
+        response = self.client.post(self.url, json.dumps(body), content_type='application/json')
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['data']['attributes'], {
+            'value': [
+                {
+                    'key': None,
+                    'value': 3
                 }
             ]
         })
