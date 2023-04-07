@@ -1,3 +1,10 @@
+## [1.4.9](https://github.com/ForestAdmin/django-forest/compare/v1.4.8...v1.4.9) (2023-04-07)
+
+
+### Bug Fixes
+
+* **ressources:** deactivate count didn't return correct value when enable ([#127](https://github.com/ForestAdmin/django-forest/issues/127)) ([3d8ef2d](https://github.com/ForestAdmin/django-forest/commit/3d8ef2dcb74bcd3d181d5b0e74ae2491ceb36518))
+
 ## [1.4.8](https://github.com/ForestAdmin/django-forest/compare/v1.4.7...v1.4.8) (2023-04-06)
 
 
