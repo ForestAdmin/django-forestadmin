@@ -31,5 +31,5 @@ class DeactivateCountMiddleware:
 
     def process_view(self, request, view_func, *args, **kwargs):
         if self.is_deactivated(request, view_func, *args, **kwargs):
-            return JsonResponse({"meta": {"count": "deactivated "}})
+            return JsonResponse({"meta": {"count": "deactivated"}})
         return None
