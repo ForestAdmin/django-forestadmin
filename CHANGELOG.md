@@ -1,3 +1,10 @@
+## [1.4.10](https://github.com/ForestAdmin/django-forest/compare/v1.4.9...v1.4.10) (2023-04-11)
+
+
+### Bug Fixes
+
+* **middleware:** users can force the forest middleware orders ([#130](https://github.com/ForestAdmin/django-forest/issues/130)) ([aeae4fd](https://github.com/ForestAdmin/django-forest/commit/aeae4fdadf0f931b2b8631d4ba0d6514717ec5a7))
+
 ## [1.4.9](https://github.com/ForestAdmin/django-forest/compare/v1.4.8...v1.4.9) (2023-04-07)
 
 
