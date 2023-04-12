@@ -26,6 +26,11 @@ mocked_scope = {
                         'operator': 'contains',
                         'value': 'color'
                     },
+                    {
+                        'field': 'id',
+                        'operator': 'greater_than',
+                        'value': 0
+                    },
                 ]
             },
             'dynamicScopesValues': {}
@@ -43,6 +48,11 @@ mocked_scope_dynamic_value = {
                         'field': 'question_text',
                         'operator': 'contains',
                         'value': 'color'
+                    },
+                    {
+                        'field': 'id',
+                        'operator': 'less_than',
+                        'value': 0
                     },
                     {
                         'field': 'question_text',
