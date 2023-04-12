@@ -1,3 +1,10 @@
+## [1.4.11](https://github.com/ForestAdmin/django-forest/compare/v1.4.10...v1.4.11) (2023-04-12)
+
+
+### Bug Fixes
+
+* **scope:** allows users to filter on integer field ([#131](https://github.com/ForestAdmin/django-forest/issues/131)) ([006ce6c](https://github.com/ForestAdmin/django-forest/commit/006ce6cf135b09c108ef096731259fff24a168a0))
+
 ## [1.4.10](https://github.com/ForestAdmin/django-forest/compare/v1.4.9...v1.4.10) (2023-04-11)
 
 
