@@ -40,7 +40,7 @@ class ScopeManager:
         try:
             scope = collection_scope['scope']
             for condition in scope['filter']['conditions']:
-                if condition['value'].startswith('$currentUser'):
+                if str(condition['value']).startswith('$currentUser'):
                     condition['value'] = scope['dynamicScopesValues']['users'][user_id][condition['value']]
             return scope['filter']
         except Exception:
