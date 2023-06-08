@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/ForestAdmin/django-forest/compare/v1.4.11...v1.5.0) (2023-06-08)
+
+
+### Features
+
+* package is installable for python3.11 ([#132](https://github.com/ForestAdmin/django-forest/issues/132)) ([405cfd9](https://github.com/ForestAdmin/django-forest/commit/405cfd95767934599c1c8260cba8fef103b0a5b5))
+
 ## [1.4.11](https://github.com/ForestAdmin/django-forest/compare/v1.4.10...v1.4.11) (2023-04-12)
 
 
