@@ -1,6 +1,6 @@
 coverage>=5.5, <6.0 #6.0 remove the support of python 3.6
 Django>=4.1, <5.0
-django-cors-headers>=3.7, <3.11 #3.11 remove the support of python3.6
+django-cors-headers >=3.14, <4.0 # 4.0 introduces (apparently) breaking changes
 django-ipware>=4.0, <5.0
 flake8>=4.0, <5.0
 marshmallow-jsonapi>=0.24.0, <1.0
