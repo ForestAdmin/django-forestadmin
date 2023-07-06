@@ -25,7 +25,6 @@ def reset_config_dir_import():
             del sys.modules[key]
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsSchemaTests(TestCase):
 
     def setUp(self):
@@ -310,7 +309,6 @@ class UtilsSchemaInitTests(TestCase):
         self.assertTrue('orm_version' in Schema.schema['meta']['stack'])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 class UtilsGetAppVersionTests(TestCase):
     @mock.patch('importlib.metadata.version', return_value='0.0.1')
     def test_get_app_version(self, mock_version):

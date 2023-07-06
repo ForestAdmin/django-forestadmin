@@ -37,7 +37,7 @@ You can see coverage, thanks to `coverage report`, `coverage xml`, `coverage htm
 
 It is also possible to combine several coverage reports run with different python versions:
 ```
-coverage3.6 run --parallel-mode -m pytest
+coverage3.8 run --parallel-mode -m pytest
 coverage3.9 run --parallel-mode -m pytest
 coverage combine
 coverage report
