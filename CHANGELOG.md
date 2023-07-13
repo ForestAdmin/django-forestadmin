@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/ForestAdmin/django-forest/compare/v1.5.0...v1.6.0) (2023-07-13)
+
+
+### Features
+
+* **django_new_version:** add support for django 4.1 and 4.2 ([#137](https://github.com/ForestAdmin/django-forest/issues/137)) ([b0898ff](https://github.com/ForestAdmin/django-forest/commit/b0898ff033f533960e711a63101c8be0c8c9d87e))
+
 # [1.5.0](https://github.com/ForestAdmin/django-forest/compare/v1.4.11...v1.5.0) (2023-06-08)
 
 
