@@ -163,7 +163,7 @@ class UtilsSchemaFileTests(TestCase):
     @pytest.mark.usefixtures('reset_config_dir_import')
     def test_handle_schema_file_no_file(self):
         with self.assertLogs() as cm:
-            self.assertRaises(Exception, Schema.handle_schema_file())
+            Schema.handle_schema_file()
             self.assertIsNone(Schema.schema_data)
             self.assertEqual(cm.output, [
                 'ERROR:django_forest.utils.schema:The .forestadmin-schema.json file does not exist.',
@@ -180,12 +180,21 @@ class UtilsSchemaFileTests(TestCase):
     @pytest.mark.usefixtures('invalid_forestadmin_schema')
     def test_handle_schema_file_invalid_json_production(self):
         with self.assertLogs() as cm:
-            self.assertRaises(Exception, Schema.handle_schema_file())
+            Schema.handle_schema_file()
             self.assertIsNone(Schema.schema_data)
             self.assertEqual(cm.output, [
                 'ERROR:django_forest.utils.schema:The content of .forestadmin-schema.json file is not a correct JSON.',
                 'ERROR:django_forest.utils.schema:The schema cannot be synchronized with Forest Admin servers.'
             ])
+
+    @pytest.mark.usefixtures('reset_config_dir_import')
+    @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_UPDATE': True}, DEBUG=True)
+    def test_handle_schema_file_debug_disable_update(self):
+        Schema.handle_schema_file()
+        self.assertIsNotNone(Schema.schema_data)
+        with self.assertRaises(FileNotFoundError) as cm:
+            open(file_path, 'r')
+
 
     @pytest.mark.usefixtures('reset_config_dir_import')
     @override_settings(DEBUG=True)
@@ -216,7 +225,7 @@ class UtilsSchemaSendTests(TestCase):
 
     @override_settings(FOREST={'FOREST_DISABLE_AUTO_SCHEMA_APPLY': 'foo'})
     def test_send_apimap_server_error(self):
-        self.assertRaises(Exception, Schema.send_apimap())
+        Exception, Schema.send_apimap()
 
     @override_settings(DEBUG=True)
     @mock.patch('requests.post', return_value=mocked_requests({'key1': 'value1'}, 200))
@@ -267,7 +276,7 @@ class UtilsSchemaSendTests(TestCase):
     def test_send_apimap_zero(self, mocked_requests_post):
         Schema.schema_data = test_question_schema_data
         with self.assertLogs() as cm:
-            self.assertRaises(Exception, Schema.send_apimap())
+            Schema.send_apimap()
             self.assertEqual(cm.records[0].message,
                              'Cannot send the apimap to Forest. Are you online?')
             self.assertEqual(cm.records[0].levelname, 'WARNING')
