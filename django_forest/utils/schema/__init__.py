@@ -233,9 +233,9 @@ class Schema:
     def send_apimap(cls):
         disable_auto_schema_apply = get_forest_setting('FOREST_DISABLE_AUTO_SCHEMA_APPLY', False)
         if not disable_auto_schema_apply:
-            serialized_schema = cls.get_serialized_schema()
-            url = ForestApiRequester.build_url('forest/apimaps')
             try:
+                serialized_schema = cls.get_serialized_schema()
+                url = ForestApiRequester.build_url('forest/apimaps')
                 r = ForestApiRequester.post(url, serialized_schema)
             except Exception:
                 logger.warning('Cannot send the apimap to Forest. Are you online?')
