@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/ForestAdmin/django-forest/compare/v1.6.0...v1.6.1) (2023-07-26)
+
+
+### Bug Fixes
+
+* **forest_init:** stop crashing if forestadmin-schema.json doesnt exists in production mode ([#139](https://github.com/ForestAdmin/django-forest/issues/139)) ([3638db8](https://github.com/ForestAdmin/django-forest/commit/3638db880a20099cb83c40ddb0aa82a390871a75))
+
 # [1.6.0](https://github.com/ForestAdmin/django-forest/compare/v1.5.0...v1.6.0) (2023-07-13)
 
 
