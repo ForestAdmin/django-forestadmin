@@ -1,7 +1,10 @@
 import uuid
 from datetime import datetime
+import logging
 
 from django.http import JsonResponse
+
+logger = logging.getLogger(__name__)
 
 
 class StatsMixin:
@@ -49,6 +52,7 @@ class StatsMixin:
         try:
             res = self.handle_chart(params, request, queryset)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             return JsonResponse(res, safe=False)

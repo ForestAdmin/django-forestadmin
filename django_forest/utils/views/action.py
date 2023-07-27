@@ -1,8 +1,12 @@
+import logging
+
 from django.http import HttpResponse
 
 from django_forest.utils import get_token
 from django_forest.utils.permissions import Permission
 from django_forest.utils.views.base import BaseView
+
+logger = logging.getLogger(__name__)
 
 
 class ActionView(BaseView):
@@ -29,6 +33,7 @@ class ActionView(BaseView):
         try:
             self.Model = self.get_model(resource)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             # check permissions

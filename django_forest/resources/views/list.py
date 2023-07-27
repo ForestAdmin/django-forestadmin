@@ -1,3 +1,5 @@
+import logging
+
 from django.http import JsonResponse, HttpResponse
 
 from django_forest.resources.utils.format import FormatFieldMixin
@@ -6,6 +8,8 @@ from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
+
+logger = logging.getLogger(__name__)
 
 
 class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, ResourceView):
@@ -28,6 +32,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             # search decorator
             data = self.decorators(data, self.Model, params)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             return JsonResponse(data, safe=False)
@@ -39,6 +44,7 @@ class ListView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, Resour
             attributes = self.populate_attribute(body)
             instance = self.Model.objects.create(**attributes)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             # json api serializer
