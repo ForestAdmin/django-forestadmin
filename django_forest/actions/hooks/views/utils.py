@@ -1,12 +1,8 @@
-import logging
-
 from django.http import JsonResponse, HttpResponse
 
 from django_forest.utils import get_token
 from django_forest.utils.collection import Collection
 from django_forest.utils.views.base import BaseView
-
-logger = logging.getLogger(__name__)
 
 
 class HookView(BaseView):
@@ -55,7 +51,6 @@ class HookView(BaseView):
             try:
                 data = self.get_hook_result(action_name, request)
             except Exception as e:
-                logger.exception(e)
                 return self.error_response(e)
             else:
                 return JsonResponse({'fields': data}, safe=False)

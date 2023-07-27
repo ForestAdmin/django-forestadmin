@@ -1,4 +1,3 @@
-import logging
 import csv
 
 from django_forest.resources.utils.csv import CsvMixin
@@ -7,8 +6,6 @@ from django_forest.resources.utils.json_api_serializer import JsonApiSerializerM
 from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
-
-logger = logging.getLogger(__name__)
 
 
 class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, ResourceView):
@@ -28,7 +25,6 @@ class CsvView(FormatFieldMixin, SmartFieldMixin, JsonApiSerializerMixin, CsvMixi
             # json api serializer
             data = self.serialize(queryset, self.Model, params)
         except Exception as e:
-            logger.exception(e)
             return self.error_response(e)
         else:
             response = self.csv_response(params['filename'])
