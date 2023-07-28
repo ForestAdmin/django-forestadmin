@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/ForestAdmin/django-forest/compare/v1.6.1...v1.6.2) (2023-07-28)
+
+
+### Bug Fixes
+
+* **debug:** add stacktraces when errors occurs ([#141](https://github.com/ForestAdmin/django-forest/issues/141)) ([6288658](https://github.com/ForestAdmin/django-forest/commit/62886581fefc907e5c40ecf22eed74e56d97fd80))
+
 ## [1.6.1](https://github.com/ForestAdmin/django-forest/compare/v1.6.0...v1.6.1) (2023-07-26)
 
 
