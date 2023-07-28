@@ -1,4 +1,5 @@
 from distutils.util import strtobool
+import logging
 
 from django.http import JsonResponse, HttpResponse
 
@@ -8,6 +9,8 @@ from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils import get_association_field
 
+logger = logging.getLogger(__name__)
+
 
 class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
 
@@ -15,6 +18,7 @@ class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
         try:
             association_field = get_association_field(self.Model, association_resource)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model
@@ -38,6 +42,7 @@ class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
         try:
             association_field = get_association_field(self.Model, association_resource)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model
@@ -65,6 +70,7 @@ class ListView(SmartFieldMixin, JsonApiSerializerMixin, AssociationView):
             association_field = get_association_field(self.Model, association_resource)
             ids = self.get_ids_from_request(request, self.Model)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model
