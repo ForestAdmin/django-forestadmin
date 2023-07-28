@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/ForestAdmin/django-forest/compare/v1.6.2...v1.6.3) (2023-07-28)
+
+
+### Bug Fixes
+
+* **edit_belongs_to:** fix search on belongsTo widget when editing ([#140](https://github.com/ForestAdmin/django-forest/issues/140)) ([6e8826d](https://github.com/ForestAdmin/django-forest/commit/6e8826d31654688cd645a5b31a3717d66a4d09f1))
+
 ## [1.6.2](https://github.com/ForestAdmin/django-forest/compare/v1.6.1...v1.6.2) (2023-07-28)
 
 
