@@ -239,7 +239,12 @@ class ResourceListViewTests(TransactionTestCase):
                         }
                     },
                 }
-            ]
+            ],
+            'meta': {
+                'decorators':[
+                    {'id':1, 'search':['id']}
+                ]
+            }
         })
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
@@ -519,4 +524,37 @@ class ResourceListViewTests(TransactionTestCase):
                     },
                 }
             ]
+        })
+
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_search_on_belongs_to_for_edition(self, mocked_decode):
+        response = self.client.get(self.url, {
+            'fields[tests_question]': 'id',
+            'page[number]': 1,
+            'page[size]': 15,
+            'search': '1',
+            'searchExtended': 0,
+            'searchToEdit': True
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    'type': 'tests_question',
+                    'id': 1,
+                    'links': {
+                        'self': '/forest/tests_question/1'
+                    },
+                }
+            ],
+            'meta': {
+                'decorators':[
+                    {'id':1, 'search':['id']}
+                ]
+            }
         })

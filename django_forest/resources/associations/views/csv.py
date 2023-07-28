@@ -1,4 +1,3 @@
-import logging
 import csv
 
 from django_forest.resources.associations.utils import AssociationView
@@ -8,15 +7,12 @@ from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils import get_association_field
 
-logger = logging.getLogger(__name__)
-
 
 class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView):
     def get(self, request, pk, association_resource):
         try:
             association_field = get_association_field(self.Model, association_resource)
         except Exception as e:
-            logger.exception(e)
             return self.error_response(e)
         else:
             RelatedModel = association_field.related_model

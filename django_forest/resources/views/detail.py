@@ -1,5 +1,3 @@
-import logging
-
 from django.http import JsonResponse, HttpResponse
 
 from django_forest.resources.utils.format import FormatFieldMixin
@@ -9,8 +7,6 @@ from django_forest.resources.utils.resource import ResourceView
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
-
-logger = logging.getLogger(__name__)
 
 
 class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, ResourceView):
@@ -36,7 +32,6 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
         try:
             instance = self.get_instance(request, pk)
         except Exception as e:
-            logger.exception(e)
             return self.error_response(e)
         else:
             # handle smart fields
@@ -60,7 +55,6 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
             instance = self.update_smart_fields(instance, body, self.Model._meta.db_table)
             instance.save()
         except Exception as e:
-            logger.exception(e)
             return self.error_response(e)
         else:
             # Notice: one to one case, where a new object is created with a new pk
@@ -77,7 +71,6 @@ class DetailView(SmartFieldMixin, FormatFieldMixin, JsonApiSerializerMixin, Reso
         try:
             instance = self.get_instance(request, pk)
         except Exception as e:
-            logger.exception(e)
             return self.error_response(e)
         else:
             instance.delete()
