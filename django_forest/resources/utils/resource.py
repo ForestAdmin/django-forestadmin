@@ -1,6 +1,10 @@
+import logging
+
 from django.http import JsonResponse
 
 from django_forest.utils.views.base import BaseView
+
+logger = logging.getLogger(__name__)
 
 
 class ResourceView(BaseView):
@@ -8,6 +12,7 @@ class ResourceView(BaseView):
         try:
             self.Model = self.get_model(resource)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             return super().dispatch(request, *args, **kwargs)
@@ -17,6 +22,7 @@ class ResourceView(BaseView):
             # enhance queryset (compute scope)
             queryset = self.enhance_queryset(queryset, self.Model, params, request)
         except Exception as e:
+            logger.exception(e)
             return self.error_response(e)
         else:
             return JsonResponse({'count': queryset.count()}, safe=False)
