@@ -1,7 +1,7 @@
-from django.apps import apps
 from django_forest.utils.schema import Schema
 from django_forest.utils.schema.json_api_schema import JsonApiSchema
 from django_forest.resources.utils.query_parameters import parse_qs
+from django_forest.utils.models import Models
 
 class JsonApiSerializerMixin:
 
@@ -41,7 +41,7 @@ class JsonApiSerializerMixin:
                     collection_fields
                 )
             )
-            Model = next(filter(lambda m: m._meta.db_table == collection['name'], apps.get_models()))
+            Model = Models.get(collection['name'])
             pk_field = Model._meta.pk
             if 'id' in required_fields and pk_field.name != 'id':
                 pk_field = next(filter(lambda f: f['field'] == pk_field.name, collection['fields']))
