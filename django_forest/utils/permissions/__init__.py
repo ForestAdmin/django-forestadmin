@@ -4,8 +4,12 @@ import pytz
 
 from django_forest.utils.forest_api_requester import ForestApiRequester
 from django_forest.utils.forest_setting import get_forest_setting
-from django_forest.utils.permissions.utils import date_difference_in_seconds, is_stat_allowed, is_user_allowed,\
-    is_smart_action_allowed
+from django_forest.utils.permissions.utils import (
+    date_difference_in_seconds,
+    is_stat_allowed,
+    is_user_allowed,
+    is_smart_action_allowed,
+)
 
 
 class Permission:
