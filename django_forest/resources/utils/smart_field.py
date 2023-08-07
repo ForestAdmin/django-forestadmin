@@ -37,7 +37,7 @@ class SmartFieldMixin:
 
         return [field for field in fields if field['field'] in filtered_fields]
 
-    def handle_smart_fields(self, queryset, resource, params=None, many=False):
+    def handle_smart_fields(self, queryset, resource, params=None, many=False, follow_relations=True):
         collection = Schema.get_collection(resource)
 
         # Rather than calculate and then filter out smart fields, we want to ignore them entirely
@@ -49,6 +49,47 @@ class SmartFieldMixin:
                 self._add_smart_fields(item, smart_fields, resource)
         elif smart_fields:
             self._add_smart_fields(queryset, smart_fields, resource)
+
+        # handle smart fields on nested relations (call handle_smart_fields recursively)
+        if follow_relations is True:
+            self._handle_smart_field_on_relations(queryset, collection, params, many)
+
+    def _handle_smart_field_on_relations(self, queryset, base_collection, params, many):
+        relations = self.__get_relations_for_smart_fields(base_collection, params)
+        for relation_field in relations:
+            collection_name = relation_field["reference"].split(".")[0]
+
+            transformed_params = None
+            if params:
+                transformed_params = {
+                    "fields": {
+                        collection_name: [params.get("fields", {}).get(relation_field["field"])]
+                    }
+                }
+
+            if many:
+                for item in queryset:
+                    self.handle_smart_fields(
+                        getattr(item, relation_field["field"]), collection_name, transformed_params, False, False
+                    )
+            else:
+                self.handle_smart_fields(
+                    getattr(queryset, relation_field["field"]), collection_name, transformed_params, False, False
+                )
+
+    def __get_relations_for_smart_fields(self, base_collection, params):
+        relations = [
+            field
+            for field in base_collection["fields"]
+            if field["relationship"] is not None and field["relationship"] in ["BelongsTo", "HasOne"]
+        ]
+        # filter with asked fields in params (if set)
+        if params is not None:
+            relations = [
+                rel for rel in relations
+                if rel["field"] in params.get("fields", {}).keys()
+            ]
+        return relations
 
     def update_smart_fields(self, instance, body, resource):
         collection = Schema.get_collection(resource)
