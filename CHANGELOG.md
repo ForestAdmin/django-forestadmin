@@ -1,3 +1,10 @@
+## [1.6.6](https://github.com/ForestAdmin/django-forest/compare/v1.6.5...v1.6.6) (2023-08-08)
+
+
+### Bug Fixes
+
+* **smart_field:** a smart field can now be used as reference_field ([#144](https://github.com/ForestAdmin/django-forest/issues/144)) ([6086b7b](https://github.com/ForestAdmin/django-forest/commit/6086b7b919ad5646a40cb53661aa4a6acdb66274))
+
 ## [1.6.5](https://github.com/ForestAdmin/django-forest/compare/v1.6.4...v1.6.5) (2023-08-03)
 
 
