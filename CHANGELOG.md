@@ -1,3 +1,10 @@
+## [1.6.7](https://github.com/ForestAdmin/django-forest/compare/v1.6.6...v1.6.7) (2023-08-11)
+
+
+### Bug Fixes
+
+* **smart_relations:** filtering over smart relationship was broken ([#145](https://github.com/ForestAdmin/django-forest/issues/145)) ([a294d1b](https://github.com/ForestAdmin/django-forest/commit/a294d1b94bdaad7ffa61684b9d20cdda4c6d52fe))
+
 ## [1.6.6](https://github.com/ForestAdmin/django-forest/compare/v1.6.5...v1.6.6) (2023-08-08)
 
 
