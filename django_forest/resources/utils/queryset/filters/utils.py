@@ -73,16 +73,41 @@ class ConditionsMixin(DatesMixin):
 
     def get_expression_smart_field(self, smart_fields, condition, resource):
         operator = condition['operator']
-        field = condition['field'].replace(':', '__')
+        splitted_fields = condition['field'].split(":")
         value = condition['value']
 
-        smart_field = smart_fields[field]
+        smart_field = smart_fields[splitted_fields[0]]
         if 'filter' in smart_field:
             method = smart_field['filter']
             if isinstance(method, str):
-                return getattr(Collection._registry[resource], method)(operator, value)
+                ret = getattr(Collection._registry[resource], method)(operator, value)
             elif callable(method):
-                return method(operator, value)
+                ret = method(operator, value)
+
+            if isinstance(ret, Q) and len(splitted_fields) > 1:
+                ret = self._rewrite_Q_with_field(ret, condition)
+
+            return ret
+
+    def _rewrite_Q_with_field(self, q, condition):
+        operator = condition['operator']
+        splitted_fields = condition['field'].split(":")
+
+        new_children = []
+        for children in q.children:
+            if isinstance(children, Q):
+                new_children.append(self._rewrite_Q_with_field(children, condition))
+            else:
+                if OPERATORS[operator] != "" and OPERATORS[operator] in children[0]:
+                    str_qs = children[0].replace(
+                        OPERATORS[operator],
+                        f'__{"__".join(splitted_fields[1:])}{OPERATORS[operator]}'
+                    )
+                else:
+                    str_qs = f'{"__".join([children[0], *splitted_fields[1:]])}'
+                new_children.append((str_qs, children[1]))
+        q.children = new_children
+        return q
 
     def _cast_dateonly_field(self, value):
         try:
@@ -128,7 +153,7 @@ class ConditionsMixin(DatesMixin):
         resource = Model._meta.db_table
         collection = Schema.get_collection(resource)
         smart_fields = {x['field']: x for x in collection['fields'] if x['is_virtual']}
-        if field in smart_fields.keys():
+        if field.split("__")[0] in smart_fields.keys():
             return self.get_expression_smart_field(smart_fields, condition, resource)
         else:
             return self.get_expression_field(condition, Model, tz)
