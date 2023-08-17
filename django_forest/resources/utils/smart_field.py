@@ -66,15 +66,19 @@ class SmartFieldMixin:
                         collection_name: [params.get("fields", {}).get(relation_field["field"])]
                     }
                 }
+            self._handle_smart_field_for_relation(queryset, relation_field, collection_name, transformed_params, many)
 
-            if many:
-                for item in queryset:
+    def _handle_smart_field_for_relation(self, queryset, relation_field, collection_name, params, many):
+        if many:
+            for item in queryset:
+                if hasattr(item, relation_field["field"]):
                     self.handle_smart_fields(
-                        getattr(item, relation_field["field"]), collection_name, transformed_params, False, False
+                        getattr(item, relation_field["field"]), collection_name, params, False, False
                     )
-            else:
+        else:
+            if hasattr(queryset, relation_field["field"]):
                 self.handle_smart_fields(
-                    getattr(queryset, relation_field["field"]), collection_name, transformed_params, False, False
+                    getattr(queryset, relation_field["field"]), collection_name, params, False, False
                 )
 
     def __get_relations_for_smart_fields(self, base_collection, params):
