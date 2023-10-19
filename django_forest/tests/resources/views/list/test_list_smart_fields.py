@@ -46,6 +46,8 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         Schema.add_smart_features()
         Schema.handle_json_api_schema()
         self.url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_question'})
+        self.place_url = reverse('django_forest:resources:list', kwargs={'resource': 'tests_place'})
+
         self.client = self.client_class(
             HTTP_AUTHORIZATION='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUiLCJlbWFpbCI6Imd1aWxsYXVtZWNAZm9yZXN0YWRtaW4uY29tIiwiZmlyc3RfbmFtZSI6Ikd1aWxsYXVtZSIsImxhc3RfbmFtZSI6IkNpc2NvIiwidGVhbSI6Ik9wZXJhdGlvbnMiLCJyZW5kZXJpbmdfaWQiOjEsImV4cCI6MTYyNTY3OTYyNi44ODYwMTh9.mHjA05yvMr99gFMuFv0SnPDCeOd2ZyMSN868V7lsjnw')
         ScopeManager.cache = {
@@ -60,6 +62,61 @@ class ResourceListSmartFieldsViewTests(TransactionTestCase):
         JsonApiSchema._registry = {}
         ScopeManager.cache = {}
         Collection._registry = {}
+
+    @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
+    @freeze_time(
+        lambda: datetime(2021, 7, 8, 9, 20, 23, 582772, tzinfo=get_timezone('UTC'))
+    )
+    def test_search_on_belongs_to(self, mocked_decode):
+        response = self.client.get(self.place_url, {
+            "context[relationship]": "BelongsTo",
+            "context[field]": "restaurant",
+            "context[collection]": "polls_place",
+            "context[recordId]": "1",
+            "fields[tests_restaurant]": "id",
+            "fields[restaurant]": "id",
+            "page[number]": "1",
+            "page[size]": "100",
+            "search": "1",
+            "searchExtended": "0",
+            "searchToEdit": "true"
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, {
+            'data': [
+                {
+                    "type": 'tests_place',
+                    "id": 1,
+                    "attributes": {'name': 'San Marco', 'address': 'Venezia, Italia'},
+                    "relationships": {
+                        "restaurant": {
+                            "links": {'related': '/forest/tests_place/1/relationships/restaurant'},
+                            "data": {'type': 'tests_restaurant', 'id': '1'},
+                        }
+                    },
+                    "links": {'self': '/forest/tests_place/1'},
+                }
+            ],
+            "included":[
+                {
+                    'type': 'tests_restaurant',
+                    'relationships': {
+                        'place': {
+                            'links': {'related': '/forest/tests_restaurant/1/relationships/place'}
+                        },
+                        'waiter_set': {
+                            'links': {'related': '/forest/tests_restaurant/1/relationships/waiter_set'}
+                        }
+                    },
+                    'attributes': {'serves_pizza': True, 'serves_hot_dogs': True},
+                    'links': {'self': '/forest/tests_restaurant/1'},
+                    'id': 1
+                }
+            ],
+            "meta":{'decorators': [{'id': 1, 'search': ['id']}]},
+        }
+    )
 
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @freeze_time(
