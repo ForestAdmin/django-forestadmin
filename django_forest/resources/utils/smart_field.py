@@ -71,12 +71,12 @@ class SmartFieldMixin:
     def _handle_smart_field_for_relation(self, queryset, relation_field, collection_name, params, many):
         if many:
             for item in queryset:
-                if hasattr(item, relation_field["field"]):
+                if getattr(item, relation_field["field"], None) is not None:
                     self.handle_smart_fields(
                         getattr(item, relation_field["field"]), collection_name, params, False, False
                     )
         else:
-            if hasattr(queryset, relation_field["field"]):
+            if getattr(queryset, relation_field["field"], None) is not None:
                 self.handle_smart_fields(
                     getattr(queryset, relation_field["field"]), collection_name, params, False, False
                 )
