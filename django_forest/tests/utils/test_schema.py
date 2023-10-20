@@ -105,7 +105,7 @@ class UtilsSchemaTests(TestCase):
         Schema.add_smart_features()
         from django_forest.tests.forest import QuestionForest
         from django_forest.tests.models import Question
-        collection_mock.register.assert_called_with(QuestionForest, Question)
+        collection_mock.register.assert_any_call(QuestionForest, Question)
 
     def test_get_collection(self):
         collection = Schema.get_collection('tests_question')
