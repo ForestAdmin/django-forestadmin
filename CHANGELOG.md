@@ -1,3 +1,10 @@
+## [1.6.9](https://github.com/ForestAdmin/django-forest/compare/v1.6.8...v1.6.9) (2023-10-20)
+
+
+### Bug Fixes
+
+* **smart_fields:** don't compute smart field on null relations ([#147](https://github.com/ForestAdmin/django-forest/issues/147)) ([c588940](https://github.com/ForestAdmin/django-forest/commit/c588940f0e7fecc9ec92e8248407c604b057b0a0))
+
 ## [1.6.8](https://github.com/ForestAdmin/django-forest/compare/v1.6.7...v1.6.8) (2023-08-17)
 
 
