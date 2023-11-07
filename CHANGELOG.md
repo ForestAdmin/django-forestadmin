@@ -1,3 +1,10 @@
+## [1.6.10](https://github.com/ForestAdmin/django-forest/compare/v1.6.9...v1.6.10) (2023-11-07)
+
+
+### Bug Fixes
+
+* **authentication_callback:** return errors detail instead of generic error 500 ([#148](https://github.com/ForestAdmin/django-forest/issues/148)) ([1541de6](https://github.com/ForestAdmin/django-forest/commit/1541de6a6aef719100f9fc5f04e1c492a17b5dd1))
+
 ## [1.6.9](https://github.com/ForestAdmin/django-forest/compare/v1.6.8...v1.6.9) (2023-10-20)
 
 
