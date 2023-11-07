@@ -7,7 +7,11 @@ from jose import jwt
 from oic.oauth2 import AuthorizationResponse
 from django.http import JsonResponse
 from django.views.generic import View
-from django_forest.authentication.exception import AuthenticationClientException, AuthenticationThirdPartyException
+from django_forest.authentication.exception import (
+    AuthenticationClientException,
+    AuthenticationOpenIdClientException,
+    AuthenticationThirdPartyException
+)
 
 from django_forest.authentication.oidc.client_manager import OidcClientManager
 from django_forest.authentication.utils import authentication_exception
@@ -63,6 +67,13 @@ class CallbackView(View):
         )
 
     def parse_authorization_response(self, client, state, full_path_info):
+        if "error" in self.request.GET:
+            raise AuthenticationOpenIdClientException(
+                "error given in the query GET params",
+                self.request.GET["error"],
+                self.request.GET["error_description"],
+                self.request.GET["state"]
+            )
         return client.parse_response(
             AuthorizationResponse,
             info=full_path_info,

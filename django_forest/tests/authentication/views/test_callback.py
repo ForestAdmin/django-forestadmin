@@ -276,3 +276,19 @@ class AuthenticationCallbackViewTests(TestCase):
         """
         with self.assertRaises(IATError):
             self.client.get(self.url)
+
+
+    def test_trial_period_ended(self):
+        query={
+            "error": "TrialBlockedError",
+            "error_description": "Your free trial has ended. We hope you enjoyed your experience with Forest Admin. "
+            "Upgrade now to continue accessing your project.",
+            "state": "{\"renderingId\": 36}",
+        }
+        url = reverse('django_forest:authentication:callback')
+        response = self.client.get(f'{url}?{urlencode(query)}')
+        self.assertEqual(response.status_code, 401)
+        body = response.json()
+        self.assertEqual(body["error"], query["error"])
+        self.assertEqual(body["error_description"], query["error_description"])
+        self.assertEqual(body["state"], query["state"])
