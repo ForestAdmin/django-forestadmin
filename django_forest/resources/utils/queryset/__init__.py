@@ -1,14 +1,15 @@
-from django_forest.utils.collection import Collection
 from .filters import FiltersMixin
 from .limit_fields import LimitFieldsMixin
 from .pagination import PaginationMixin
 from .scope import ScopeMixin
 from .search import SearchMixin
+from .segment import SegmentMixin
 from django_forest.resources.utils.decorators import DecoratorsMixin
 
 
-class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, ScopeMixin, DecoratorsMixin, LimitFieldsMixin):
-
+class QuerysetMixin(
+    PaginationMixin, FiltersMixin, SearchMixin, ScopeMixin, DecoratorsMixin, LimitFieldsMixin, SegmentMixin
+):
     def filter_queryset(self, queryset, Model, params, request):
         # Notice: first apply scope
         scope_filters = self.get_scope(request, Model)
@@ -34,11 +35,7 @@ class QuerysetMixin(PaginationMixin, FiltersMixin, SearchMixin, ScopeMixin, Deco
             queryset = queryset.order_by(params['sort'].replace('.', '__'))
 
         # segment
-        if 'segment' in params:
-            collection = Collection._registry[Model._meta.db_table]
-            segment = next((x for x in collection.segments if x['name'] == params['segment']), None)
-            if segment is not None and 'where' in segment:
-                queryset = queryset.filter(segment['where']())
+        queryset = self.handle_segment(params, Model, queryset)
 
         # limit fields
         queryset = self.handle_limit_fields(params, Model, queryset)
