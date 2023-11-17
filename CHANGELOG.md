@@ -1,3 +1,10 @@
+## [1.6.11](https://github.com/ForestAdmin/django-forest/compare/v1.6.10...v1.6.11) (2023-11-17)
+
+
+### Bug Fixes
+
+* **segments:** add an util to handle live query ([#149](https://github.com/ForestAdmin/django-forest/issues/149)) ([8c896ed](https://github.com/ForestAdmin/django-forest/commit/8c896ed59355b2b0b99688f61911ba4e2296bd5b))
+
 ## [1.6.10](https://github.com/ForestAdmin/django-forest/compare/v1.6.9...v1.6.10) (2023-11-07)
 
 
