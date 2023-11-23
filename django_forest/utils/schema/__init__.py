@@ -161,8 +161,10 @@ class Schema:
             for index, collection in enumerate(cls.schema_data['collections']):
                 cls.schema_data['collections'][index] = cls.get_serialized_collection(collection)
 
-            with open(file_path, 'w') as f:
-                f.write(json.dumps(cls.schema_data, indent=2))
+            disable_auto_schema_update = get_forest_setting('FOREST_DISABLE_AUTO_SCHEMA_UPDATE', False)
+            if not disable_auto_schema_update:
+                with open(file_path, 'w') as f:
+                    f.write(json.dumps(cls.schema_data, indent=2))
         else:
             cls.handle_schema_file_production(file_path)
 
