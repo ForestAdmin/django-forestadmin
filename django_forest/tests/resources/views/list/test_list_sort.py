@@ -75,11 +75,12 @@ class ResourceListViewTests(TransactionTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
-                          FROM "tests_question"
-                           ORDER BY "tests_question"."id"
-                           DESC
-                           LIMIT 15'''.replace('\n', ' ').split()))
+                        ' '.join('''SELECT "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id", "tests_topic"."id", "tests_topic"."name"
+                        FROM "tests_question"
+                        LEFT OUTER JOIN "tests_topic" ON ("tests_question"."topic_id" = "tests_topic"."id")
+                        ORDER BY "tests_question"."id"
+                        DESC
+                        LIMIT 15'''.replace('\n', ' ').split()))
         self.assertEqual(data, {
             'data': [
                 {
@@ -145,7 +146,7 @@ class ResourceListViewTests(TransactionTestCase):
     @mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
     @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
     def test_get_sort_related_data(self, mocked_scope_has_expired, mocked_decode):
-        with self._django_assert_num_queries(7) as captured:
+        with self._django_assert_num_queries(4) as captured:
             response = self.client.get(self.reverse_url, {
                 'fields[tests_choice]': 'id,topic,question,choice_text',
                 'fields[topic]': 'name',
@@ -157,9 +158,89 @@ class ResourceListViewTests(TransactionTestCase):
             })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(captured.captured_queries[0]['sql'],
-                         ' '.join('''SELECT "tests_choice"."id", "tests_choice"."question_id", "tests_choice"."choice_text"
+                         ' '.join('''SELECT "tests_choice"."id", "tests_choice"."question_id", "tests_choice"."choice_text", "tests_question"."id", "tests_question"."question_text", "tests_question"."pub_date", "tests_question"."topic_id"
                           FROM "tests_choice"
                            LEFT OUTER JOIN "tests_question" ON ("tests_choice"."question_id" = "tests_question"."id")
                           ORDER BY "tests_question"."question_text"
                           ASC
                           LIMIT 15'''.replace('\n', ' ').split()))
+        data = response.json()
+        self.assertEqual(data, {
+            "data": [
+                {
+                    "type": "tests_choice",
+                    "relationships": {
+                        "topic": {
+                            "links": {
+                                "related": "/forest/tests_choice/3/relationships/topic"
+                            },
+                            "data": None,
+                        },
+                        "question": {
+                            "links": {
+                                "related": "/forest/tests_choice/3/relationships/question"
+                            },
+                            "data": {"type": "tests_question", "id": "2"},
+                        },
+                    },
+                    "id": 3,
+                    "attributes": {"choice_text": "good"},
+                    "links": {"self": "/forest/tests_choice/3"},
+                },
+                {
+                    "type": "tests_choice",
+                    "relationships": {
+                        "topic": {
+                            "links": {
+                                "related": "/forest/tests_choice/1/relationships/topic"
+                            },
+                            "data": None,
+                        },
+                        "question": {
+                            "links": {
+                                "related": "/forest/tests_choice/1/relationships/question"
+                            },
+                            "data": {"type": "tests_question", "id": "1"},
+                        },
+                    },
+                    "id": 1,
+                    "attributes": {"choice_text": "yes"},
+                    "links": {"self": "/forest/tests_choice/1"},
+                },
+                {
+                    "type": "tests_choice",
+                    "relationships": {
+                        "topic": {
+                            "links": {
+                                "related": "/forest/tests_choice/2/relationships/topic"
+                            },
+                            "data": None,
+                        },
+                        "question": {
+                            "links": {
+                                "related": "/forest/tests_choice/2/relationships/question"
+                            },
+                            "data": {"type": "tests_question", "id": "1"},
+                        },
+                    },
+                    "id": 2,
+                    "attributes": {"choice_text": "no"},
+                    "links": {"self": "/forest/tests_choice/2"},
+                },
+            ],
+            "included": [
+                {
+                    "type": "tests_question",
+                    "attributes": {"question_text": "do you like chocolate?"},
+                    "links": {"self": "/forest/tests_question/2"},
+                    "id": 2,
+                },
+                {
+                    "type": "tests_question",
+                    "attributes": {"question_text": "what is your favorite color?"},
+                    "links": {"self": "/forest/tests_question/1"},
+                    "id": 1,
+                },
+            ],
+        }
+    )

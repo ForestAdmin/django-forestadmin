@@ -39,10 +39,6 @@ class QuerysetMixin(
             if field["relationship"] is not None and field["relationship"] in ["BelongsTo", "HasOne"]
         ]
 
-        # scope
-
-        # filters
-
         # projection
         for key, value in params.items():
             if re.search(r"fields\[[^\]]+\]", key):
