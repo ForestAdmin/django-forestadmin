@@ -8,6 +8,7 @@ from django_forest.resources.utils.json_api_serializer import JsonApiSerializerM
 from django_forest.resources.utils.query_parameters import parse_qs
 from django_forest.resources.utils.smart_field import SmartFieldMixin
 from django_forest.utils import get_association_field
+from django.db import connection, reset_queries
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView):
     def get(self, request, pk, association_resource):
         t0 = time.time()
+        reset_queries()
         try:
             association_field = get_association_field(self.Model, association_resource)
         except Exception as e:
@@ -31,8 +33,8 @@ class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView
             t2 = time.time()
             # enhance queryset
             queryset = self.enhance_queryset(queryset, RelatedModel, params, request, apply_pagination=False)
-            for _ in queryset[0:1]:  # force SQL request execution
-                pass
+            for _ in queryset:  # force SQL request execution
+                break
 
             t3 = time.time()
             logger.warning(f"-- timing enhance_queryset: {(t3 - t2):.2f} seconds")
@@ -55,6 +57,5 @@ class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView
             writer.writerow(dict(zip(field_names_requested, csv_header)))
             self.fill_csv(data, writer, params)
             t6 = time.time()
-            logger.warning(f"-- timing csv serialization into response body: {(t6 - t5):.2f} seconds")
-            logger.warning(f"--- total timing: {(t6 - t0):.2f} seconds")
+            logger.warning(f"--- total timing: {(t6 - t0):.2f} seconds with {len(connection.queries)} sql queries")
             return response
