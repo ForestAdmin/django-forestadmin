@@ -15,7 +15,7 @@ from django_forest.utils.date import get_timezone
 
 
 @mock.patch('django_forest.utils.scope.ScopeManager._has_cache_expired', return_value=False)
-@mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})    
+@mock.patch('jose.jwt.decode', return_value={'id': 1, 'rendering_id': 1})
 class ResourceListFilterDateViewTests(TransactionTestCase):
     fixtures = ['question.json']
 
@@ -90,7 +90,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             'filters': '{"field":"pub_date","operator":"future","value":null}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
-            'page[size]': '15'
+            'page[size]': '15',
+            'sort': 'id'
         })
         data = response.json()
         self.assertEqual(response.status_code, 200)
@@ -241,7 +242,8 @@ class ResourceListFilterDateViewTests(TransactionTestCase):
             'filters': '{"field":"pub_date","operator":"after_x_hours_ago","value":1}',
             'timezone': 'Europe/Paris',
             'page[number]': '1',
-            'page[size]': '15'
+            'page[size]': '15',
+            'sort': 'id'
         })
         data = response.json()
         self.assertEqual(response.status_code, 200)

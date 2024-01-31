@@ -1,3 +1,5 @@
+import re
+
 from .filters import FiltersMixin
 from .limit_fields import LimitFieldsMixin
 from .pagination import PaginationMixin
@@ -5,6 +7,7 @@ from .scope import ScopeMixin
 from .search import SearchMixin
 from .segment import SegmentMixin
 from django_forest.resources.utils.decorators import DecoratorsMixin
+from django_forest.utils.schema import Schema
 
 
 class QuerysetMixin(
@@ -26,7 +29,29 @@ class QuerysetMixin(
                 queryset = queryset.filter(method(params, Model))
         return queryset
 
+    def join_relations(self, queryset, Model, params, request):
+        select_related = set()
+
+        collection = Schema.get_collection(Model._meta.db_table)
+        relations = [
+            field['field']
+            for field in collection["fields"]
+            if field["relationship"] is not None and field["relationship"] in ["BelongsTo", "HasOne"]
+        ]
+
+        # projection
+        for key, value in params.items():
+            if re.search(r"fields\[[^\]]+\]", key):
+                fields_for = key.split("fields[")[1][:-1]
+                if fields_for in relations:
+                    select_related.add(fields_for)
+
+        return queryset.select_related(*select_related)
+
     def enhance_queryset(self, queryset, Model, params, request, apply_pagination=True):
+        # perform inner join
+        queryset = self.join_relations(queryset, Model, params, request)
+
         # scopes + filter + search
         queryset = self.filter_queryset(queryset, Model, params, request)
 

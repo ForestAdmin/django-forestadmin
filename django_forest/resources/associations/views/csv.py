@@ -1,5 +1,6 @@
 import logging
 import csv
+import time
 
 from django_forest.resources.associations.utils import AssociationView
 from django_forest.resources.utils.csv import CsvMixin
@@ -25,8 +26,11 @@ class CsvView(SmartFieldMixin, JsonApiSerializerMixin, CsvMixin, AssociationView
             queryset = getattr(self.Model.objects.get(pk=pk), association_resource).all()
 
             params = request.GET.dict()
+
             # enhance queryset
             queryset = self.enhance_queryset(queryset, RelatedModel, params, request, apply_pagination=False)
+            for _ in queryset:  # force SQL request execution
+                break
 
             # handle smart fields
             self.handle_smart_fields(queryset, RelatedModel._meta.db_table, parse_qs(params), many=True)
