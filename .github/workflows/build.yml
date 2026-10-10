@@ -119,6 +119,7 @@ jobs:
         run: |
           coverage combine ./code-coverage-report.*/.coverage
       - name: Send coverage
+        continue-on-error: true # the Code Climate test reporter download is gone (404)
         uses: paambaati/codeclimate-action@v2.7.4
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
