@@ -1,3 +1,10 @@
+## [1.6.12](https://github.com/ForestAdmin/django-forest/compare/v1.6.11...v1.6.12) (2026-10-10)
+
+
+### Bug Fixes
+
+* **license:** relicense from GPL-3.0 to Apache-2.0 ([#151](https://github.com/ForestAdmin/django-forest/issues/151)) ([e357b4b](https://github.com/ForestAdmin/django-forest/commit/e357b4bf66ba8e454c79ce174fdbe74554bf69e3))
+
 ## [1.6.11](https://github.com/ForestAdmin/django-forest/compare/v1.6.10...v1.6.11) (2023-11-17)
 
 
